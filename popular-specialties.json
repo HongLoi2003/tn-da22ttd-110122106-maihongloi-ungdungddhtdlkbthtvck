@@ -1,0 +1,22 @@
+[
+  {
+    "id": "pop_1",
+    "name": "Tim mạch",
+    "doctors": 12
+  },
+  {
+    "id": "pop_2",
+    "name": "Hô hấp",
+    "doctors": 8
+  },
+  {
+    "id": "pop_3",
+    "name": "Thần kinh",
+    "doctors": 10
+  },
+  {
+    "id": "pop_4",
+    "name": "Da liễu",
+    "doctors": 6
+  }
+]

@@ -1,0 +1,82 @@
+[
+  {
+    "id": "sym_1",
+    "name": "Đau đầu",
+    "icon": "alert-circle",
+    "color": "#FF6B6B",
+    "description": "Đau đầu, chóng mặt",
+    "specialty": "Thần kinh"
+  },
+  {
+    "id": "sym_2",
+    "name": "Sốt cao",
+    "icon": "thermometer",
+    "color": "#FFA500",
+    "description": "Sốt cao trên 38°C",
+    "specialty": "Nội tổng quát"
+  },
+  {
+    "id": "sym_3",
+    "name": "Ho khan",
+    "icon": "cloud",
+    "color": "#4ECDC4",
+    "description": "Ho khan, khó thở",
+    "specialty": "Hô hấp"
+  },
+  {
+    "id": "sym_4",
+    "name": "Đau bụng",
+    "icon": "alert",
+    "color": "#FFD93D",
+    "description": "Đau bụng, buồn nôn",
+    "specialty": "Tiêu hóa"
+  },
+  {
+    "id": "sym_5",
+    "name": "Đau ngực",
+    "icon": "heart",
+    "color": "#FF1744",
+    "description": "Đau ngực, khó thở",
+    "specialty": "Tim mạch"
+  },
+  {
+    "id": "sym_6",
+    "name": "Đau khớp",
+    "icon": "body",
+    "color": "#9C27B0",
+    "description": "Đau khớp, sưng tấy",
+    "specialty": "Cơ xương khớp"
+  },
+  {
+    "id": "sym_7",
+    "name": "Ngạt mũi",
+    "icon": "ear",
+    "color": "#FF9800",
+    "description": "Ngạt mũi, chảy nước mũi",
+    "specialty": "Tai mũi họng"
+  },
+  {
+    "id": "sym_8",
+    "name": "Mờ mắt",
+    "icon": "eye",
+    "color": "#2196F3",
+    "description": "Nhìn mờ, đau mắt",
+    "specialty": "Mắt"
+  },
+  {
+    "id": "sym_9",
+    "name": "Đau răng",
+    "icon": "happy",
+    "color": "#00BCD4",
+    "description": "Đau răng, sưng lợi",
+    "specialty": "Răng hàm mặt"
+  },
+  {
+    "id": "sym_10",
+    "name": "Mệt mỏi",
+    "icon": "battery-dead",
+    "color": "#9E9E9E",
+    "description": "Mệt mỏi, uể oải",
+    "specialty": "Nội tiết"
+  }
+]

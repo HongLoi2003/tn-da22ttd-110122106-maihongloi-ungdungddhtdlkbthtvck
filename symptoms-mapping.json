@@ -1,0 +1,36 @@
+{
+  "symptoms": [
+    { "id": 1, "name": "đau đầu", "icon": "🤕" },
+    { "id": 2, "name": "sốt", "icon": "🌡️" },
+    { "id": 3, "name": "ho", "icon": "🤧" },
+    { "id": 4, "name": "khó thở", "icon": "😮‍💨" },
+    { "id": 5, "name": "đau ngực", "icon": "💔" },
+    { "id": 6, "name": "tim đập nhanh", "icon": "💓" },
+    { "id": 7, "name": "đau bụng", "icon": "🤢" },
+    { "id": 8, "name": "tiêu chảy", "icon": "🚽" },
+    { "id": 9, "name": "nổi mẩn đỏ", "icon": "🔴" },
+    { "id": 10, "name": "ngứa", "icon": "🤏" },
+    { "id": 11, "name": "đau khớp", "icon": "🦴" },
+    { "id": 12, "name": "mất ngủ", "icon": "😴" },
+    { "id": 13, "name": "chóng mặt", "icon": "🌀" },
+    { "id": 14, "name": "buồn nôn", "icon": "🤮" },
+    { "id": 15, "name": "mệt mỏi", "icon": "😩" },
+    { "id": 16, "name": "đau họng", "icon": "😣" },
+    { "id": 17, "name": "chảy máu cam", "icon": "🩸" },
+    { "id": 18, "name": "nhức mắt", "icon": "👁️" },
+    { "id": 19, "name": "chảy máu chân răng", "icon": "🦷" },
+    { "id": 20, "name": "đau tai", "icon": "👂" }
+  ],
+  "mappings": [
+    { "symptomIds": [1, 12, 13], "specialtyId": 4, "specialtyName": "Thần kinh", "confidence": 95 },
+    { "symptomIds": [5, 6, 15], "specialtyId": 1, "specialtyName": "Tim mạch", "confidence": 95 },
+    { "symptomIds": [3, 4, 2, 16], "specialtyId": 11, "specialtyName": "Hô hấp", "confidence": 90 },
+    { "symptomIds": [7, 8, 14], "specialtyId": 2, "specialtyName": "Tiêu hóa", "confidence": 90 },
+    { "symptomIds": [9, 10], "specialtyId": 6, "specialtyName": "Da liễu", "confidence": 95 },
+    { "symptomIds": [11], "specialtyId": 5, "specialtyName": "Cơ xương khớp", "confidence": 90 },
+    { "symptomIds": [16, 17, 19], "specialtyId": 7, "specialtyName": "Tai mũi họng", "confidence": 85 },
+    { "symptomIds": [18], "specialtyId": 8, "specialtyName": "Mắt", "confidence": 90 },
+    { "symptomIds": [19], "specialtyId": 9, "specialtyName": "Răng hàm mặt", "confidence": 95 },
+    { "symptomIds": [2, 15], "specialtyId": 10, "specialtyName": "Nội tiết", "confidence": 70 }
+  ]
+}

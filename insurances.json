@@ -1,0 +1,20 @@
+[
+  {
+    "id": "ins_1",
+    "userId": "user1",
+    "name": "Bảo hiểm Sức khỏe Toàn diện",
+    "provider": "Bảo Việt",
+    "status": "active",
+    "expiryDate": "2025-12-31",
+    "coverage": "500 triệu"
+  },
+  {
+    "id": "ins_2",
+    "userId": "user1",
+    "name": "Bảo hiểm Sức khỏe Cơ bản",
+    "provider": "AIA",
+    "status": "active",
+    "expiryDate": "2025-06-30",
+    "coverage": "300 triệu"
+  }
+]

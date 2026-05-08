@@ -1,0 +1,48 @@
+[
+  {
+    "id": "user001",
+    "uid": "firebase_uid_001",
+    "email": "nguyenvana@example.com",
+    "fullName": "Nguyễn Văn A",
+    "phone": "0912345678",
+    "dateOfBirth": "1990-05-15",
+    "gender": "Nam",
+    "address": "123 Nguyễn Trãi, Thanh Xuân, Hà Nội",
+    "avatar": "https://i.pravatar.cc/150?img=12",
+    "bloodType": "O+",
+    "height": 170,
+    "weight": 65,
+    "allergies": ["Penicillin"],
+    "chronicDiseases": ["Tăng huyết áp nhẹ"],
+    "emergencyContact": {
+      "name": "Nguyễn Thị B",
+      "relationship": "Vợ",
+      "phone": "0987654321"
+    },
+    "insuranceNumber": "BH123456789",
+    "createdAt": "2025-01-10"
+  },
+  {
+    "id": "user002",
+    "uid": "firebase_uid_002",
+    "email": "tranthib@example.com",
+    "fullName": "Trần Thị B",
+    "phone": "0923456789",
+    "dateOfBirth": "1992-08-20",
+    "gender": "Nữ",
+    "address": "456 Láng Hạ, Đống Đa, Hà Nội",
+    "avatar": "https://i.pravatar.cc/150?img=5",
+    "bloodType": "A+",
+    "height": 160,
+    "weight": 52,
+    "allergies": [],
+    "chronicDiseases": [],
+    "emergencyContact": {
+      "name": "Trần Văn C",
+      "relationship": "Chồng",
+      "phone": "0976543210"
+    },
+    "insuranceNumber": "BH987654321",
+    "createdAt": "2025-02-15"
+  }
+]

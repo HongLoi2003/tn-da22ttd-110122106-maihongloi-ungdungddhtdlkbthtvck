@@ -1,0 +1,193 @@
+[
+  {
+    "id": "cmt001",
+    "articleId": "1",
+    "userId": "user001",
+    "userName": "Nguyễn Văn A",
+    "userAvatar": "nguyenvanam.png",
+    "content": "Bài viết rất hữu ích! Tôi đã áp dụng và thấy sức khỏe cải thiện rõ rệt.",
+    "createdAt": "2024-03-20T10:30:00Z",
+    "likes": 15,
+    "replies": []
+  },
+  {
+    "id": "cmt002",
+    "articleId": "1",
+    "userId": "user002",
+    "userName": "Trần Thị B",
+    "userAvatar": "tranthilan.png",
+    "content": "Cảm ơn bác sĩ đã chia sẻ. Mình sẽ thử uống đủ 2 lít nước mỗi ngày.",
+    "createdAt": "2024-03-20T11:15:00Z",
+    "likes": 8,
+    "replies": [
+      {
+        "id": "reply001",
+        "userId": "user003",
+        "userName": "Lê Minh C",
+        "userAvatar": "leminhtam.png",
+        "content": "Mình cũng đang thử và thấy hiệu quả đấy!",
+        "createdAt": "2024-03-20T12:00:00Z",
+        "likes": 3
+      }
+    ]
+  },
+  {
+    "id": "cmt003",
+    "articleId": "1",
+    "userId": "user004",
+    "userName": "Phạm Thu D",
+    "userAvatar": "phamthuha.png",
+    "content": "Bài viết dễ hiểu và thực tế. Đặc biệt phần mẹo uống nước rất hay!",
+    "createdAt": "2024-03-20T14:20:00Z",
+    "likes": 12,
+    "replies": []
+  },
+  {
+    "id": "cmt004",
+    "articleId": "1",
+    "userId": "user005",
+    "userName": "Hoàng Văn E",
+    "userAvatar": "hoangvanduc.png",
+    "content": "Mình thường quên uống nước, giờ sẽ đặt nhắc nhở trên điện thoại theo lời khuyên của bác sĩ.",
+    "createdAt": "2024-03-20T15:45:00Z",
+    "likes": 6,
+    "replies": []
+  },
+  {
+    "id": "cmt005",
+    "articleId": "2",
+    "userId": "user006",
+    "userName": "Vũ Thị F",
+    "userAvatar": "vuthilan.png",
+    "content": "Tập thể dục đều đặn thật sự giúp tăng sức đề kháng. Mình đã thử và thấy ít bị ốm hơn.",
+    "createdAt": "2024-03-18T09:00:00Z",
+    "likes": 20,
+    "replies": [
+      {
+        "id": "reply002",
+        "userId": "user007",
+        "userName": "Đỗ Minh G",
+        "userAvatar": "dominhtuan.png",
+        "content": "Bạn tập bao lâu mỗi ngày vậy?",
+        "createdAt": "2024-03-18T10:30:00Z",
+        "likes": 2
+      },
+      {
+        "id": "reply003",
+        "userId": "user006",
+        "userName": "Vũ Thị F",
+        "userAvatar": "vuthilan.png",
+        "content": "Mình tập khoảng 30-45 phút mỗi ngày, chủ yếu là yoga và đi bộ.",
+        "createdAt": "2024-03-18T11:00:00Z",
+        "likes": 5
+      }
+    ]
+  },
+  {
+    "id": "cmt006",
+    "articleId": "2",
+    "userId": "user008",
+    "userName": "Ngô Thị H",
+    "userAvatar": "ngothihuong.png",
+    "content": "Bài viết rất chi tiết và khoa học. Cảm ơn bác sĩ!",
+    "createdAt": "2024-03-18T13:20:00Z",
+    "likes": 10,
+    "replies": []
+  },
+  {
+    "id": "cmt007",
+    "articleId": "3",
+    "userId": "user009",
+    "userName": "Trần Văn I",
+    "userAvatar": "tranvankhoa.png",
+    "content": "Chế độ ăn uống cân bằng thật sự quan trọng. Mình đã thay đổi và cảm thấy khỏe hơn nhiều.",
+    "createdAt": "2024-03-15T08:30:00Z",
+    "likes": 18,
+    "replies": []
+  },
+  {
+    "id": "cmt008",
+    "articleId": "3",
+    "userId": "user010",
+    "userName": "Lê Thị K",
+    "userAvatar": "tranthimai.png",
+    "content": "Bác sĩ có thể tư vấn thêm về thực đơn cụ thể không ạ?",
+    "createdAt": "2024-03-15T10:00:00Z",
+    "likes": 7,
+    "replies": [
+      {
+        "id": "reply004",
+        "userId": "doctor001",
+        "userName": "BS. Nguyễn Văn An",
+        "userAvatar": "nguyenvanam.png",
+        "content": "Chào bạn! Bạn có thể tham khảo thêm bài viết về thực đơn dinh dưỡng trên trang của chúng tôi nhé.",
+        "createdAt": "2024-03-15T14:00:00Z",
+        "likes": 12
+      }
+    ]
+  },
+  {
+    "id": "cmt009",
+    "articleId": "4",
+    "userId": "user011",
+    "userName": "Phạm Văn L",
+    "userAvatar": "nguyenvanam.png",
+    "content": "Ngủ đủ giấc thật sự quan trọng. Từ khi ngủ đủ 8 tiếng, mình thấy tinh thần tốt hơn hẳn.",
+    "createdAt": "2024-03-14T20:00:00Z",
+    "likes": 25,
+    "replies": []
+  },
+  {
+    "id": "cmt010",
+    "articleId": "4",
+    "userId": "user012",
+    "userName": "Hoàng Thị M",
+    "userAvatar": "tranthilan.png",
+    "content": "Mình hay bị mất ngủ, có cách nào khắc phục không ạ?",
+    "createdAt": "2024-03-14T21:30:00Z",
+    "likes": 9,
+    "replies": [
+      {
+        "id": "reply005",
+        "userId": "user013",
+        "userName": "Nguyễn Văn N",
+        "userAvatar": "leminhtam.png",
+        "content": "Bạn thử tắt điện thoại trước khi ngủ 30 phút và uống sữa ấm xem sao.",
+        "createdAt": "2024-03-14T22:00:00Z",
+        "likes": 6
+      }
+    ]
+  },
+  {
+    "id": "cmt011",
+    "articleId": "1",
+    "userId": "user014",
+    "userName": "Đặng Văn O",
+    "userAvatar": "hoangvanduc.png",
+    "content": "Bài viết rất bổ ích, mình sẽ chia sẻ cho bạn bè.",
+    "createdAt": "2024-03-21T08:00:00Z",
+    "likes": 4,
+    "replies": []
+  },
+  {
+    "id": "cmt012",
+    "articleId": "2",
+    "userId": "user015",
+    "userName": "Cao Thị P",
+    "userAvatar": "vuthilan.png",
+    "content": "Tập thể dục buổi sáng hay buổi tối tốt hơn ạ?",
+    "createdAt": "2024-03-19T07:30:00Z",
+    "likes": 11,
+    "replies": [
+      {
+        "id": "reply006",
+        "userId": "doctor002",
+        "userName": "BS. Trần Thị Lan",
+        "userAvatar": "tranthilan.png",
+        "content": "Cả hai đều tốt, tùy vào thời gian rảnh của bạn. Quan trọng là duy trì đều đặn.",
+        "createdAt": "2024-03-19T09:00:00Z",
+        "likes": 15
+      }
+    ]
+  }
+]

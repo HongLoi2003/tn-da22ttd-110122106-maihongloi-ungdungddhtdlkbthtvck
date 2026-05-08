@@ -1,0 +1,26 @@
+[
+  {
+    "id": "ben_1",
+    "userId": "user1",
+    "insuranceId": "ins_1",
+    "name": "Khám bệnh ngoại trú",
+    "coverage": "100%",
+    "limit": "50 triệu"
+  },
+  {
+    "id": "ben_2",
+    "userId": "user1",
+    "insuranceId": "ins_1",
+    "name": "Nằm viện",
+    "coverage": "100%",
+    "limit": "300 triệu"
+  },
+  {
+    "id": "ben_3",
+    "userId": "user1",
+    "insuranceId": "ins_1",
+    "name": "Phẫu thuật",
+    "coverage": "100%",
+    "limit": "200 triệu"
+  }
+]

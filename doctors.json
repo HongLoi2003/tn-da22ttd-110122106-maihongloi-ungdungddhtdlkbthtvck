@@ -1,0 +1,162 @@
+[
+  {
+    "id": "bs001",
+    "ten": "BS. Nguyễn Văn An",
+    "chuyen_khoa": "Tim mạch",
+    "so_dien_thoai": "0900000001",
+    "kinh_nghiem": 10,
+    "rating": 4.8,
+    "image": "nguyenvanam.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs002",
+    "ten": "BS. Trần Thị Lan",
+    "chuyen_khoa": "Da liễu",
+    "so_dien_thoai": "0900000002",
+    "kinh_nghiem": 7,
+    "rating": 4.8,
+    "image": "tranthilan.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs003",
+    "ten": "BS. Lê Minh Tâm",
+    "chuyen_khoa": "Sản phụ khoa",
+    "so_dien_thoai": "0900000003",
+    "kinh_nghiem": 5,
+    "rating": 4.8,
+    "image": "leminhtam.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs004",
+    "ten": "BS. Trần Thị Mai",
+    "chuyen_khoa": "Hô hấp",
+    "so_dien_thoai": "0900000004",
+    "kinh_nghiem": 8,
+    "rating": 4.9,
+    "image": "tranthimai.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs005",
+    "ten": "BS. Lê Hoàng Nam",
+    "chuyen_khoa": "Hô hấp",
+    "so_dien_thoai": "0900000005",
+    "kinh_nghiem": 9,
+    "rating": 4.9,
+    "image": "lehoangnam.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs006",
+    "ten": "BS. Phạm Thu Hà",
+    "chuyen_khoa": "Tim mạch",
+    "so_dien_thoai": "0900000006",
+    "kinh_nghiem": 6,
+    "rating": 4.9,
+    "image": "phamthuha.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs007",
+    "ten": "BS. Đỗ Minh Tuấn",
+    "chuyen_khoa": "Da liễu",
+    "so_dien_thoai": "0900000007",
+    "kinh_nghiem": 12,
+    "rating": 4.7,
+    "image": "dominhtuan.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs008",
+    "ten": "BS. Vũ Thị Lan",
+    "chuyen_khoa": "Thần kinh",
+    "so_dien_thoai": "0900000008",
+    "kinh_nghiem": 4,
+    "rating": 4.8,
+    "image": "vuthilan.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs009",
+    "ten": "BS. Hoàng Văn Đức",
+    "chuyen_khoa": "Nhi khoa",
+    "so_dien_thoai": "0900000009",
+    "kinh_nghiem": 11,
+    "rating": 4.9,
+    "image": "hoangvanduc.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs010",
+    "ten": "BS. Ngô Thị Hương",
+    "chuyen_khoa": "Tim mạch",
+    "so_dien_thoai": "0900000010",
+    "kinh_nghiem": 3,
+    "rating": 4.8,
+    "image": "ngothihuong.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs011",
+    "ten": "BS. Nguyễn Thị Hoa",
+    "chuyen_khoa": "Tiêu hóa",
+    "so_dien_thoai": "0900000011",
+    "kinh_nghiem": 8,
+    "rating": 4.9,
+    "image": "nguyenthihoa.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs012",
+    "ten": "BS. Trần Văn Khoa",
+    "chuyen_khoa": "Cơ xương khớp",
+    "so_dien_thoai": "0900000012",
+    "kinh_nghiem": 10,
+    "rating": 4.8,
+    "image": "tranvankhoa.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs013",
+    "ten": "BS. Phạm Minh Quân",
+    "chuyen_khoa": "Tai mũi họng",
+    "so_dien_thoai": "0900000013",
+    "kinh_nghiem": 9,
+    "rating": 4.9,
+    "image": "phamminhquan.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs014",
+    "ten": "BS. Lê Thị Hằng",
+    "chuyen_khoa": "Mắt",
+    "so_dien_thoai": "0900000014",
+    "kinh_nghiem": 12,
+    "rating": 4.9,
+    "image": "lethihang.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs015",
+    "ten": "BS. Nguyễn Văn Hải",
+    "chuyen_khoa": "Răng hàm mặt",
+    "so_dien_thoai": "0900000015",
+    "kinh_nghiem": 8,
+    "rating": 4.8,
+    "image": "nguyenvanhai.png",
+    "trang_thai": true
+  },
+  {
+    "id": "bs016",
+    "ten": "BS. Đặng Thị Thảo",
+    "chuyen_khoa": "Nội tiết",
+    "so_dien_thoai": "0900000016",
+    "kinh_nghiem": 11,
+    "rating": 4.9,
+    "image": "dangthithao.jpg",
+    "trang_thai": true
+  }
+]

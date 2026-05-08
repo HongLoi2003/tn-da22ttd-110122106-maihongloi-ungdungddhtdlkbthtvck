@@ -1,0 +1,12 @@
+System Volume Information
+$RECYCLE.BIN
+.DS_Store
+node_modules
+.git
+.expo
+.env
+.env.local
+*.log
+.cache
+dist
+build

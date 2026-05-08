@@ -1,0 +1,106 @@
+[
+  {
+    "id": "notif_001",
+    "userId": "user001",
+    "title": "Nhắc lịch khám",
+    "body": "Bạn có lịch khám với BS. Nguyễn Văn An vào ngày mai lúc 09:00 tại Bệnh viện Trung ương",
+    "type": "appointment",
+    "read": false,
+    "createdAt": "2026-05-04T10:30:00.000Z",
+    "data": {
+      "appointmentId": "apt001",
+      "doctorName": "BS. Nguyễn Văn An",
+      "appointmentDate": "2026-05-05T09:00:00.000Z"
+    }
+  },
+  {
+    "id": "notif_002",
+    "userId": "user001",
+    "title": "Kết quả xét nghiệm",
+    "body": "Kết quả xét nghiệm máu của bạn đã có. Nhấn để xem chi tiết.",
+    "type": "test_result",
+    "read": false,
+    "createdAt": "2026-05-03T14:20:00.000Z",
+    "data": {
+      "testId": "test001"
+    }
+  },
+  {
+    "id": "notif_003",
+    "userId": "user001",
+    "title": "Nhắc uống thuốc",
+    "body": "Đã đến giờ uống thuốc Paracetamol 500mg",
+    "type": "medication",
+    "read": true,
+    "createdAt": "2026-05-02T08:00:00.000Z",
+    "data": {
+      "medicationId": "med001",
+      "medicationName": "Paracetamol 500mg"
+    }
+  },
+  {
+    "id": "notif_004",
+    "userId": "user001",
+    "title": "Lịch khám sắp tới",
+    "body": "Lịch khám của bạn với BS. Trần Thị Mai sẽ bắt đầu trong 1 giờ nữa",
+    "type": "appointment",
+    "read": true,
+    "createdAt": "2026-05-01T13:00:00.000Z",
+    "data": {
+      "appointmentId": "apt004",
+      "doctorName": "BS. Trần Thị Mai",
+      "appointmentDate": "2026-05-01T14:00:00.000Z"
+    }
+  },
+  {
+    "id": "notif_005",
+    "userId": "user001",
+    "title": "Đơn thuốc mới",
+    "body": "BS. Lê Minh Tâm đã kê đơn thuốc cho bạn. Vui lòng kiểm tra!",
+    "type": "prescription",
+    "read": true,
+    "createdAt": "2026-04-30T16:45:00.000Z",
+    "data": {
+      "prescriptionId": "pres001",
+      "doctorName": "BS. Lê Minh Tâm"
+    }
+  },
+  {
+    "id": "notif_006",
+    "userId": "user001",
+    "title": "Chào mừng đến với HealthCare",
+    "body": "Cảm ơn bạn đã sử dụng ứng dụng. Khám phá các tính năng ngay!",
+    "type": "general",
+    "read": true,
+    "createdAt": "2026-04-28T09:00:00.000Z",
+    "data": {}
+  },
+  {
+    "id": "notif_007",
+    "userId": "user002",
+    "title": "Nhắc lịch khám",
+    "body": "Bạn có lịch khám với BS. Hoàng Văn Đức vào ngày mai lúc 15:00",
+    "type": "appointment",
+    "read": false,
+    "createdAt": "2026-05-05T10:00:00.000Z",
+    "data": {
+      "appointmentId": "apt005",
+      "doctorName": "BS. Hoàng Văn Đức",
+      "appointmentDate": "2026-05-06T15:00:00.000Z"
+    }
+  },
+  {
+    "id": "notif_008",
+    "userId": "user001",
+    "title": "Xác nhận đặt lịch",
+    "body": "Lịch khám của bạn với BS. Trần Thị Lan đã được xác nhận cho ngày 08/05/2026 lúc 14:30",
+    "type": "appointment",
+    "read": false,
+    "createdAt": "2026-05-03T11:15:00.000Z",
+    "data": {
+      "appointmentId": "apt002",
+      "doctorName": "BS. Trần Thị Lan",
+      "appointmentDate": "2026-05-08T14:30:00.000Z"
+    }
+  }
+]

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "tim_mach",
+    "name": "Tim mạch",
+    "icon": "heart",
+    "description": "Chuyên khoa tim mạch"
+  },
+  {
+    "id": "da_lieu",
+    "name": "Da liễu",
+    "icon": "water",
+    "description": "Chuyên khoa da liễu"
+  },
+  {
+    "id": "nhi_khoa",
+    "name": "Nhi khoa",
+    "icon": "happy",
+    "description": "Chuyên khoa nhi khoa"
+  },
+  {
+    "id": "san_phu_khoa",
+    "name": "Sản phụ khoa",
+    "icon": "woman",
+    "description": "Chuyên khoa sản phụ khoa"
+  },
+  {
+    "id": "than_kinh",
+    "name": "Thần kinh",
+    "icon": "brain",
+    "description": "Chuyên khoa thần kinh"
+  },
+  {
+    "id": "ho_hap",
+    "name": "Hô hấp",
+    "icon": "lung",
+    "description": "Chuyên khoa hô hấp"
+  },
+  {
+    "id": "tieu_hoa",
+    "name": "Tiêu hóa",
+    "icon": "nutrition",
+    "description": "Chuyên khoa tiêu hóa"
+  },
+  {
+    "id": "co_xuong_khop",
+    "name": "Cơ xương khớp",
+    "icon": "body",
+    "description": "Chuyên khoa cơ xương khớp"
+  },
+  {
+    "id": "tai_mui_hong",
+    "name": "Tai mũi họng",
+    "icon": "ear",
+    "description": "Chuyên khoa tai mũi họng"
+  },
+  {
+    "id": "mat",
+    "name": "Mắt",
+    "icon": "eye",
+    "description": "Chuyên khoa mắt"
+  },
+  {
+    "id": "rang_ham_mat",
+    "name": "Răng hàm mặt",
+    "icon": "tooth",
+    "description": "Chuyên khoa răng hàm mặt"
+  },
+  {
+    "id": "noi_tiet",
+    "name": "Nội tiết",
+    "icon": "medical",
+    "description": "Chuyên khoa nội tiết"
+  }
+]
