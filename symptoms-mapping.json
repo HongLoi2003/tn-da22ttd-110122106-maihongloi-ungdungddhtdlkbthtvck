@@ -1,36 +1,5226 @@
 {
   "symptoms": [
-    { "id": 1, "name": "đau đầu", "icon": "🤕" },
-    { "id": 2, "name": "sốt", "icon": "🌡️" },
-    { "id": 3, "name": "ho", "icon": "🤧" },
-    { "id": 4, "name": "khó thở", "icon": "😮‍💨" },
-    { "id": 5, "name": "đau ngực", "icon": "💔" },
-    { "id": 6, "name": "tim đập nhanh", "icon": "💓" },
-    { "id": 7, "name": "đau bụng", "icon": "🤢" },
-    { "id": 8, "name": "tiêu chảy", "icon": "🚽" },
-    { "id": 9, "name": "nổi mẩn đỏ", "icon": "🔴" },
-    { "id": 10, "name": "ngứa", "icon": "🤏" },
-    { "id": 11, "name": "đau khớp", "icon": "🦴" },
-    { "id": 12, "name": "mất ngủ", "icon": "😴" },
-    { "id": 13, "name": "chóng mặt", "icon": "🌀" },
-    { "id": 14, "name": "buồn nôn", "icon": "🤮" },
-    { "id": 15, "name": "mệt mỏi", "icon": "😩" },
-    { "id": 16, "name": "đau họng", "icon": "😣" },
-    { "id": 17, "name": "chảy máu cam", "icon": "🩸" },
-    { "id": 18, "name": "nhức mắt", "icon": "👁️" },
-    { "id": 19, "name": "chảy máu chân răng", "icon": "🦷" },
-    { "id": 20, "name": "đau tai", "icon": "👂" }
+    {
+      "id": 1,
+      "name": "đau đầu",
+      "icon": "🧠",
+      "keywords": [
+        "đau đầu",
+        "nhức đầu",
+        "đầu đau",
+        "dau dau",
+        "đau đầu dữ dội"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 2,
+      "name": "chóng mặt",
+      "icon": "🧠",
+      "keywords": [
+        "chóng mặt",
+        "hoa mắt",
+        "choáng",
+        "choang",
+        "chong mat",
+        "hoa mat",
+        "váng đầu"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 3,
+      "name": "mất ngủ",
+      "icon": "🧠",
+      "keywords": [
+        "mất ngủ",
+        "khó ngủ",
+        "không ngủ được",
+        "mat ngu",
+        "kho ngu",
+        "thức đêm",
+        "mất giấc"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 4,
+      "name": "đau nửa đầu",
+      "icon": "🧠",
+      "keywords": [
+        "đau nửa đầu",
+        "migraine",
+        "đau nửa đầu",
+        "đau đầu một bên",
+        "nhức nửa đầu"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 5,
+      "name": "run tay chân",
+      "icon": "🧠",
+      "keywords": [
+        "run tay chân",
+        "run tay",
+        "run chân",
+        "run rẩy",
+        "rung",
+        "run liên tục"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 6,
+      "name": "tê tay chân",
+      "icon": "🧠",
+      "keywords": [
+        "tê tay chân",
+        "tê bì",
+        "tê tay",
+        "tê chân",
+        "tê liệt",
+        "tê mỏi"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 7,
+      "name": "co giật",
+      "icon": "🧠",
+      "keywords": [
+        "co giật",
+        "giật mình",
+        "co cứng",
+        "co thắt",
+        "giật cơ",
+        "co giật toàn thân"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 8,
+      "name": "mất trí nhớ",
+      "icon": "🧠",
+      "keywords": [
+        "mất trí nhớ",
+        "quên",
+        "hay quên",
+        "suy giảm trí nhớ",
+        "mất trí",
+        "không nhớ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 9,
+      "name": "hay quên",
+      "icon": "🧠",
+      "keywords": [
+        "hay quên",
+        "quên lãng",
+        "hay quên việc",
+        "dễ quên",
+        "quên nhanh"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 10,
+      "name": "mệt mỏi thần kinh",
+      "icon": "🧠",
+      "keywords": [
+        "mệt mỏi thần kinh",
+        "mệt mỏi",
+        "mệt",
+        "mỏi",
+        "met moi",
+        "uể oải",
+        "kiệt sức"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 11,
+      "name": "khó tập trung",
+      "icon": "🧠",
+      "keywords": [
+        "khó tập trung",
+        "không tập trung",
+        "mất tập trung",
+        "không chú ý",
+        "xao lãng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 12,
+      "name": "stress kéo dài",
+      "icon": "🧠",
+      "keywords": [
+        "stress kéo dài",
+        "stress",
+        "căng thẳng",
+        "lo âu",
+        "lo lắng",
+        "canh thang",
+        "lo au",
+        "stress mãn tính"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 13,
+      "name": "đau dây thần kinh",
+      "icon": "🧠",
+      "keywords": [
+        "đau dây thần kinh",
+        "đau thần kinh",
+        "viêm dây thần kinh",
+        "đau dây",
+        "tổn thương thần kinh"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 14,
+      "name": "mất thăng bằng",
+      "icon": "🧠",
+      "keywords": [
+        "mất thăng bằng",
+        "loạng choạng",
+        "đi không vững",
+        "mất cân bằng",
+        "không giữ thăng bằng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 15,
+      "name": "hoa mắt",
+      "icon": "🧠",
+      "keywords": [
+        "hoa mắt",
+        "mờ mắt",
+        "nhìn mờ",
+        "chóng mặt",
+        "hoa mắt chóng mặt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 16,
+      "name": "ngất xỉu",
+      "icon": "🧠",
+      "keywords": [
+        "ngất xỉu",
+        "ngất",
+        "xỉu",
+        "bất tỉnh",
+        "mất ý thức",
+        "choáng váng"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 17,
+      "name": "yếu cơ",
+      "icon": "🧠",
+      "keywords": [
+        "yếu cơ",
+        "yếu tay chân",
+        "cơ yếu",
+        "mất sức",
+        "không có sức",
+        "teo cơ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 18,
+      "name": "liệt mặt",
+      "icon": "🧠",
+      "keywords": [
+        "liệt mặt",
+        "méo mặt",
+        "liệt nửa mặt",
+        "mặt méo",
+        "liệt dây thần kinh mặt"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 19,
+      "name": "đau cổ vai gáy",
+      "icon": "🧠",
+      "keywords": [
+        "đau cổ vai gáy",
+        "đau cổ",
+        "đau vai",
+        "đau gáy",
+        "nhức cổ vai",
+        "cứng cổ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 20,
+      "name": "đau lưng thần kinh",
+      "icon": "🧠",
+      "keywords": [
+        "đau lưng thần kinh",
+        "đau lưng",
+        "nhức lưng",
+        "đau thần kinh tọa",
+        "đau dây thần kinh lưng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 21,
+      "name": "dị cảm",
+      "icon": "🧠",
+      "keywords": [
+        "dị cảm",
+        "cảm giác lạ",
+        "tê buốt",
+        "châm chích",
+        "kiến bò",
+        "ngứa ran"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 22,
+      "name": "rối loạn giấc ngủ",
+      "icon": "🧠",
+      "keywords": [
+        "rối loạn giấc ngủ",
+        "ngủ không ngon",
+        "ngủ không sâu",
+        "thức giấc nhiều",
+        "mất ngủ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 23,
+      "name": "căng thẳng thần kinh",
+      "icon": "🧠",
+      "keywords": [
+        "căng thẳng thần kinh",
+        "căng thẳng",
+        "stress",
+        "lo âu",
+        "bồn chồn",
+        "bất an"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 24,
+      "name": "lo âu",
+      "icon": "🧠",
+      "keywords": [
+        "lo âu",
+        "lo lắng",
+        "lo sợ",
+        "bồn chồn",
+        "hồi hộp",
+        "bất an"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 25,
+      "name": "trầm cảm nhẹ",
+      "icon": "🧠",
+      "keywords": [
+        "trầm cảm nhẹ",
+        "trầm cảm",
+        "buồn chán",
+        "u sầu",
+        "tram cam",
+        "chán nản"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 26,
+      "name": "động kinh",
+      "icon": "🧠",
+      "keywords": [
+        "động kinh",
+        "co giật",
+        "giật cơ",
+        "động kinh toàn thể",
+        "cơn động kinh"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 27,
+      "name": "khó nói",
+      "icon": "🧠",
+      "keywords": [
+        "khó nói",
+        "nói khó",
+        "nói ngọng",
+        "nói lắp",
+        "khó phát âm",
+        "nói không rõ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 28,
+      "name": "méo miệng",
+      "icon": "🧠",
+      "keywords": [
+        "méo miệng",
+        "miệng méo",
+        "liệt mặt",
+        "mặt méo",
+        "méo mồm"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 29,
+      "name": "tay chân yếu",
+      "icon": "🧠",
+      "keywords": [
+        "tay chân yếu",
+        "yếu tay chân",
+        "tay yếu",
+        "chân yếu",
+        "mất sức",
+        "liệt nhẹ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 30,
+      "name": "rối loạn cảm giác",
+      "icon": "🧠",
+      "keywords": [
+        "rối loạn cảm giác",
+        "mất cảm giác",
+        "tê liệt",
+        "dị cảm",
+        "cảm giác lạ",
+        "giảm cảm giác"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 31,
+      "name": "đau lưng",
+      "icon": "🦴",
+      "keywords": [
+        "đau lưng",
+        "nhức lưng",
+        "dau lung",
+        "lung dau",
+        "lưng đau",
+        "đau thắt lưng"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 32,
+      "name": "đau cổ vai gáy",
+      "icon": "🦴",
+      "keywords": [
+        "đau cổ vai gáy",
+        "đau cổ",
+        "đau vai",
+        "đau gáy",
+        "nhức cổ vai",
+        "cứng cổ",
+        "mỏi vai gáy"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 33,
+      "name": "đau khớp gối",
+      "icon": "🦴",
+      "keywords": [
+        "đau khớp gối",
+        "đau gối",
+        "nhức gối",
+        "gối đau",
+        "dau goi",
+        "đau đầu gối"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 34,
+      "name": "đau vai",
+      "icon": "🦴",
+      "keywords": [
+        "đau vai",
+        "nhức vai",
+        "vai đau",
+        "dau vai",
+        "đau khớp vai"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 35,
+      "name": "đau cột sống",
+      "icon": "🦴",
+      "keywords": [
+        "đau cột sống",
+        "đau lưng",
+        "nhức cột sống",
+        "cột sống đau",
+        "đau sống lưng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 36,
+      "name": "tê tay chân",
+      "icon": "🦴",
+      "keywords": [
+        "tê tay chân",
+        "tê bì",
+        "tê tay",
+        "tê chân",
+        "tê liệt",
+        "tê mỏi"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 37,
+      "name": "cứng khớp",
+      "icon": "🦴",
+      "keywords": [
+        "cứng khớp",
+        "khớp cứng",
+        "khớp không mềm",
+        "cứng đơ",
+        "khó cử động khớp"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 38,
+      "name": "đau cơ",
+      "icon": "🦴",
+      "keywords": [
+        "đau cơ",
+        "nhức cơ",
+        "cơ đau",
+        "dau co",
+        "đau bắp thịt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 39,
+      "name": "nhức mỏi xương khớp",
+      "icon": "🦴",
+      "keywords": [
+        "nhức mỏi xương khớp",
+        "mỏi xương",
+        "nhức xương",
+        "mỏi khớp",
+        "nhức khớp",
+        "xương khớp đau"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 40,
+      "name": "sưng khớp",
+      "icon": "🦴",
+      "keywords": [
+        "sưng khớp",
+        "khớp sưng",
+        "sưng đau khớp",
+        "phù khớp",
+        "khớp to"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 41,
+      "name": "viêm khớp",
+      "icon": "🦴",
+      "keywords": [
+        "viêm khớp",
+        "viem khop",
+        "khớp viêm",
+        "viêm đau khớp",
+        "viêm nhiều khớp"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 42,
+      "name": "khó vận động",
+      "icon": "🦴",
+      "keywords": [
+        "khó vận động",
+        "khó cử động",
+        "khó di chuyển",
+        "hạn chế vận động",
+        "cứng đơ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 43,
+      "name": "đau thắt lưng",
+      "icon": "🦴",
+      "keywords": [
+        "đau thắt lưng",
+        "thắt lưng đau",
+        "đau lưng dưới",
+        "đau vùng thắt lưng"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 44,
+      "name": "đau bàn chân",
+      "icon": "🦴",
+      "keywords": [
+        "đau bàn chân",
+        "bàn chân đau",
+        "nhức bàn chân",
+        "đau gót chân",
+        "đau mu bàn chân"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 45,
+      "name": "đau bàn tay",
+      "icon": "🦴",
+      "keywords": [
+        "đau bàn tay",
+        "bàn tay đau",
+        "nhức bàn tay",
+        "đau cổ tay",
+        "đau ngón tay"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 46,
+      "name": "chuột rút",
+      "icon": "🦴",
+      "keywords": [
+        "chuột rút",
+        "co cứng cơ",
+        "co thắt cơ",
+        "chuột rút chân",
+        "chuột rút tay"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 47,
+      "name": "yếu cơ",
+      "icon": "🦴",
+      "keywords": [
+        "yếu cơ",
+        "yếu tay chân",
+        "cơ yếu",
+        "mất sức",
+        "không có sức",
+        "teo cơ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 48,
+      "name": "khớp phát tiếng kêu",
+      "icon": "🦴",
+      "keywords": [
+        "khớp phát tiếng kêu",
+        "khớp kêu",
+        "khớp kêu lục cục",
+        "khớp kêu răng rắc",
+        "tiếng kêu khớp"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 49,
+      "name": "đau khi đi lại",
+      "icon": "🦴",
+      "keywords": [
+        "đau khi đi lại",
+        "đau khi đi",
+        "đau khi bước",
+        "khó đi lại",
+        "đau khi vận động"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 50,
+      "name": "đau đầu gối khi leo cầu thang",
+      "icon": "🦴",
+      "keywords": [
+        "đau đầu gối khi leo cầu thang",
+        "đau gối leo cầu thang",
+        "gối đau khi lên xuống cầu thang",
+        "đau khi leo thang"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 51,
+      "name": "cứng cổ",
+      "icon": "🦴",
+      "keywords": [
+        "cứng cổ",
+        "cổ cứng",
+        "cổ không quay được",
+        "đau cứng cổ",
+        "khó quay cổ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 52,
+      "name": "đau hông",
+      "icon": "🦴",
+      "keywords": [
+        "đau hông",
+        "nhức hông",
+        "hông đau",
+        "đau khớp hông",
+        "đau xương hông"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 53,
+      "name": "đau xương",
+      "icon": "🦴",
+      "keywords": [
+        "đau xương",
+        "nhức xương",
+        "xương đau",
+        "đau nhức xương",
+        "xương bị đau"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 54,
+      "name": "sưng đau cơ",
+      "icon": "🦴",
+      "keywords": [
+        "sưng đau cơ",
+        "cơ sưng",
+        "sưng cơ",
+        "viêm cơ",
+        "đau và sưng cơ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 55,
+      "name": "mỏi vai gáy",
+      "icon": "🦴",
+      "keywords": [
+        "mỏi vai gáy",
+        "vai gáy mỏi",
+        "nhức vai gáy",
+        "mỏi cổ vai",
+        "vai gáy nặng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 56,
+      "name": "thoái hóa khớp",
+      "icon": "🦴",
+      "keywords": [
+        "thoái hóa khớp",
+        "thoái hóa",
+        "thoai hoa",
+        "khớp thoái hóa",
+        "thoái hóa cột sống"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 57,
+      "name": "đau dây thần kinh tọa",
+      "icon": "🦴",
+      "keywords": [
+        "đau dây thần kinh tọa",
+        "đau thần kinh tọa",
+        "tọa cốt thần kinh",
+        "đau từ lưng xuống chân"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 58,
+      "name": "khó cúi người",
+      "icon": "🦴",
+      "keywords": [
+        "khó cúi người",
+        "không cúi được",
+        "cúi khó",
+        "đau khi cúi",
+        "cứng lưng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 59,
+      "name": "khó đứng lâu",
+      "icon": "🦴",
+      "keywords": [
+        "khó đứng lâu",
+        "không đứng lâu được",
+        "đau khi đứng lâu",
+        "mỏi khi đứng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 60,
+      "name": "đau khi vận động",
+      "icon": "🦴",
+      "keywords": [
+        "đau khi vận động",
+        "đau khi cử động",
+        "đau khi hoạt động",
+        "đau khi di chuyển",
+        "vận động đau"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 61,
+      "name": "đau ngực",
+      "icon": "❤️",
+      "keywords": [
+        "đau ngực",
+        "tức ngực",
+        "ngực đau",
+        "dau nguc",
+        "nhức ngực",
+        "đau vùng ngực"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 62,
+      "name": "tức ngực",
+      "icon": "❤️",
+      "keywords": [
+        "tức ngực",
+        "ngực tức",
+        "nghẹt ngực",
+        "ngực nghẹt",
+        "căng tức ngực"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 63,
+      "name": "khó thở",
+      "icon": "❤️",
+      "keywords": [
+        "khó thở",
+        "thở khó",
+        "kho tho",
+        "thở gấp",
+        "hụt hơi",
+        "thở nhanh"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 64,
+      "name": "tim đập nhanh",
+      "icon": "❤️",
+      "keywords": [
+        "tim đập nhanh",
+        "hồi hộp",
+        "tim nhanh",
+        "đánh trống ngực",
+        "tim đập mạnh",
+        "nhịp tim nhanh"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 65,
+      "name": "tim đập chậm",
+      "icon": "❤️",
+      "keywords": [
+        "tim đập chậm",
+        "tim chậm",
+        "nhịp tim chậm",
+        "tim đập yếu",
+        "tim đập ít"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 66,
+      "name": "hồi hộp",
+      "icon": "❤️",
+      "keywords": [
+        "hồi hộp",
+        "tim đập nhanh",
+        "tim hồi hộp",
+        "hồi hộp tim",
+        "tim nhanh"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 67,
+      "name": "chóng mặt",
+      "icon": "❤️",
+      "keywords": [
+        "chóng mặt",
+        "hoa mắt",
+        "choáng",
+        "choang",
+        "chong mat",
+        "hoa mat",
+        "váng đầu"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 68,
+      "name": "mệt mỏi",
+      "icon": "❤️",
+      "keywords": [
+        "mệt mỏi",
+        "mệt",
+        "mỏi",
+        "met moi",
+        "uể oải",
+        "kiệt sức"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 69,
+      "name": "đau tim",
+      "icon": "❤️",
+      "keywords": [
+        "đau tim",
+        "nhức tim",
+        "tim đau",
+        "dau tim",
+        "đau vùng tim",
+        "đau tức vùng tim"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 70,
+      "name": "huyết áp cao",
+      "icon": "❤️",
+      "keywords": [
+        "huyết áp cao",
+        "huyết áp",
+        "cao huyết áp",
+        "huyet ap",
+        "huyệt áp cao",
+        "tăng huyết áp"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 71,
+      "name": "huyết áp thấp",
+      "icon": "❤️",
+      "keywords": [
+        "huyết áp thấp",
+        "hạ huyết áp",
+        "huyết áp thấp",
+        "huyết áp giảm",
+        "huyết áp yếu"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 72,
+      "name": "đau ngực khi vận động",
+      "icon": "❤️",
+      "keywords": [
+        "đau ngực khi vận động",
+        "đau ngực khi gắng sức",
+        "đau ngực khi hoạt động",
+        "đau khi vận động"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 73,
+      "name": "khó thở khi nằm",
+      "icon": "❤️",
+      "keywords": [
+        "khó thở khi nằm",
+        "thở khó khi nằm",
+        "khó thở ban đêm",
+        "thở khó khi ngủ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 74,
+      "name": "phù chân",
+      "icon": "❤️",
+      "keywords": [
+        "phù chân",
+        "sưng chân",
+        "chân sưng",
+        "phù bàn chân",
+        "chân phù"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 75,
+      "name": "đau vai trái",
+      "icon": "❤️",
+      "keywords": [
+        "đau vai trái",
+        "vai trái đau",
+        "nhức vai trái",
+        "đau vai bên trái"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 76,
+      "name": "tê tay trái",
+      "icon": "❤️",
+      "keywords": [
+        "tê tay trái",
+        "tay trái tê",
+        "tê bì tay trái",
+        "tê cánh tay trái"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 77,
+      "name": "ngất xỉu",
+      "icon": "❤️",
+      "keywords": [
+        "ngất xỉu",
+        "ngất",
+        "xỉu",
+        "bất tỉnh",
+        "mất ý thức",
+        "choáng váng"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 78,
+      "name": "tim đập không đều",
+      "icon": "❤️",
+      "keywords": [
+        "tim đập không đều",
+        "nhịp tim không đều",
+        "loạn nhịp tim",
+        "tim đập bất thường",
+        "rối loạn nhịp tim"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 79,
+      "name": "đau tức vùng tim",
+      "icon": "❤️",
+      "keywords": [
+        "đau tức vùng tim",
+        "tức vùng tim",
+        "đau vùng tim",
+        "tức ngực trái",
+        "đau tim"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 80,
+      "name": "thở gấp",
+      "icon": "❤️",
+      "keywords": [
+        "thở gấp",
+        "thở nhanh",
+        "thở hổn hển",
+        "thở dốc",
+        "thở mệt"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 81,
+      "name": "mệt khi leo cầu thang",
+      "icon": "❤️",
+      "keywords": [
+        "mệt khi leo cầu thang",
+        "mệt khi lên cầu thang",
+        "khó thở khi leo thang",
+        "mệt khi vận động"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 82,
+      "name": "đau lan lên cổ",
+      "icon": "❤️",
+      "keywords": [
+        "đau lan lên cổ",
+        "đau cổ",
+        "đau lan ra cổ",
+        "đau từ ngực lên cổ",
+        "đau lan vai cổ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 83,
+      "name": "đổ mồ hôi lạnh",
+      "icon": "❤️",
+      "keywords": [
+        "đổ mồ hôi lạnh",
+        "ra mồ hôi lạnh",
+        "toát mồ hôi lạnh",
+        "mồ hôi lạnh",
+        "đổ mồ hôi"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 84,
+      "name": "đau ngực kéo dài",
+      "icon": "❤️",
+      "keywords": [
+        "đau ngực kéo dài",
+        "đau ngực dai dẳng",
+        "đau ngực lâu",
+        "đau ngực không ngớt"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 85,
+      "name": "cảm giác hụt hơi",
+      "icon": "❤️",
+      "keywords": [
+        "cảm giác hụt hơi",
+        "hụt hơi",
+        "thiếu hơi",
+        "khó thở",
+        "thở không đủ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 86,
+      "name": "mệt tim",
+      "icon": "❤️",
+      "keywords": [
+        "mệt tim",
+        "suy tim",
+        "yếu tim",
+        "tim yếu",
+        "tim mệt",
+        "met tim"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 87,
+      "name": "đau vùng ngực trái",
+      "icon": "❤️",
+      "keywords": [
+        "đau vùng ngực trái",
+        "đau ngực trái",
+        "ngực trái đau",
+        "đau bên trái ngực"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 88,
+      "name": "nhịp tim bất thường",
+      "icon": "❤️",
+      "keywords": [
+        "nhịp tim bất thường",
+        "tim đập bất thường",
+        "loạn nhịp",
+        "rối loạn nhịp tim",
+        "tim không đều"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 89,
+      "name": "căng tức ngực",
+      "icon": "❤️",
+      "keywords": [
+        "căng tức ngực",
+        "ngực căng",
+        "tức ngực",
+        "ngực đau",
+        "căng vùng ngực"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 90,
+      "name": "khó thở về đêm",
+      "icon": "❤️",
+      "keywords": [
+        "khó thở về đêm",
+        "khó thở ban đêm",
+        "thở khó đêm",
+        "khó thở khi ngủ",
+        "thở khó về đêm"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 91,
+      "name": "đau bụng",
+      "icon": "🍽️",
+      "keywords": [
+        "đau bụng",
+        "nhức bụng",
+        "bụng đau",
+        "dau bung",
+        "đau dạ dày",
+        "đau bao tử"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 92,
+      "name": "đầy hơi",
+      "icon": "🍽️",
+      "keywords": [
+        "đầy hơi",
+        "chướng bụng",
+        "đầy bụng",
+        "day hoi",
+        "bụng đầy",
+        "bụng phình"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 93,
+      "name": "khó tiêu",
+      "icon": "🍽️",
+      "keywords": [
+        "khó tiêu",
+        "kho tieu",
+        "khó tiêu hóa",
+        "ăn không tiêu",
+        "tiêu hóa kém"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 94,
+      "name": "buồn nôn",
+      "icon": "🍽️",
+      "keywords": [
+        "buồn nôn",
+        "nôn",
+        "ói",
+        "muốn nôn",
+        "buon non",
+        "cảm giác nôn"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 95,
+      "name": "nôn ói",
+      "icon": "🍽️",
+      "keywords": [
+        "nôn ói",
+        "nôn",
+        "ói",
+        "nôn mửa",
+        "ói mửa",
+        "nôn ra"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 96,
+      "name": "tiêu chảy",
+      "icon": "🍽️",
+      "keywords": [
+        "tiêu chảy",
+        "ỉa chảy",
+        "đi ngoài",
+        "tieu chay",
+        "tiêu lỏng",
+        "đi ngoài nhiều"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 97,
+      "name": "táo bón",
+      "icon": "🍽️",
+      "keywords": [
+        "táo bón",
+        "táo",
+        "tao bon",
+        "khó đi ngoài",
+        "bí đại tiện",
+        "táo lâu ngày"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 98,
+      "name": "đau dạ dày",
+      "icon": "🍽️",
+      "keywords": [
+        "đau dạ dày",
+        "dạ dày đau",
+        "đau bao tử",
+        "nhức dạ dày",
+        "đau thượng vị"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 99,
+      "name": "ợ chua",
+      "icon": "🍽️",
+      "keywords": [
+        "ợ chua",
+        "ợ",
+        "ợ hơi chua",
+        "o chua",
+        "ợ trào ngược"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 100,
+      "name": "ợ nóng",
+      "icon": "🍽️",
+      "keywords": [
+        "ợ nóng",
+        "ợ",
+        "trào ngược",
+        "o nong",
+        "ợ hơi nóng",
+        "nóng ngực"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 101,
+      "name": "chướng bụng",
+      "icon": "🍽️",
+      "keywords": [
+        "chướng bụng",
+        "đầy hơi",
+        "bụng chướng",
+        "bụng căng",
+        "bụng phình"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 102,
+      "name": "đi ngoài ra máu",
+      "icon": "🍽️",
+      "keywords": [
+        "đi ngoài ra máu",
+        "phân có máu",
+        "đại tiện ra máu",
+        "máu trong phân",
+        "đi cầu ra máu"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 103,
+      "name": "phân đen",
+      "icon": "🍽️",
+      "keywords": [
+        "phân đen",
+        "đại tiện đen",
+        "phân màu đen",
+        "phân sẫm",
+        "phân đen sì"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 104,
+      "name": "đau bụng dưới",
+      "icon": "🍽️",
+      "keywords": [
+        "đau bụng dưới",
+        "đau vùng chậu",
+        "dau bung duoi",
+        "đau hạ vị",
+        "đau bụng phía dưới"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 105,
+      "name": "viêm đại tràng",
+      "icon": "🍽️",
+      "keywords": [
+        "viêm đại tràng",
+        "đại tràng viêm",
+        "viêm ruột",
+        "viêm đại tràng cấp"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 106,
+      "name": "viêm dạ dày",
+      "icon": "🍽️",
+      "keywords": [
+        "viêm dạ dày",
+        "dạ dày viêm",
+        "viem da day",
+        "viêm bao tử",
+        "viêm loét dạ dày"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 107,
+      "name": "co thắt bụng",
+      "icon": "🍽️",
+      "keywords": [
+        "co thắt bụng",
+        "co bụng",
+        "bụng co",
+        "co cứng bụng",
+        "cơn co bụng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 108,
+      "name": "khó nuốt",
+      "icon": "🍽️",
+      "keywords": [
+        "khó nuốt",
+        "nuốt khó",
+        "khó nuốt nước",
+        "đau khi nuốt",
+        "nuốt vướng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 109,
+      "name": "đau khi ăn",
+      "icon": "🍽️",
+      "keywords": [
+        "đau khi ăn",
+        "ăn đau",
+        "đau khi ăn uống",
+        "ăn bị đau",
+        "đau sau khi ăn"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 110,
+      "name": "ăn không ngon",
+      "icon": "🍽️",
+      "keywords": [
+        "ăn không ngon",
+        "chán ăn",
+        "biếng ăn",
+        "không thèm ăn",
+        "kém ăn"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 111,
+      "name": "sụt cân",
+      "icon": "🍽️",
+      "keywords": [
+        "sụt cân",
+        "giảm cân",
+        "sut can",
+        "gầy",
+        "nhẹ cân",
+        "giảm cân nhanh"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 112,
+      "name": "mệt mỏi tiêu hóa",
+      "icon": "🍽️",
+      "keywords": [
+        "mệt mỏi tiêu hóa",
+        "mệt mỏi",
+        "mệt",
+        "mỏi",
+        "met moi",
+        "uể oải"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 113,
+      "name": "đau gan",
+      "icon": "🍽️",
+      "keywords": [
+        "đau gan",
+        "gan đau",
+        "nhức gan",
+        "đau vùng gan",
+        "đau hạ sườn phải"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 114,
+      "name": "vàng da",
+      "icon": "🍽️",
+      "keywords": [
+        "vàng da",
+        "da vàng",
+        "vàng mắt",
+        "vàng da mắt",
+        "da bị vàng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 115,
+      "name": "đắng miệng",
+      "icon": "🍽️",
+      "keywords": [
+        "đắng miệng",
+        "miệng đắng",
+        "miệng bị đắng",
+        "vị đắng",
+        "cảm giác đắng"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 116,
+      "name": "đau quanh rốn",
+      "icon": "🍽️",
+      "keywords": [
+        "đau quanh rốn",
+        "đau rốn",
+        "rốn đau",
+        "đau vùng rốn",
+        "nhức quanh rốn"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 117,
+      "name": "đi ngoài nhiều lần",
+      "icon": "🍽️",
+      "keywords": [
+        "đi ngoài nhiều lần",
+        "tiêu chảy",
+        "đi ngoài liên tục",
+        "đi cầu nhiều",
+        "đại tiện nhiều"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 118,
+      "name": "táo bón kéo dài",
+      "icon": "🍽️",
+      "keywords": [
+        "táo bón kéo dài",
+        "táo mãn tính",
+        "táo lâu ngày",
+        "táo dai dẳng",
+        "bí đại tiện lâu"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 119,
+      "name": "nóng rát dạ dày",
+      "icon": "🍽️",
+      "keywords": [
+        "nóng rát dạ dày",
+        "dạ dày nóng",
+        "rát dạ dày",
+        "nóng bao tử",
+        "rát bao tử"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 120,
+      "name": "trào ngược dạ dày",
+      "icon": "🍽️",
+      "keywords": [
+        "trào ngược dạ dày",
+        "trào ngược",
+        "ợ nóng",
+        "ợ chua",
+        "trào ngược thực quản"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 121,
+      "name": "ho",
+      "icon": "🫁",
+      "keywords": [
+        "ho",
+        "ho khan",
+        "ho có đờm",
+        "ho đờm",
+        "ho lâu ngày",
+        "ho nhiều"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 122,
+      "name": "ho khan",
+      "icon": "🫁",
+      "keywords": [
+        "ho khan",
+        "ho khô",
+        "ho không đờm",
+        "ho khạc",
+        "ho liên tục"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 123,
+      "name": "ho có đờm",
+      "icon": "🫁",
+      "keywords": [
+        "ho có đờm",
+        "ho đờm",
+        "ho bị đờm",
+        "ho ra đờm",
+        "ho có đàm"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 124,
+      "name": "khó thở",
+      "icon": "🫁",
+      "keywords": [
+        "khó thở",
+        "thở khó",
+        "kho tho",
+        "thở gấp",
+        "hụt hơi",
+        "thở nhanh",
+        "khó hít thở"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 125,
+      "name": "đau họng",
+      "icon": "🫁",
+      "keywords": [
+        "đau họng",
+        "họng đau",
+        "dau hong",
+        "viêm họng",
+        "sưng họng",
+        "nhức họng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 126,
+      "name": "viêm họng",
+      "icon": "🫁",
+      "keywords": [
+        "viêm họng",
+        "họng viêm",
+        "viem hong",
+        "họng sưng",
+        "họng đỏ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 127,
+      "name": "nghẹt mũi",
+      "icon": "🫁",
+      "keywords": [
+        "nghẹt mũi",
+        "ngạt mũi",
+        "tắc mũi",
+        "nghet mui",
+        "mũi tắc",
+        "mũi bị nghẹt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 128,
+      "name": "sổ mũi",
+      "icon": "🫁",
+      "keywords": [
+        "sổ mũi",
+        "chảy nước mũi",
+        "so mui",
+        "mũi chảy",
+        "chảy mũi"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 129,
+      "name": "hắt hơi",
+      "icon": "🫁",
+      "keywords": [
+        "hắt hơi",
+        "hắt xì",
+        "hắt hơi liên tục",
+        "hắt hơi nhiều",
+        "hắt xì hơi"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 130,
+      "name": "đau ngực khi thở",
+      "icon": "🫁",
+      "keywords": [
+        "đau ngực khi thở",
+        "ngực đau khi thở",
+        "đau ngực",
+        "thở đau ngực",
+        "đau khi hít thở"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 131,
+      "name": "thở khò khè",
+      "icon": "🫁",
+      "keywords": [
+        "thở khò khè",
+        "khò khè",
+        "thở rít",
+        "thở có tiếng",
+        "thở khó"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 132,
+      "name": "tức ngực",
+      "icon": "🫁",
+      "keywords": [
+        "tức ngực",
+        "ngực tức",
+        "nghẹt ngực",
+        "ngực nghẹt",
+        "khó thở ngực"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 133,
+      "name": "viêm phế quản",
+      "icon": "🫁",
+      "keywords": [
+        "viêm phế quản",
+        "phế quản viêm",
+        "viêm phế quản cấp",
+        "viêm phế quản mãn"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 134,
+      "name": "viêm phổi",
+      "icon": "🫁",
+      "keywords": [
+        "viêm phổi",
+        "viem phoi",
+        "phổi viêm",
+        "nhiễm trùng phổi",
+        "viêm phổi cấp"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 135,
+      "name": "hen suyễn",
+      "icon": "🫁",
+      "keywords": [
+        "hen suyễn",
+        "hen",
+        "suyễn",
+        "hen suyen",
+        "hen phế quản",
+        "bệnh hen"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 136,
+      "name": "ho kéo dài",
+      "icon": "🫁",
+      "keywords": [
+        "ho kéo dài",
+        "ho mãn tính",
+        "ho lâu ngày",
+        "ho không khỏi",
+        "ho dai dẳng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 137,
+      "name": "khàn tiếng",
+      "icon": "🫁",
+      "keywords": [
+        "khàn tiếng",
+        "tiếng khàn",
+        "khàn giọng",
+        "giọng khàn",
+        "nói khàn"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 138,
+      "name": "mất tiếng",
+      "icon": "🫁",
+      "keywords": [
+        "mất tiếng",
+        "mất giọng",
+        "không nói được",
+        "câm tiếng",
+        "tiếng bị mất"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 139,
+      "name": "khó nuốt",
+      "icon": "🫁",
+      "keywords": [
+        "khó nuốt",
+        "nuốt khó",
+        "khó nuốt nước",
+        "đau khi nuốt",
+        "nuốt vướng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 140,
+      "name": "đau khi nuốt",
+      "icon": "🫁",
+      "keywords": [
+        "đau khi nuốt",
+        "nuốt đau",
+        "đau nuốt",
+        "đau họng khi nuốt",
+        "nuốt bị đau"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 141,
+      "name": "thở gấp",
+      "icon": "🫁",
+      "keywords": [
+        "thở gấp",
+        "thở nhanh",
+        "thở hổn hển",
+        "thở dốc",
+        "thở mệt"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 142,
+      "name": "ho ra máu",
+      "icon": "🫁",
+      "keywords": [
+        "ho ra máu",
+        "ho máu",
+        "khạc máu",
+        "ho có máu",
+        "đờm có máu"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 143,
+      "name": "đờm nhiều",
+      "icon": "🫁",
+      "keywords": [
+        "đờm nhiều",
+        "nhiều đờm",
+        "đàm nhiều",
+        "đờm đặc",
+        "đờm vàng",
+        "đờm xanh"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 144,
+      "name": "viêm xoang",
+      "icon": "🫁",
+      "keywords": [
+        "viêm xoang",
+        "viem xoang",
+        "xoang viêm",
+        "đau xoang",
+        "viêm xoang mũi"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 145,
+      "name": "chảy nước mũi",
+      "icon": "🫁",
+      "keywords": [
+        "chảy nước mũi",
+        "sổ mũi",
+        "mũi chảy nước",
+        "chảy mũi",
+        "nước mũi chảy"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 146,
+      "name": "viêm amidan",
+      "icon": "🫁",
+      "keywords": [
+        "viêm amidan",
+        "viem amidan",
+        "amidan sưng",
+        "sưng amidan",
+        "amidan viêm"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 147,
+      "name": "cảm lạnh",
+      "icon": "🫁",
+      "keywords": [
+        "cảm lạnh",
+        "cảm",
+        "cúm",
+        "cam cum",
+        "cảm cúm",
+        "bị cảm"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 148,
+      "name": "sốt kèm ho",
+      "icon": "🫁",
+      "keywords": [
+        "sốt kèm ho",
+        "sốt và ho",
+        "ho và sốt",
+        "sốt ho",
+        "ho có sốt"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 149,
+      "name": "mệt khi hít thở",
+      "icon": "🫁",
+      "keywords": [
+        "mệt khi hít thở",
+        "mệt khi thở",
+        "thở mệt",
+        "hít thở mệt",
+        "khó thở mệt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 150,
+      "name": "dị ứng hô hấp",
+      "icon": "🫁",
+      "keywords": [
+        "dị ứng hô hấp",
+        "dị ứng đường hô hấp",
+        "dị ứng phổi",
+        "dị ứng mũi họng",
+        "viêm mũi dị ứng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 151,
+      "name": "nổi mẩn đỏ",
+      "icon": "🧴",
+      "keywords": [
+        "nổi mẩn đỏ",
+        "mẩn đỏ",
+        "nổi mẩn",
+        "man do",
+        "phát ban",
+        "nổi đỏ",
+        "da đỏ"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 152,
+      "name": "ngứa da",
+      "icon": "🧴",
+      "keywords": [
+        "ngứa da",
+        "ngứa",
+        "ngứa ngáy",
+        "ngua",
+        "da ngứa",
+        "ngứa khắp người"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 153,
+      "name": "mụn trứng cá",
+      "icon": "🧴",
+      "keywords": [
+        "mụn trứng cá",
+        "mụn",
+        "nổi mụn",
+        "noi mun",
+        "mụn cá",
+        "mụn bọc",
+        "mụn đầu đen"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 154,
+      "name": "dị ứng da",
+      "icon": "🧴",
+      "keywords": [
+        "dị ứng da",
+        "dị ứng",
+        "di ung",
+        "da dị ứng",
+        "kích ứng da",
+        "phản ứng da"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 155,
+      "name": "phát ban",
+      "icon": "🧴",
+      "keywords": [
+        "phát ban",
+        "nổi ban",
+        "ban đỏ",
+        "da nổi ban",
+        "xuất hiện ban"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 156,
+      "name": "da khô",
+      "icon": "🧴",
+      "keywords": [
+        "da khô",
+        "khô da",
+        "da khô ráp",
+        "da thiếu ẩm",
+        "da bị khô"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 157,
+      "name": "da bong tróc",
+      "icon": "🧴",
+      "keywords": [
+        "da bong tróc",
+        "bong tróc",
+        "da bong",
+        "da tróc",
+        "da lột",
+        "da bị lột"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 158,
+      "name": "nổi mề đay",
+      "icon": "🧴",
+      "keywords": [
+        "nổi mề đay",
+        "mề đay",
+        "me day",
+        "nổi mề",
+        "phát mề đay"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 159,
+      "name": "viêm da",
+      "icon": "🧴",
+      "keywords": [
+        "viêm da",
+        "viem da",
+        "da viêm",
+        "sưng da",
+        "da bị viêm"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 160,
+      "name": "nấm da",
+      "icon": "🧴",
+      "keywords": [
+        "nấm da",
+        "nấm",
+        "nam da",
+        "nhiễm nấm",
+        "nấm ngoài da",
+        "nấm da đầu"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 161,
+      "name": "lang ben",
+      "icon": "🧴",
+      "keywords": [
+        "lang ben",
+        "lang beng",
+        "ghẻ lở",
+        "ghẻ ngứa",
+        "bệnh ghẻ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 162,
+      "name": "chàm da",
+      "icon": "🧴",
+      "keywords": [
+        "chàm da",
+        "chàm",
+        "cham",
+        "eczema",
+        "viêm da chàm"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 163,
+      "name": "da nổi đốm",
+      "icon": "🧴",
+      "keywords": [
+        "da nổi đốm",
+        "nổi đốm",
+        "đốm da",
+        "da có đốm",
+        "đốm trắng",
+        "đốm đỏ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 164,
+      "name": "da bị kích ứng",
+      "icon": "🧴",
+      "keywords": [
+        "da bị kích ứng",
+        "kích ứng da",
+        "da kích ứng",
+        "da nhạy cảm",
+        "da bị tổn thương"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 165,
+      "name": "mụn nước",
+      "icon": "🧴",
+      "keywords": [
+        "mụn nước",
+        "nổi mụn nước",
+        "bọng nước",
+        "mụn bóng nước",
+        "phỏng nước"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 166,
+      "name": "da sưng đỏ",
+      "icon": "🧴",
+      "keywords": [
+        "da sưng đỏ",
+        "sưng đỏ",
+        "da sưng",
+        "da đỏ sưng",
+        "viêm sưng da"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 167,
+      "name": "ngứa da đầu",
+      "icon": "🧴",
+      "keywords": [
+        "ngứa da đầu",
+        "da đầu ngứa",
+        "ngứa đầu",
+        "ngứa vùng đầu",
+        "đầu ngứa"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 168,
+      "name": "rụng tóc",
+      "icon": "🧴",
+      "keywords": [
+        "rụng tóc",
+        "tóc rụng",
+        "rung toc",
+        "hói",
+        "tóc gãy rụng",
+        "rụng tóc nhiều"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 169,
+      "name": "gàu nhiều",
+      "icon": "🧴",
+      "keywords": [
+        "gàu nhiều",
+        "gàu",
+        "gàu đầu",
+        "da đầu bị gàu",
+        "nhiều gàu"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 170,
+      "name": "da nhờn",
+      "icon": "🧴",
+      "keywords": [
+        "da nhờn",
+        "da dầu",
+        "da tiết dầu",
+        "da bóng nhờn",
+        "da nhiều dầu"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 171,
+      "name": "da bị thâm",
+      "icon": "🧴",
+      "keywords": [
+        "da bị thâm",
+        "da thâm",
+        "thâm da",
+        "vết thâm",
+        "da sạm",
+        "da đen"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 172,
+      "name": "viêm nang lông",
+      "icon": "🧴",
+      "keywords": [
+        "viêm nang lông",
+        "nang lông viêm",
+        "viêm lỗ chân lông",
+        "mụn viêm nang lông"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 173,
+      "name": "nứt da",
+      "icon": "🧴",
+      "keywords": [
+        "nứt da",
+        "da nứt",
+        "da bị nứt",
+        "nứt nẻ",
+        "da nứt nẻ",
+        "da rạn nứt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 174,
+      "name": "da bị cháy nắng",
+      "icon": "🧴",
+      "keywords": [
+        "da bị cháy nắng",
+        "cháy nắng",
+        "da cháy",
+        "bỏng nắng",
+        "da bị bỏng nắng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 175,
+      "name": "mụn viêm",
+      "icon": "🧴",
+      "keywords": [
+        "mụn viêm",
+        "mụn sưng",
+        "mụn đỏ",
+        "mụn bọc viêm",
+        "mụn có mủ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 176,
+      "name": "da nổi hạt",
+      "icon": "🧴",
+      "keywords": [
+        "da nổi hạt",
+        "nổi hạt",
+        "hạt da",
+        "da sần sùi",
+        "da nhám"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 177,
+      "name": "da đổi màu",
+      "icon": "🧴",
+      "keywords": [
+        "da đổi màu",
+        "đổi màu da",
+        "da thay đổi màu",
+        "da sạm màu",
+        "da bạc màu"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 178,
+      "name": "ngứa toàn thân",
+      "icon": "🧴",
+      "keywords": [
+        "ngứa toàn thân",
+        "ngứa khắp người",
+        "ngứa cả người",
+        "toàn thân ngứa",
+        "ngứa nhiều chỗ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 179,
+      "name": "viêm da cơ địa",
+      "icon": "🧴",
+      "keywords": [
+        "viêm da cơ địa",
+        "viêm da dị ứng",
+        "da cơ địa",
+        "atopic dermatitis",
+        "viêm da mãn tính"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 180,
+      "name": "da bị sẹo",
+      "icon": "🧴",
+      "keywords": [
+        "da bị sẹo",
+        "sẹo da",
+        "vết sẹo",
+        "da có sẹo",
+        "sẹo lồi",
+        "sẹo lõm"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 181,
+      "name": "đau họng",
+      "icon": "👂",
+      "keywords": [
+        "đau họng",
+        "họng đau",
+        "dau hong",
+        "viêm họng",
+        "sưng họng",
+        "nhức họng"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 182,
+      "name": "viêm họng",
+      "icon": "👂",
+      "keywords": [
+        "viêm họng",
+        "họng viêm",
+        "viem hong",
+        "họng sưng",
+        "họng đỏ",
+        "họng bị viêm"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 183,
+      "name": "ho",
+      "icon": "👂",
+      "keywords": [
+        "ho",
+        "ho khan",
+        "ho có đờm",
+        "ho đờm",
+        "ho lâu ngày",
+        "ho nhiều"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 184,
+      "name": "khàn tiếng",
+      "icon": "👂",
+      "keywords": [
+        "khàn tiếng",
+        "tiếng khàn",
+        "khàn giọng",
+        "giọng khàn",
+        "nói khàn",
+        "giọng bị khàn"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 185,
+      "name": "mất tiếng",
+      "icon": "👂",
+      "keywords": [
+        "mất tiếng",
+        "mất giọng",
+        "không nói được",
+        "câm tiếng",
+        "tiếng bị mất",
+        "không ra tiếng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 186,
+      "name": "nghẹt mũi",
+      "icon": "👂",
+      "keywords": [
+        "nghẹt mũi",
+        "ngạt mũi",
+        "tắc mũi",
+        "nghet mui",
+        "mũi tắc",
+        "mũi bị nghẹt"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 187,
+      "name": "sổ mũi",
+      "icon": "👂",
+      "keywords": [
+        "sổ mũi",
+        "chảy nước mũi",
+        "so mui",
+        "mũi chảy",
+        "chảy mũi",
+        "mũi sổ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 188,
+      "name": "chảy nước mũi",
+      "icon": "👂",
+      "keywords": [
+        "chảy nước mũi",
+        "sổ mũi",
+        "mũi chảy nước",
+        "chảy mũi",
+        "nước mũi chảy"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 189,
+      "name": "hắt hơi",
+      "icon": "👂",
+      "keywords": [
+        "hắt hơi",
+        "hắt xì",
+        "hắt hơi liên tục",
+        "hắt hơi nhiều",
+        "hắt xì hơi"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 190,
+      "name": "đau tai",
+      "icon": "👂",
+      "keywords": [
+        "đau tai",
+        "tai đau",
+        "dau tai",
+        "nhức tai",
+        "tai nhức",
+        "tai bị đau"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 191,
+      "name": "ù tai",
+      "icon": "👂",
+      "keywords": [
+        "ù tai",
+        "u tai",
+        "tai ù",
+        "nghe kém",
+        "tai bị ù",
+        "ù ù tai"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 192,
+      "name": "nghe kém",
+      "icon": "👂",
+      "keywords": [
+        "nghe kém",
+        "điếc",
+        "nghe không rõ",
+        "giảm thính lực",
+        "tai kém",
+        "nghe yếu"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 193,
+      "name": "viêm tai giữa",
+      "icon": "👂",
+      "keywords": [
+        "viêm tai giữa",
+        "viêm tai",
+        "tai viêm",
+        "viem tai",
+        "viêm tai trong",
+        "tai giữa viêm"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 194,
+      "name": "chảy mủ tai",
+      "icon": "👂",
+      "keywords": [
+        "chảy mủ tai",
+        "tai chảy mủ",
+        "mủ tai",
+        "tai ra mủ",
+        "chảy dịch tai"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 195,
+      "name": "viêm xoang",
+      "icon": "👂",
+      "keywords": [
+        "viêm xoang",
+        "viem xoang",
+        "xoang viêm",
+        "đau xoang",
+        "viêm xoang mũi",
+        "viêm xoang mạn"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 196,
+      "name": "đau vùng xoang",
+      "icon": "👂",
+      "keywords": [
+        "đau vùng xoang",
+        "đau xoang",
+        "xoang đau",
+        "nhức xoang",
+        "đau vùng mũi"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 197,
+      "name": "khó nuốt",
+      "icon": "👂",
+      "keywords": [
+        "khó nuốt",
+        "nuốt khó",
+        "khó nuốt nước",
+        "đau khi nuốt",
+        "nuốt vướng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 198,
+      "name": "đau khi nuốt",
+      "icon": "👂",
+      "keywords": [
+        "đau khi nuốt",
+        "nuốt đau",
+        "đau nuốt",
+        "đau họng khi nuốt",
+        "nuốt bị đau"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 199,
+      "name": "hôi miệng",
+      "icon": "👂",
+      "keywords": [
+        "hôi miệng",
+        "hơi thở hôi",
+        "hoi mieng",
+        "miệng hôi",
+        "thở hôi"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 200,
+      "name": "viêm amidan",
+      "icon": "👂",
+      "keywords": [
+        "viêm amidan",
+        "viem amidan",
+        "amidan sưng",
+        "sưng amidan",
+        "amidan viêm",
+        "viêm amiđan"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 201,
+      "name": "sưng amidan",
+      "icon": "👂",
+      "keywords": [
+        "sưng amidan",
+        "amidan sưng",
+        "amidan to",
+        "amidan bị sưng",
+        "sưng họng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 202,
+      "name": "khó thở bằng mũi",
+      "icon": "👂",
+      "keywords": [
+        "khó thở bằng mũi",
+        "thở mũi khó",
+        "không thở được mũi",
+        "nghẹt mũi",
+        "tắc mũi"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 203,
+      "name": "ngứa họng",
+      "icon": "👂",
+      "keywords": [
+        "ngứa họng",
+        "họng ngứa",
+        "ngứa cổ họng",
+        "ngứa trong họng",
+        "họng bị ngứa"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 204,
+      "name": "đau đầu do xoang",
+      "icon": "👂",
+      "keywords": [
+        "đau đầu do xoang",
+        "đau đầu xoang",
+        "nhức đầu do xoang",
+        "đau đầu viêm xoang"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 205,
+      "name": "chảy máu cam",
+      "icon": "👂",
+      "keywords": [
+        "chảy máu cam",
+        "máu cam",
+        "chay mau mui",
+        "mũi chảy máu",
+        "chảy máu mũi"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 206,
+      "name": "khạc đờm",
+      "icon": "👂",
+      "keywords": [
+        "khạc đờm",
+        "ho đờm",
+        "đờm",
+        "khạc ra đờm",
+        "có đờm"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 207,
+      "name": "dị ứng mũi",
+      "icon": "👂",
+      "keywords": [
+        "dị ứng mũi",
+        "viêm mũi dị ứng",
+        "dị ứng",
+        "mũi dị ứng",
+        "viêm mũi"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 208,
+      "name": "thở khò khè",
+      "icon": "👂",
+      "keywords": [
+        "thở khò khè",
+        "khò khè",
+        "thở rít",
+        "thở có tiếng",
+        "thở khó"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 209,
+      "name": "cảm lạnh",
+      "icon": "👂",
+      "keywords": [
+        "cảm lạnh",
+        "cảm",
+        "cúm",
+        "cam cum",
+        "cảm cúm",
+        "bị cảm"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 210,
+      "name": "sốt kèm đau họng",
+      "icon": "👂",
+      "keywords": [
+        "sốt kèm đau họng",
+        "sốt và đau họng",
+        "đau họng có sốt",
+        "sốt họng",
+        "sốt viêm họng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 211,
+      "name": "đau mắt",
+      "icon": "👁️",
+      "keywords": [
+        "đau mắt",
+        "mắt đau",
+        "dau mat",
+        "nhức mắt",
+        "mắt nhức"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 212,
+      "name": "mắt đỏ",
+      "icon": "👁️",
+      "keywords": [
+        "mắt đỏ",
+        "đỏ mắt",
+        "do mat",
+        "mắt đỏ ngầu",
+        "mắt bị đỏ"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 213,
+      "name": "mờ mắt",
+      "icon": "👁️",
+      "keywords": [
+        "mờ mắt",
+        "mắt mờ",
+        "mo mat",
+        "nhìn mờ",
+        "nhìn không rõ",
+        "thị lực mờ"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 214,
+      "name": "khô mắt",
+      "icon": "👁️",
+      "keywords": [
+        "khô mắt",
+        "mắt khô",
+        "kho mat",
+        "mắt khô khan",
+        "mắt bị khô"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 215,
+      "name": "ngứa mắt",
+      "icon": "👁️",
+      "keywords": [
+        "ngứa mắt",
+        "mắt ngứa",
+        "ngua mat",
+        "mắt bị ngứa",
+        "ngứa vùng mắt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 216,
+      "name": "chảy nước mắt",
+      "icon": "👁️",
+      "keywords": [
+        "chảy nước mắt",
+        "mắt chảy nước",
+        "chay nuoc mat",
+        "nước mắt chảy",
+        "mắt ra nước"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 217,
+      "name": "nhìn đôi",
+      "icon": "👁️",
+      "keywords": [
+        "nhìn đôi",
+        "nhìn hai",
+        "thấy đôi",
+        "nhìn bóng đôi",
+        "song thị"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 218,
+      "name": "sưng mắt",
+      "icon": "👁️",
+      "keywords": [
+        "sưng mắt",
+        "mắt sưng",
+        "phù mắt",
+        "mắt bị sưng",
+        "sưng quanh mắt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 219,
+      "name": "cộm mắt",
+      "icon": "👁️",
+      "keywords": [
+        "cộm mắt",
+        "lẹo mắt",
+        "mắt cộm",
+        "mắt bị lẹo",
+        "viêm bờ mi"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 220,
+      "name": "nhạy cảm ánh sáng",
+      "icon": "👁️",
+      "keywords": [
+        "nhạy cảm ánh sáng",
+        "sợ ánh sáng",
+        "chói mắt",
+        "mắt nhạy sáng",
+        "quang sợ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 221,
+      "name": "mỏi mắt",
+      "icon": "👁️",
+      "keywords": [
+        "mỏi mắt",
+        "mắt mỏi",
+        "mệt mắt",
+        "mắt mệt mỏi",
+        "mắt bị mỏi"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 222,
+      "name": "giảm thị lực",
+      "icon": "👁️",
+      "keywords": [
+        "giảm thị lực",
+        "thị lực giảm",
+        "mắt kém",
+        "nhìn kém",
+        "thị lực yếu"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 223,
+      "name": "nhìn không rõ",
+      "icon": "👁️",
+      "keywords": [
+        "nhìn không rõ",
+        "nhìn mờ",
+        "thấy không rõ",
+        "mờ mắt",
+        "nhìn không sắc"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 224,
+      "name": "đau khi nhìn",
+      "icon": "👁️",
+      "keywords": [
+        "đau khi nhìn",
+        "nhìn đau",
+        "mắt đau khi nhìn",
+        "đau khi mở mắt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 225,
+      "name": "mắt có ghèn",
+      "icon": "👁️",
+      "keywords": [
+        "mắt có ghèn",
+        "ghèn mắt",
+        "mắt ghèn",
+        "mắt ra ghèn",
+        "chảy ghèn"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 226,
+      "name": "viêm kết mạc",
+      "icon": "👁️",
+      "keywords": [
+        "viêm kết mạc",
+        "đau mắt đỏ",
+        "viêm màng kết",
+        "kết mạc viêm",
+        "mắt hột"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 227,
+      "name": "viêm bờ mi",
+      "icon": "👁️",
+      "keywords": [
+        "viêm bờ mi",
+        "bờ mi viêm",
+        "mi mắt viêm",
+        "viêm mi",
+        "cộm mắt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 228,
+      "name": "mắt bị kích ứng",
+      "icon": "👁️",
+      "keywords": [
+        "mắt bị kích ứng",
+        "kích ứng mắt",
+        "mắt kích ứng",
+        "mắt nhạy cảm",
+        "dị ứng mắt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 229,
+      "name": "chớp mắt nhiều",
+      "icon": "👁️",
+      "keywords": [
+        "chớp mắt nhiều",
+        "nháy mắt nhiều",
+        "chớp mắt liên tục",
+        "mắt chớp",
+        "giật mí"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 230,
+      "name": "nhìn thấy đốm đen",
+      "icon": "👁️",
+      "keywords": [
+        "nhìn thấy đốm đen",
+        "đốm đen",
+        "ruồi bay",
+        "thấy bóng đen",
+        "thấy đốm"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 231,
+      "name": "mắt bị khô rát",
+      "icon": "👁️",
+      "keywords": [
+        "mắt bị khô rát",
+        "khô rát mắt",
+        "mắt khô và rát",
+        "rát mắt",
+        "cay rát mắt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 232,
+      "name": "chảy ghèn mắt",
+      "icon": "👁️",
+      "keywords": [
+        "chảy ghèn mắt",
+        "ghèn chảy",
+        "mắt chảy ghèn",
+        "ra ghèn",
+        "mủ mắt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 233,
+      "name": "mắt bị sưng đỏ",
+      "icon": "👁️",
+      "keywords": [
+        "mắt bị sưng đỏ",
+        "sưng đỏ mắt",
+        "mắt sưng và đỏ",
+        "viêm sưng mắt"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 234,
+      "name": "mắt mệt mỏi",
+      "icon": "👁️",
+      "keywords": [
+        "mắt mệt mỏi",
+        "mỏi mắt",
+        "mắt mỏi",
+        "mệt mắt",
+        "mắt bị mệt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 235,
+      "name": "nhìn xa không rõ",
+      "icon": "👁️",
+      "keywords": [
+        "nhìn xa không rõ",
+        "cận thị",
+        "cận",
+        "can thi",
+        "nhìn gần",
+        "mắt cận"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 236,
+      "name": "nhìn gần không rõ",
+      "icon": "👁️",
+      "keywords": [
+        "nhìn gần không rõ",
+        "viễn thị",
+        "viễn",
+        "vien thi",
+        "nhìn xa",
+        "mắt viễn"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 237,
+      "name": "đau hốc mắt",
+      "icon": "👁️",
+      "keywords": [
+        "đau hốc mắt",
+        "hốc mắt đau",
+        "đau quanh mắt",
+        "nhức hốc mắt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 238,
+      "name": "cay mắt",
+      "icon": "👁️",
+      "keywords": [
+        "cay mắt",
+        "mắt cay",
+        "mắt bị cay",
+        "rát mắt",
+        "cay rát"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 239,
+      "name": "mắt bị lóa",
+      "icon": "👁️",
+      "keywords": [
+        "mắt bị lóa",
+        "lóa mắt",
+        "chói mắt",
+        "mắt chói",
+        "bị chói"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 240,
+      "name": "co giật mí mắt",
+      "icon": "👁️",
+      "keywords": [
+        "co giật mí mắt",
+        "giật mí",
+        "mí mắt giật",
+        "co giật mi",
+        "nháy mắt không tự chủ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 241,
+      "name": "sốt",
+      "icon": "👶",
+      "keywords": [
+        "sốt",
+        "sốt cao",
+        "nóng",
+        "sot",
+        "trẻ sốt",
+        "bé sốt",
+        "con sốt"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 242,
+      "name": "ho",
+      "icon": "👶",
+      "keywords": [
+        "ho",
+        "ho khan",
+        "ho có đờm",
+        "ho đờm",
+        "trẻ ho",
+        "bé ho",
+        "ho nhiều"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 243,
+      "name": "sổ mũi",
+      "icon": "👶",
+      "keywords": [
+        "sổ mũi",
+        "chảy nước mũi",
+        "so mui",
+        "mũi chảy",
+        "trẻ sổ mũi"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 244,
+      "name": "nghẹt mũi",
+      "icon": "👶",
+      "keywords": [
+        "nghẹt mũi",
+        "ngạt mũi",
+        "tắc mũi",
+        "nghet mui",
+        "mũi tắc",
+        "mũi bị nghẹt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 245,
+      "name": "đau họng",
+      "icon": "👶",
+      "keywords": [
+        "đau họng",
+        "họng đau",
+        "dau hong",
+        "viêm họng",
+        "trẻ đau họng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 246,
+      "name": "khó thở",
+      "icon": "👶",
+      "keywords": [
+        "khó thở",
+        "thở khó",
+        "kho tho",
+        "thở gấp",
+        "hụt hơi",
+        "thở nhanh"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 247,
+      "name": "biếng ăn",
+      "icon": "👶",
+      "keywords": [
+        "biếng ăn",
+        "không ăn",
+        "bieng an",
+        "kém ăn",
+        "chán ăn",
+        "không chịu ăn"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 248,
+      "name": "quấy khóc",
+      "icon": "👶",
+      "keywords": [
+        "quấy khóc",
+        "khóc nhiều",
+        "quay khoc",
+        "bé khóc",
+        "trẻ khóc",
+        "khóc quấy"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 249,
+      "name": "tiêu chảy",
+      "icon": "👶",
+      "keywords": [
+        "tiêu chảy",
+        "ỉa chảy",
+        "đi ngoài nhiều",
+        "tieu chay",
+        "tiêu lỏng",
+        "bé tiêu chảy"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 250,
+      "name": "nôn ói",
+      "icon": "👶",
+      "keywords": [
+        "nôn ói",
+        "nôn",
+        "ói",
+        "nôn mửa",
+        "trẻ nôn",
+        "bé nôn"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 251,
+      "name": "đau bụng",
+      "icon": "👶",
+      "keywords": [
+        "đau bụng",
+        "nhức bụng",
+        "bụng đau",
+        "dau bung",
+        "trẻ đau bụng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 252,
+      "name": "phát ban",
+      "icon": "👶",
+      "keywords": [
+        "phát ban",
+        "nổi ban",
+        "ban đỏ",
+        "da nổi ban",
+        "nổi mẩn"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 253,
+      "name": "dị ứng",
+      "icon": "👶",
+      "keywords": [
+        "dị ứng",
+        "di ung",
+        "dị ứng da",
+        "dị ứng thức ăn",
+        "phản ứng dị ứng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 254,
+      "name": "mệt mỏi",
+      "icon": "👶",
+      "keywords": [
+        "mệt mỏi",
+        "mệt",
+        "mỏi",
+        "met moi",
+        "uể oải",
+        "trẻ mệt"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 255,
+      "name": "khò khè",
+      "icon": "👶",
+      "keywords": [
+        "khò khè",
+        "thở khò khè",
+        "thở rít",
+        "thở có tiếng",
+        "khò khè khi thở"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 256,
+      "name": "táo bón",
+      "icon": "👶",
+      "keywords": [
+        "táo bón",
+        "táo",
+        "tao bon",
+        "khó đi ngoài",
+        "trẻ táo bón",
+        "bí đại tiện"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 257,
+      "name": "sụt cân",
+      "icon": "👶",
+      "keywords": [
+        "sụt cân",
+        "giảm cân",
+        "sut can",
+        "gầy",
+        "trẻ gầy",
+        "nhẹ cân"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 258,
+      "name": "chậm tăng cân",
+      "icon": "👶",
+      "keywords": [
+        "chậm tăng cân",
+        "không tăng cân",
+        "cân không tăng",
+        "chậm lớn",
+        "suy dinh dưỡng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 259,
+      "name": "mất ngủ",
+      "icon": "👶",
+      "keywords": [
+        "mất ngủ",
+        "khó ngủ",
+        "không ngủ được",
+        "mat ngu",
+        "trẻ mất ngủ",
+        "ngủ không ngon"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 260,
+      "name": "co giật",
+      "icon": "👶",
+      "keywords": [
+        "co giật",
+        "giật mình",
+        "co cứng",
+        "co thắt",
+        "giật cơ",
+        "co giật toàn thân"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 261,
+      "name": "da nổi mẩn",
+      "icon": "👶",
+      "keywords": [
+        "da nổi mẩn",
+        "nổi mẩn",
+        "mẩn đỏ",
+        "da đỏ",
+        "phát ban"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 262,
+      "name": "viêm họng",
+      "icon": "👶",
+      "keywords": [
+        "viêm họng",
+        "họng viêm",
+        "viem hong",
+        "họng sưng",
+        "họng đỏ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 263,
+      "name": "viêm tai",
+      "icon": "👶",
+      "keywords": [
+        "viêm tai",
+        "đau tai",
+        "tai viêm",
+        "viem tai",
+        "tai đau",
+        "viêm tai giữa"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 264,
+      "name": "sốt cao",
+      "icon": "👶",
+      "keywords": [
+        "sốt cao",
+        "sốt",
+        "nóng cao",
+        "sot cao",
+        "sốt trên 38 độ",
+        "sốt trên 39 độ"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 265,
+      "name": "chảy nước mũi",
+      "icon": "👶",
+      "keywords": [
+        "chảy nước mũi",
+        "sổ mũi",
+        "mũi chảy nước",
+        "chảy mũi",
+        "nước mũi chảy"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 266,
+      "name": "đổ mồ hôi nhiều",
+      "icon": "👶",
+      "keywords": [
+        "đổ mồ hôi nhiều",
+        "ra mồ hôi",
+        "toát mồ hôi",
+        "đổ mồ hôi",
+        "trẻ đổ mồ hôi"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 267,
+      "name": "bé bỏ bú",
+      "icon": "👶",
+      "keywords": [
+        "bé bỏ bú",
+        "không bú",
+        "bỏ bú",
+        "không chịu bú",
+        "từ chối bú",
+        "ngừng bú"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 268,
+      "name": "khóc đêm",
+      "icon": "👶",
+      "keywords": [
+        "khóc đêm",
+        "khóc ban đêm",
+        "khóc về đêm",
+        "trẻ khóc đêm",
+        "bé khóc đêm"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 269,
+      "name": "mọc răng sốt",
+      "icon": "👶",
+      "keywords": [
+        "mọc răng sốt",
+        "sốt mọc răng",
+        "mọc răng",
+        "trẻ mọc răng",
+        "sốt khi mọc răng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 270,
+      "name": "viêm phế quản",
+      "icon": "👶",
+      "keywords": [
+        "viêm phế quản",
+        "phế quản viêm",
+        "viêm phế quản cấp",
+        "viêm phế quản trẻ em"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 271,
+      "name": "tiểu nhiều",
+      "icon": "🦋",
+      "keywords": [
+        "tiểu nhiều",
+        "đi tiểu nhiều",
+        "tiểu đường",
+        "tieu nhieu",
+        "đái nhiều",
+        "tiểu liên tục"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 272,
+      "name": "khát nước nhiều",
+      "icon": "🦋",
+      "keywords": [
+        "khát nước nhiều",
+        "khát nước",
+        "uống nước nhiều",
+        "khát liên tục",
+        "luôn khát"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 273,
+      "name": "sụt cân bất thường",
+      "icon": "🦋",
+      "keywords": [
+        "sụt cân bất thường",
+        "giảm cân nhanh",
+        "sut can",
+        "gầy nhanh",
+        "giảm cân không rõ nguyên nhân"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 274,
+      "name": "tăng cân nhanh",
+      "icon": "🦋",
+      "keywords": [
+        "tăng cân nhanh",
+        "béo nhanh",
+        "tăng cân",
+        "béo phì",
+        "thừa cân",
+        "tăng cân không kiểm soát"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 275,
+      "name": "mệt mỏi kéo dài",
+      "icon": "🦋",
+      "keywords": [
+        "mệt mỏi kéo dài",
+        "mệt mỏi",
+        "mệt",
+        "mỏi",
+        "met moi",
+        "uể oải",
+        "kiệt sức"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 276,
+      "name": "đường huyết cao",
+      "icon": "🦋",
+      "keywords": [
+        "đường huyết cao",
+        "tiểu đường",
+        "đái tháo đường",
+        "tieu duong",
+        "đường máu cao",
+        "glucose cao"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 277,
+      "name": "run tay",
+      "icon": "🦋",
+      "keywords": [
+        "run tay",
+        "run chân",
+        "run rẩy",
+        "rung",
+        "run liên tục",
+        "tay run"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 278,
+      "name": "đổ mồ hôi nhiều",
+      "icon": "🦋",
+      "keywords": [
+        "đổ mồ hôi nhiều",
+        "ra mồ hôi",
+        "toát mồ hôi",
+        "đổ mồ hôi",
+        "tiết mồ hôi nhiều"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 279,
+      "name": "tim đập nhanh",
+      "icon": "🦋",
+      "keywords": [
+        "tim đập nhanh",
+        "hồi hộp",
+        "tim nhanh",
+        "đánh trống ngực",
+        "tim đập mạnh"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 280,
+      "name": "rụng tóc",
+      "icon": "🦋",
+      "keywords": [
+        "rụng tóc",
+        "tóc rụng",
+        "rung toc",
+        "hói",
+        "tóc gãy rụng",
+        "rụng tóc nhiều"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 281,
+      "name": "da khô",
+      "icon": "🦋",
+      "keywords": [
+        "da khô",
+        "khô da",
+        "da khô ráp",
+        "da thiếu ẩm",
+        "da bị khô"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 282,
+      "name": "khó ngủ",
+      "icon": "🦋",
+      "keywords": [
+        "khó ngủ",
+        "mất ngủ",
+        "không ngủ được",
+        "mat ngu",
+        "kho ngu",
+        "thức đêm"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 283,
+      "name": "mất ngủ",
+      "icon": "🦋",
+      "keywords": [
+        "mất ngủ",
+        "khó ngủ",
+        "không ngủ được",
+        "mat ngu",
+        "thức đêm",
+        "mất giấc"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 284,
+      "name": "ăn nhiều",
+      "icon": "🦋",
+      "keywords": [
+        "ăn nhiều",
+        "ăn nhiều mà gầy",
+        "ăn không no",
+        "thèm ăn nhiều",
+        "ăn liên tục"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 285,
+      "name": "chán ăn",
+      "icon": "🦋",
+      "keywords": [
+        "chán ăn",
+        "biếng ăn",
+        "không ăn",
+        "kém ăn",
+        "không thèm ăn"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 286,
+      "name": "mờ mắt",
+      "icon": "🦋",
+      "keywords": [
+        "mờ mắt",
+        "mắt mờ",
+        "mo mat",
+        "nhìn mờ",
+        "nhìn không rõ",
+        "thị lực mờ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 287,
+      "name": "tê tay chân",
+      "icon": "🦋",
+      "keywords": [
+        "tê tay chân",
+        "tê bì",
+        "tê tay",
+        "tê chân",
+        "tê liệt",
+        "tê mỏi"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 288,
+      "name": "yếu cơ",
+      "icon": "🦋",
+      "keywords": [
+        "yếu cơ",
+        "yếu tay chân",
+        "cơ yếu",
+        "mất sức",
+        "không có sức",
+        "teo cơ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 289,
+      "name": "hạ đường huyết",
+      "icon": "🦋",
+      "keywords": [
+        "hạ đường huyết",
+        "đường huyết thấp",
+        "glucose thấp",
+        "đường máu thấp",
+        "hạ đường máu"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 290,
+      "name": "huyết áp cao",
+      "icon": "🦋",
+      "keywords": [
+        "huyết áp cao",
+        "huyết áp",
+        "cao huyết áp",
+        "huyet ap",
+        "huyệt áp cao",
+        "tăng huyết áp"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 291,
+      "name": "mệt sau ăn",
+      "icon": "🦋",
+      "keywords": [
+        "mệt sau ăn",
+        "buồn ngủ sau ăn",
+        "mệt khi ăn xong",
+        "uể oải sau ăn"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 292,
+      "name": "vết thương lâu lành",
+      "icon": "🦋",
+      "keywords": [
+        "vết thương lâu lành",
+        "vết thương khó lành",
+        "vết thương không lành",
+        "lâu liền sẹo"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 293,
+      "name": "đi tiểu ban đêm nhiều",
+      "icon": "🦋",
+      "keywords": [
+        "đi tiểu ban đêm nhiều",
+        "tiểu đêm",
+        "đi tiểu đêm",
+        "tiểu ban đêm",
+        "thức đêm đi tiểu"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 294,
+      "name": "khô miệng",
+      "icon": "🦋",
+      "keywords": [
+        "khô miệng",
+        "miệng khô",
+        "khát nước",
+        "miệng bị khô",
+        "khô họng"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 295,
+      "name": "da sạm màu",
+      "icon": "🦋",
+      "keywords": [
+        "da sạm màu",
+        "da đen",
+        "da sạm",
+        "da thâm",
+        "da đổi màu"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 296,
+      "name": "căng thẳng nội tiết",
+      "icon": "🦋",
+      "keywords": [
+        "căng thẳng nội tiết",
+        "căng thẳng",
+        "stress",
+        "lo âu",
+        "bồn chồn"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 297,
+      "name": "rối loạn kinh nguyệt",
+      "icon": "🦋",
+      "keywords": [
+        "rối loạn kinh nguyệt",
+        "kinh nguyệt",
+        "roi loan kinh",
+        "mất kinh",
+        "kinh không đều"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 298,
+      "name": "tăng tiết mồ hôi",
+      "icon": "🦋",
+      "keywords": [
+        "tăng tiết mồ hôi",
+        "đổ mồ hôi nhiều",
+        "ra mồ hôi nhiều",
+        "tiết mồ hôi"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 299,
+      "name": "lạnh tay chân",
+      "icon": "🦋",
+      "keywords": [
+        "lạnh tay chân",
+        "tay chân lạnh",
+        "tay lạnh",
+        "chân lạnh",
+        "tứ chi lạnh"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 300,
+      "name": "rối loạn hormone",
+      "icon": "🦋",
+      "keywords": [
+        "rối loạn hormone",
+        "mất cân bằng hormone",
+        "hormone không ổn định",
+        "rối loạn nội tiết tố"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 301,
+      "name": "đau răng",
+      "icon": "🦷",
+      "keywords": [
+        "đau răng",
+        "nhức răng",
+        "dau rang",
+        "răng đau",
+        "răng nhức"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 302,
+      "name": "sâu răng",
+      "icon": "🦷",
+      "keywords": [
+        "sâu răng",
+        "răng sâu",
+        "sau rang",
+        "răng bị sâu",
+        "răng bị mục",
+        "răng thủng"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 303,
+      "name": "chảy máu chân răng",
+      "icon": "🦷",
+      "keywords": [
+        "chảy máu chân răng",
+        "chảy máu nướu",
+        "chay mau rang",
+        "nướu chảy máu",
+        "lợi chảy máu"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 304,
+      "name": "sưng nướu",
+      "icon": "🦷",
+      "keywords": [
+        "sưng nướu",
+        "nướu sưng",
+        "lợi sưng",
+        "sưng lợi",
+        "nướu bị sưng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 305,
+      "name": "hôi miệng",
+      "icon": "🦷",
+      "keywords": [
+        "hôi miệng",
+        "hơi thở hôi",
+        "hoi mieng",
+        "miệng hôi",
+        "thở hôi"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 306,
+      "name": "ê buốt răng",
+      "icon": "🦷",
+      "keywords": [
+        "ê buốt răng",
+        "răng ê buốt",
+        "răng nhạy cảm",
+        "buốt răng",
+        "răng buốt"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 307,
+      "name": "viêm nướu",
+      "icon": "🦷",
+      "keywords": [
+        "viêm nướu",
+        "nướu viêm",
+        "viem nuou",
+        "viêm lợi",
+        "lợi viêm"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 308,
+      "name": "viêm nha chu",
+      "icon": "🦷",
+      "keywords": [
+        "viêm nha chu",
+        "nha chu",
+        "viêm quanh răng",
+        "bệnh nha chu",
+        "viêm quanh nướu"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 309,
+      "name": "đau hàm",
+      "icon": "🦷",
+      "keywords": [
+        "đau hàm",
+        "hàm đau",
+        "nhức hàm",
+        "đau xương hàm",
+        "hàm bị đau"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 310,
+      "name": "mọc răng khôn",
+      "icon": "🦷",
+      "keywords": [
+        "mọc răng khôn",
+        "răng khôn",
+        "rang khon",
+        "răng số 8",
+        "răng khôn mọc",
+        "răng khôn đau"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 311,
+      "name": "lệch khớp cắn",
+      "icon": "🦷",
+      "keywords": [
+        "lệch khớp cắn",
+        "khớp cắn lệch",
+        "cắn lệch",
+        "răng lệch",
+        "khớp cắn sai"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 312,
+      "name": "răng lung lay",
+      "icon": "🦷",
+      "keywords": [
+        "răng lung lay",
+        "lung lay răng",
+        "răng lay",
+        "răng lung",
+        "răng yếu"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 313,
+      "name": "khó nhai",
+      "icon": "🦷",
+      "keywords": [
+        "khó nhai",
+        "nhai khó",
+        "không nhai được",
+        "đau khi nhai",
+        "nhai đau"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 314,
+      "name": "đau khi ăn uống",
+      "icon": "🦷",
+      "keywords": [
+        "đau khi ăn uống",
+        "ăn đau",
+        "uống đau",
+        "đau khi ăn",
+        "đau khi uống"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 315,
+      "name": "viêm tủy răng",
+      "icon": "🦷",
+      "keywords": [
+        "viêm tủy răng",
+        "tủy răng viêm",
+        "viêm tủy",
+        "đau tủy răng",
+        "tủy bị viêm"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 316,
+      "name": "mẻ răng",
+      "icon": "🦷",
+      "keywords": [
+        "mẻ răng",
+        "răng mẻ",
+        "răng gãy",
+        "răng bị mẻ",
+        "răng vỡ"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 317,
+      "name": "răng bị vàng",
+      "icon": "🦷",
+      "keywords": [
+        "răng bị vàng",
+        "răng vàng",
+        "răng ố vàng",
+        "răng xỉn màu",
+        "răng đổi màu"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 318,
+      "name": "áp xe răng",
+      "icon": "🦷",
+      "keywords": [
+        "áp xe răng",
+        "áp xe",
+        "mủ răng",
+        "viêm mủ răng",
+        "răng có mủ"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 319,
+      "name": "sưng mặt do răng",
+      "icon": "🦷",
+      "keywords": [
+        "sưng mặt do răng",
+        "sưng má",
+        "mặt sưng",
+        "má sưng",
+        "sưng mặt"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 320,
+      "name": "nhiệt miệng",
+      "icon": "🦷",
+      "keywords": [
+        "nhiệt miệng",
+        "nóng miệng",
+        "lở miệng",
+        "nhiệt trong miệng",
+        "miệng nóng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 321,
+      "name": "loét miệng",
+      "icon": "🦷",
+      "keywords": [
+        "loét miệng",
+        "lở miệng",
+        "miệng loét",
+        "loét lưỡi",
+        "lở lưỡi"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 322,
+      "name": "khô miệng",
+      "icon": "🦷",
+      "keywords": [
+        "khô miệng",
+        "miệng khô",
+        "khát nước",
+        "miệng bị khô",
+        "thiếu nước bọt"
+      ],
+      "weight": 7
+    },
+    {
+      "id": 323,
+      "name": "đau lợi",
+      "icon": "🦷",
+      "keywords": [
+        "đau lợi",
+        "lợi đau",
+        "đau nướu",
+        "nướu đau",
+        "nhức lợi"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 324,
+      "name": "khó há miệng",
+      "icon": "🦷",
+      "keywords": [
+        "khó há miệng",
+        "há miệng khó",
+        "không há miệng được",
+        "miệng khó mở",
+        "cứng hàm"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 325,
+      "name": "đau khớp hàm",
+      "icon": "🦷",
+      "keywords": [
+        "đau khớp hàm",
+        "khớp hàm đau",
+        "đau khớp thái dương hàm",
+        "TMJ",
+        "khớp hàm bị đau"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 326,
+      "name": "viêm miệng",
+      "icon": "🦷",
+      "keywords": [
+        "viêm miệng",
+        "miệng viêm",
+        "viêm niêm mạc miệng",
+        "viêm lưỡi",
+        "viêm trong miệng"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 327,
+      "name": "mất răng",
+      "icon": "🦷",
+      "keywords": [
+        "mất răng",
+        "rụng răng",
+        "răng rụng",
+        "răng bị mất",
+        "thiếu răng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 328,
+      "name": "răng nhạy cảm",
+      "icon": "🦷",
+      "keywords": [
+        "răng nhạy cảm",
+        "răng ê buốt",
+        "răng nhạy",
+        "răng yếu",
+        "răng dễ buốt"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 329,
+      "name": "đau quai hàm",
+      "icon": "🦷",
+      "keywords": [
+        "đau quai hàm",
+        "quai hàm đau",
+        "đau vùng hàm",
+        "nhức quai hàm",
+        "đau má"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 330,
+      "name": "cắn đau",
+      "icon": "🦷",
+      "keywords": [
+        "cắn đau",
+        "đau khi cắn",
+        "cắn bị đau",
+        "đau khi nhai",
+        "cắn không được"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 331,
+      "name": "đau bụng dưới",
+      "icon": "🤰",
+      "keywords": [
+        "đau bụng dưới",
+        "đau vùng chậu",
+        "dau bung duoi",
+        "đau bụng kinh",
+        "đau hạ vị"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 332,
+      "name": "rối loạn kinh nguyệt",
+      "icon": "🤰",
+      "keywords": [
+        "rối loạn kinh nguyệt",
+        "kinh nguyệt",
+        "roi loan kinh",
+        "mất kinh",
+        "kinh không đều"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 333,
+      "name": "trễ kinh",
+      "icon": "🤰",
+      "keywords": [
+        "trễ kinh",
+        "chậm kinh",
+        "kinh trễ",
+        "kinh muộn",
+        "kinh không đến"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 334,
+      "name": "đau bụng kinh",
+      "icon": "🤰",
+      "keywords": [
+        "đau bụng kinh",
+        "đau kinh",
+        "đau bụng khi hành kinh",
+        "đau khi có kinh",
+        "đau bụng đến tháng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 335,
+      "name": "rong kinh",
+      "icon": "🤰",
+      "keywords": [
+        "rong kinh",
+        "kinh nhiều",
+        "ra máu nhiều",
+        "kinh kéo dài",
+        "kinh ra nhiều"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 336,
+      "name": "khí hư bất thường",
+      "icon": "🤰",
+      "keywords": [
+        "khí hư bất thường",
+        "khí hư",
+        "dịch âm đạo",
+        "ra khí hư",
+        "khí hư nhiều"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 337,
+      "name": "ngứa vùng kín",
+      "icon": "🤰",
+      "keywords": [
+        "ngứa vùng kín",
+        "ngứa âm đạo",
+        "ngứa phụ khoa",
+        "ngứa vùng nhạy cảm",
+        "ngứa bên trong"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 338,
+      "name": "đau vùng chậu",
+      "icon": "🤰",
+      "keywords": [
+        "đau vùng chậu",
+        "đau chậu",
+        "đau vùng bụng dưới",
+        "đau hạ vị",
+        "đau vùng tử cung"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 339,
+      "name": "ra máu bất thường",
+      "icon": "🤰",
+      "keywords": [
+        "ra máu bất thường",
+        "chảy máu âm đạo",
+        "ra máu ngoài kinh",
+        "xuất huyết âm đạo",
+        "chảy máu bất thường"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 340,
+      "name": "tiểu buốt",
+      "icon": "🤰",
+      "keywords": [
+        "tiểu buốt",
+        "đi tiểu buốt",
+        "tiểu đau",
+        "buốt khi tiểu",
+        "đau khi đi tiểu"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 341,
+      "name": "tiểu rắt",
+      "icon": "🤰",
+      "keywords": [
+        "tiểu rắt",
+        "đi tiểu rắt",
+        "tiểu gắt",
+        "rát khi tiểu",
+        "tiểu khó"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 342,
+      "name": "đau khi quan hệ",
+      "icon": "🤰",
+      "keywords": [
+        "đau khi quan hệ",
+        "quan hệ đau",
+        "đau khi giao hợp",
+        "giao hợp đau",
+        "đau khi ân ái"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 343,
+      "name": "buồn nôn khi mang thai",
+      "icon": "🤰",
+      "keywords": [
+        "buồn nôn khi mang thai",
+        "nôn nghén",
+        "nghén",
+        "buồn nôn",
+        "nôn khi mang thai"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 344,
+      "name": "mệt mỏi khi mang thai",
+      "icon": "🤰",
+      "keywords": [
+        "mệt mỏi khi mang thai",
+        "mệt khi mang thai",
+        "mệt mỏi thai kỳ",
+        "mệt khi có thai"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 345,
+      "name": "thai máy bất thường",
+      "icon": "🤰",
+      "keywords": [
+        "thai máy bất thường",
+        "thai máy",
+        "thai động",
+        "thai không ổn định",
+        "thai yếu"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 346,
+      "name": "đau lưng khi mang thai",
+      "icon": "🤰",
+      "keywords": [
+        "đau lưng khi mang thai",
+        "đau lưng thai kỳ",
+        "nhức lưng khi mang thai",
+        "lưng đau khi có thai"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 347,
+      "name": "căng tức ngực",
+      "icon": "🤰",
+      "keywords": [
+        "căng tức ngực",
+        "ngực căng",
+        "tức ngực",
+        "ngực đau",
+        "căng vú"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 348,
+      "name": "khó thụ thai",
+      "icon": "🤰",
+      "keywords": [
+        "khó thụ thai",
+        "vô sinh",
+        "hiếm muộn",
+        "vo sinh",
+        "khó có con",
+        "không có thai"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 349,
+      "name": "viêm phụ khoa",
+      "icon": "🤰",
+      "keywords": [
+        "viêm phụ khoa",
+        "viêm âm đạo",
+        "viem phu khoa",
+        "viêm vùng kín",
+        "nhiễm trùng phụ khoa"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 350,
+      "name": "viêm âm đạo",
+      "icon": "🤰",
+      "keywords": [
+        "viêm âm đạo",
+        "âm đạo viêm",
+        "viêm vùng kín",
+        "viêm phụ khoa",
+        "nhiễm trùng âm đạo"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 351,
+      "name": "nấm âm đạo",
+      "icon": "🤰",
+      "keywords": [
+        "nấm âm đạo",
+        "nấm phụ khoa",
+        "nhiễm nấm",
+        "nấm vùng kín",
+        "nấm candida"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 352,
+      "name": "ra khí hư có mùi",
+      "icon": "🤰",
+      "keywords": [
+        "ra khí hư có mùi",
+        "khí hư hôi",
+        "dịch có mùi",
+        "khí hư tanh",
+        "dịch âm đạo có mùi"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 353,
+      "name": "chậm kinh",
+      "icon": "🤰",
+      "keywords": [
+        "chậm kinh",
+        "trễ kinh",
+        "kinh chậm",
+        "kinh muộn",
+        "kinh không đến"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 354,
+      "name": "đau tử cung",
+      "icon": "🤰",
+      "keywords": [
+        "đau tử cung",
+        "tử cung đau",
+        "đau vùng tử cung",
+        "co thắt tử cung",
+        "tử cung co"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 355,
+      "name": "sảy thai dấu hiệu",
+      "icon": "🤰",
+      "keywords": [
+        "sảy thai dấu hiệu",
+        "sảy thai",
+        "say thai",
+        "mất thai",
+        "thai lưu",
+        "dấu hiệu sảy thai"
+      ],
+      "weight": 10
+    },
+    {
+      "id": 356,
+      "name": "phù chân khi mang thai",
+      "icon": "🤰",
+      "keywords": [
+        "phù chân khi mang thai",
+        "sưng chân",
+        "phù chân thai kỳ",
+        "chân sưng khi mang thai"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 357,
+      "name": "co thắt bụng",
+      "icon": "🤰",
+      "keywords": [
+        "co thắt bụng",
+        "co bụng",
+        "bụng co",
+        "co tử cung",
+        "cơn co"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 358,
+      "name": "đau sau sinh",
+      "icon": "🤰",
+      "keywords": [
+        "đau sau sinh",
+        "đau hậu sản",
+        "đau sau đẻ",
+        "đau tử cung sau sinh",
+        "đau bụng sau sinh"
+      ],
+      "weight": 8
+    },
+    {
+      "id": 359,
+      "name": "kinh nguyệt không đều",
+      "icon": "🤰",
+      "keywords": [
+        "kinh nguyệt không đều",
+        "kinh không đều",
+        "rối loạn kinh",
+        "kinh thất thường",
+        "kinh không đúng"
+      ],
+      "weight": 9
+    },
+    {
+      "id": 360,
+      "name": "ra dịch bất thường",
+      "icon": "🤰",
+      "keywords": [
+        "ra dịch bất thường",
+        "dịch âm đạo bất thường",
+        "khí hư bất thường",
+        "ra dịch nhiều",
+        "dịch lạ"
+      ],
+      "weight": 9
+    }
   ],
   "mappings": [
-    { "symptomIds": [1, 12, 13], "specialtyId": 4, "specialtyName": "Thần kinh", "confidence": 95 },
-    { "symptomIds": [5, 6, 15], "specialtyId": 1, "specialtyName": "Tim mạch", "confidence": 95 },
-    { "symptomIds": [3, 4, 2, 16], "specialtyId": 11, "specialtyName": "Hô hấp", "confidence": 90 },
-    { "symptomIds": [7, 8, 14], "specialtyId": 2, "specialtyName": "Tiêu hóa", "confidence": 90 },
-    { "symptomIds": [9, 10], "specialtyId": 6, "specialtyName": "Da liễu", "confidence": 95 },
-    { "symptomIds": [11], "specialtyId": 5, "specialtyName": "Cơ xương khớp", "confidence": 90 },
-    { "symptomIds": [16, 17, 19], "specialtyId": 7, "specialtyName": "Tai mũi họng", "confidence": 85 },
-    { "symptomIds": [18], "specialtyId": 8, "specialtyName": "Mắt", "confidence": 90 },
-    { "symptomIds": [19], "specialtyId": 9, "specialtyName": "Răng hàm mặt", "confidence": 95 },
-    { "symptomIds": [2, 15], "specialtyId": 10, "specialtyName": "Nội tiết", "confidence": 70 }
+    {
+      "specialtyId": 1,
+      "specialtyName": "Thần kinh",
+      "symptomIds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "confidence": 90
+    },
+    {
+      "specialtyId": 2,
+      "specialtyName": "Cơ xương khớp",
+      "symptomIds": [
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        59,
+        60
+      ],
+      "confidence": 90
+    },
+    {
+      "specialtyId": 3,
+      "specialtyName": "Tim mạch",
+      "symptomIds": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90
+      ],
+      "confidence": 90
+    },
+    {
+      "specialtyId": 4,
+      "specialtyName": "Tiêu hóa",
+      "symptomIds": [
+        91,
+        92,
+        93,
+        94,
+        95,
+        96,
+        97,
+        98,
+        99,
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119,
+        120
+      ],
+      "confidence": 90
+    },
+    {
+      "specialtyId": 5,
+      "specialtyName": "Hô hấp",
+      "symptomIds": [
+        121,
+        122,
+        123,
+        124,
+        125,
+        126,
+        127,
+        128,
+        129,
+        130,
+        131,
+        132,
+        133,
+        134,
+        135,
+        136,
+        137,
+        138,
+        139,
+        140,
+        141,
+        142,
+        143,
+        144,
+        145,
+        146,
+        147,
+        148,
+        149,
+        150
+      ],
+      "confidence": 90
+    },
+    {
+      "specialtyId": 6,
+      "specialtyName": "Da liễu",
+      "symptomIds": [
+        151,
+        152,
+        153,
+        154,
+        155,
+        156,
+        157,
+        158,
+        159,
+        160,
+        161,
+        162,
+        163,
+        164,
+        165,
+        166,
+        167,
+        168,
+        169,
+        170,
+        171,
+        172,
+        173,
+        174,
+        175,
+        176,
+        177,
+        178,
+        179,
+        180
+      ],
+      "confidence": 90
+    },
+    {
+      "specialtyId": 7,
+      "specialtyName": "Tai mũi họng",
+      "symptomIds": [
+        181,
+        182,
+        183,
+        184,
+        185,
+        186,
+        187,
+        188,
+        189,
+        190,
+        191,
+        192,
+        193,
+        194,
+        195,
+        196,
+        197,
+        198,
+        199,
+        200,
+        201,
+        202,
+        203,
+        204,
+        205,
+        206,
+        207,
+        208,
+        209,
+        210
+      ],
+      "confidence": 90
+    },
+    {
+      "specialtyId": 8,
+      "specialtyName": "Mắt",
+      "symptomIds": [
+        211,
+        212,
+        213,
+        214,
+        215,
+        216,
+        217,
+        218,
+        219,
+        220,
+        221,
+        222,
+        223,
+        224,
+        225,
+        226,
+        227,
+        228,
+        229,
+        230,
+        231,
+        232,
+        233,
+        234,
+        235,
+        236,
+        237,
+        238,
+        239,
+        240
+      ],
+      "confidence": 90
+    },
+    {
+      "specialtyId": 9,
+      "specialtyName": "Nhi khoa",
+      "symptomIds": [
+        241,
+        242,
+        243,
+        244,
+        245,
+        246,
+        247,
+        248,
+        249,
+        250,
+        251,
+        252,
+        253,
+        254,
+        255,
+        256,
+        257,
+        258,
+        259,
+        260,
+        261,
+        262,
+        263,
+        264,
+        265,
+        266,
+        267,
+        268,
+        269,
+        270
+      ],
+      "confidence": 90
+    },
+    {
+      "specialtyId": 10,
+      "specialtyName": "Nội tiết",
+      "symptomIds": [
+        271,
+        272,
+        273,
+        274,
+        275,
+        276,
+        277,
+        278,
+        279,
+        280,
+        281,
+        282,
+        283,
+        284,
+        285,
+        286,
+        287,
+        288,
+        289,
+        290,
+        291,
+        292,
+        293,
+        294,
+        295,
+        296,
+        297,
+        298,
+        299,
+        300
+      ],
+      "confidence": 90
+    },
+    {
+      "specialtyId": 11,
+      "specialtyName": "Răng hàm mặt",
+      "symptomIds": [
+        301,
+        302,
+        303,
+        304,
+        305,
+        306,
+        307,
+        308,
+        309,
+        310,
+        311,
+        312,
+        313,
+        314,
+        315,
+        316,
+        317,
+        318,
+        319,
+        320,
+        321,
+        322,
+        323,
+        324,
+        325,
+        326,
+        327,
+        328,
+        329,
+        330
+      ],
+      "confidence": 90
+    },
+    {
+      "specialtyId": 12,
+      "specialtyName": "Sản phụ khoa",
+      "symptomIds": [
+        331,
+        332,
+        333,
+        334,
+        335,
+        336,
+        337,
+        338,
+        339,
+        340,
+        341,
+        342,
+        343,
+        344,
+        345,
+        346,
+        347,
+        348,
+        349,
+        350,
+        351,
+        352,
+        353,
+        354,
+        355,
+        356,
+        357,
+        358,
+        359,
+        360
+      ],
+      "confidence": 90
+    }
   ]
 }

@@ -238,6 +238,17 @@ class NotificationService {
     });
   }
 
+  // Thông báo thay đổi lịch khám
+  async notifyAppointmentChanged(doctorName: string, newTime: string): Promise<string> {
+    return await this.sendLocalNotification({
+      title: '🔄 Thay đổi lịch khám',
+      body: `Lịch khám với ${doctorName} đã được thay đổi sang ${newTime}.`,
+      data: {
+        type: 'appointment_changed',
+      },
+    });
+  }
+
   // Thông báo tin nhắn mới từ bác sĩ
   async notifyNewMessage(doctorName: string, message: string): Promise<string> {
     return await this.sendLocalNotification({

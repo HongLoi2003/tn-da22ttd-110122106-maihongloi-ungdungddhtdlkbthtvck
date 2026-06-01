@@ -1,24 +1,59 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import CustomToast from '../components/CustomToast';
 import { useAuth } from '../context/AuthContext';
+import { getAllDocuments } from '../services/firebaseService';
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { logout, userData, loading } = useAuth();
+  const { logout, userData, loading, user, updateUserData } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
   const [avatar, setAvatar] = useState(
     userData?.avatar ? { uri: userData.avatar } : require('@/assets/images/logo.png')
   );
   
-  // Refresh avatar khi userData thay đổi
-  useCallback(() => {
+  // Toast state
+  const [toast, setToast] = useState({
+    visible: false,
+    type: 'success' as 'success' | 'error' | 'warning' | 'info',
+    title: '',
+    message: '',
+  });
+  
+  // Cập nhật avatar khi userData thay đổi
+  useEffect(() => {
     if (userData?.avatar) {
       setAvatar({ uri: userData.avatar });
     }
   }, [userData?.avatar]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadUnreadNotifications();
+    }, [user])
+  );
+
+  const loadUnreadNotifications = async () => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+
+    try {
+      const allNotifications = await getAllDocuments('notifications');
+      const userUnreadNotifications = allNotifications.filter(
+        (n: any) => n.userId === user.uid && !n.read
+      );
+      setUnreadCount(userUnreadNotifications.length);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+      setUnreadCount(0);
+    }
+  };
   
   const userInfo = {
     name: userData?.fullName || 'Người dùng',
@@ -43,10 +78,13 @@ export default function ProfileScreen() {
               const result = await ImagePicker.launchCameraAsync({
                 allowsEditing: true,
                 aspect: [1, 1],
-                quality: 1,
+                quality: 0.8,
               });
               if (!result.canceled) {
-                setAvatar({ uri: result.assets[0].uri });
+                const newAvatarUri = result.assets[0].uri;
+                setAvatar({ uri: newAvatarUri });
+                // Lưu avatar vào Firebase
+                await saveAvatarToFirebase(newAvatarUri);
               }
             }
           },
@@ -59,10 +97,13 @@ export default function ProfileScreen() {
               const result = await ImagePicker.launchImageLibraryAsync({
                 allowsEditing: true,
                 aspect: [1, 1],
-                quality: 1,
+                quality: 0.8,
               });
               if (!result.canceled) {
-                setAvatar({ uri: result.assets[0].uri });
+                const newAvatarUri = result.assets[0].uri;
+                setAvatar({ uri: newAvatarUri });
+                // Lưu avatar vào Firebase
+                await saveAvatarToFirebase(newAvatarUri);
               }
             }
           },
@@ -70,6 +111,18 @@ export default function ProfileScreen() {
         { text: 'Hủy', style: 'cancel' },
       ]
     );
+  };
+
+  const saveAvatarToFirebase = async (avatarUri: string) => {
+    try {
+      console.log('💾 [PROFILE] Saving avatar to Firebase:', avatarUri);
+      await updateUserData({ avatar: avatarUri });
+      console.log('✅ [PROFILE] Avatar saved successfully');
+      Alert.alert('Thành công', 'Ảnh đại diện đã được cập nhật');
+    } catch (error) {
+      console.error('❌ [PROFILE] Error saving avatar:', error);
+      Alert.alert('Lỗi', 'Không thể cập nhật ảnh đại diện');
+    }
   };
 
   const quickActions = [
@@ -91,19 +144,51 @@ export default function ProfileScreen() {
 
   const otherOptions = [
     { id: '1', icon: 'lock-closed-outline', label: 'Đổi mật khẩu', color: '#00BCD4' },
-    { id: '2', icon: 'cloud-upload-outline', label: 'Import Dữ Liệu', color: '#8B5CF6', isDev: true },
+    { id: '2', icon: 'cloud-upload-outline', label: 'Import Hồ Sơ Y Tế', color: '#8B5CF6', isDev: true },
     { id: '3', icon: 'help-circle-outline', label: 'Trung tâm hỗ trợ', color: '#00BCD4' },
     { id: '4', icon: 'information-circle-outline', label: 'Điều khoản & Chính sách', color: '#00BCD4' },
     { id: '5', icon: 'log-out-outline', label: 'Đăng xuất', color: '#EF4444', isLogout: true },
   ];
+
+  const isWeb = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
+  const handleLogout = async () => {
+    try {
+      console.log('🚪 [PROFILE] Logging out...');
+      
+      // Hiển thị toast đang đăng xuất
+      setToast({
+        visible: true,
+        type: 'info',
+        title: 'Đang đăng xuất...',
+        message: 'Hẹn gặp lại bạn!',
+      });
+      
+      await logout();
+      console.log('✅ [PROFILE] Logout successful, redirecting to login...');
+      
+      // Đợi 1 giây để hiển thị toast rồi chuyển trang
+      setTimeout(() => {
+        router.replace('/login');
+      }, 1000);
+    } catch (error) {
+      console.error('❌ [PROFILE] Logout error:', error);
+      setToast({
+        visible: true,
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể đăng xuất. Vui lòng thử lại!',
+      });
+    }
+  };
 
   const handleOptionPress = (optionLabel: string) => {
     switch (optionLabel) {
       case 'Đổi mật khẩu':
         router.push('/change-password');
         break;
-      case 'Import Dữ Liệu':
-        router.push('/seed-data');
+      case 'Import Hồ Sơ Y Tế':
+        router.push('/seed-medical-data');
         break;
       case 'Trung tâm hỗ trợ':
         router.push('/support-center');
@@ -112,30 +197,43 @@ export default function ProfileScreen() {
         router.push('/terms-policy');
         break;
       case 'Đăng xuất':
-        Alert.alert(
-          'Đăng xuất',
-          'Bạn có chắc chắn muốn đăng xuất?',
-          [
-            { text: 'Hủy', style: 'cancel' },
-            { 
-              text: 'Đăng xuất', 
-              style: 'destructive', 
-              onPress: async () => {
-                try {
-                  await logout();
-                } catch (error) {
-                  Alert.alert('Lỗi', 'Không thể đăng xuất');
-                }
-              }
-            },
-          ]
-        );
+        if (isWeb) {
+          // Sử dụng confirm cho web
+          const confirmed = window.confirm('Bạn có chắc chắn muốn đăng xuất?');
+          if (confirmed) {
+            handleLogout();
+          }
+        } else {
+          // Sử dụng Alert cho mobile
+          Alert.alert(
+            'Đăng xuất',
+            'Bạn có chắc chắn muốn đăng xuất?',
+            [
+              { text: 'Hủy', style: 'cancel' },
+              { 
+                text: 'Đăng xuất', 
+                style: 'destructive', 
+                onPress: handleLogout
+              },
+            ]
+          );
+        }
         break;
     }
   };
 
   return (
     <View style={styles.container}>
+      {/* Toast Notification */}
+      <CustomToast
+        visible={toast.visible}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        onHide={() => setToast({ ...toast, visible: false })}
+        duration={3000}
+      />
+
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -143,17 +241,22 @@ export default function ProfileScreen() {
           <Text style={styles.headerSubtitle}>Quản lý thông tin và tài khoản</Text>
         </View>
         <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.iconBtn}>
-            <Ionicons name="settings-outline" size={24} color="#fff" />
+          <TouchableOpacity 
+            style={styles.iconBtn}
+            onPress={() => router.push('/edit-profile')}
+          >
+            <Ionicons name="settings-outline" size={24} color="#0f172a" />
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.iconBtn}
             onPress={() => router.push('/notifications')}
           >
-            <View style={styles.notificationBadge}>
-              <Text style={styles.badgeText}>3</Text>
-            </View>
-            <Ionicons name="notifications-outline" size={24} color="#fff" />
+            {unreadCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.badgeText}>{unreadCount}</Text>
+              </View>
+            )}
+            <Ionicons name="notifications-outline" size={24} color="#0f172a" />
           </TouchableOpacity>
         </View>
       </View>
@@ -288,26 +391,28 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f9ff',
+    backgroundColor: '#fff',
   },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     paddingTop: 50,
     paddingBottom: 20,
     paddingHorizontal: 16,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#fff',
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#0f172a',
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 13,
-    color: '#fff',
+    color: '#64748b',
     opacity: 0.9,
   },
   headerIcons: {

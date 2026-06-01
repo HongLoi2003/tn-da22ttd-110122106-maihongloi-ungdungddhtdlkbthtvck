@@ -2,20 +2,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  FlatList,
-  Image,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    FlatList,
+    Image,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 
 export default function AllProductsScreen() {
   const router = useRouter();
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [favoriteProducts, setFavoriteProducts] = useState<Set<number>>(new Set());
 
   const categories = [
     { id: 'all', name: 'Tất cả' },
@@ -107,6 +108,18 @@ export default function AllProductsScreen() {
     return matchesCategory && matchesSearch;
   });
 
+  const toggleFavoriteProduct = (productId: number) => {
+    setFavoriteProducts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(productId)) {
+        newSet.delete(productId);
+      } else {
+        newSet.add(productId);
+      }
+      return newSet;
+    });
+  };
+
   const renderProduct = ({ item }: { item: typeof allProducts[0] }) => (
     <TouchableOpacity style={styles.productCard}>
       {item.discount && (
@@ -114,8 +127,21 @@ export default function AllProductsScreen() {
           <Text style={styles.discountText}>{item.discount}</Text>
         </View>
       )}
-      <TouchableOpacity style={styles.favoriteButton}>
-        <Ionicons name="heart-outline" size={20} color="#999" />
+      <TouchableOpacity 
+        style={[
+          styles.favoriteButton,
+          favoriteProducts.has(item.id) && styles.favoriteButtonActive
+        ]}
+        onPress={(e) => {
+          e.stopPropagation();
+          toggleFavoriteProduct(item.id);
+        }}
+      >
+        <Ionicons 
+          name={favoriteProducts.has(item.id) ? "heart" : "heart-outline"} 
+          size={20} 
+          color={favoriteProducts.has(item.id) ? "#fff" : "#999"} 
+        />
       </TouchableOpacity>
       <Image source={item.image} style={styles.productImage} />
       <Text style={styles.productName} numberOfLines={2}>
@@ -337,6 +363,15 @@ const styles = StyleSheet.create({
     top: 8,
     right: 8,
     zIndex: 1,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  favoriteButtonActive: {
+    backgroundColor: '#E91E63',
   },
   productImage: {
     width: '100%',

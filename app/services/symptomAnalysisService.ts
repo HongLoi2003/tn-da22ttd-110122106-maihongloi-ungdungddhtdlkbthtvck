@@ -4,6 +4,8 @@ export interface SymptomItem {
   id: number;
   name: string;
   icon: string;
+  keywords?: string[];
+  specialtyIds?: number[];
 }
 
 export interface SpecialtyRecommendation {
@@ -13,9 +15,112 @@ export interface SpecialtyRecommendation {
   matchedSymptoms: string[];
 }
 
+interface SymptomMatch {
+  symptom: SymptomItem;
+  score: number;
+}
+
 class SymptomAnalysisService {
   private symptoms: SymptomItem[] = symptomsData.symptoms;
   private mappings: any[] = symptomsData.mappings;
+
+  /**
+   * Chuẩn hóa text: loại bỏ dấu, chuyển thường, loại bỏ khoảng trắng thừa
+   */
+  private normalizeText(text: string): string {
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Loại bỏ dấu
+      .replace(/đ/g, 'd')
+      .replace(/Đ/g, 'D')
+      .trim();
+  }
+
+  /**
+   * Tính độ tương đồng giữa 2 chuỗi (0-100%)
+   */
+  private calculateSimilarity(str1: string, str2: string): number {
+    const normalized1 = this.normalizeText(str1);
+    const normalized2 = this.normalizeText(str2);
+
+    // Kiểm tra chứa hoàn toàn
+    if (normalized1.includes(normalized2) || normalized2.includes(normalized1)) {
+      return 100;
+    }
+
+    // Tách thành từng từ
+    const words1 = normalized1.split(/\s+/);
+    const words2 = normalized2.split(/\s+/);
+
+    let matchCount = 0;
+    words1.forEach(word1 => {
+      words2.forEach(word2 => {
+        if (word1.includes(word2) || word2.includes(word1)) {
+          matchCount++;
+        }
+      });
+    });
+
+    const maxWords = Math.max(words1.length, words2.length);
+    return maxWords > 0 ? Math.round((matchCount / maxWords) * 100) : 0;
+  }
+
+  /**
+   * Tính độ tương đồng với keywords (0-100%)
+   * Ưu tiên exact match hơn partial match
+   */
+  private calculateSimilarityWithKeywords(input: string, symptom: SymptomItem): number {
+    const normalizedInput = this.normalizeText(input);
+    
+    // Kiểm tra exact match với tên triệu chứng
+    const normalizedName = this.normalizeText(symptom.name);
+    if (normalizedInput === normalizedName) {
+      return 100;
+    }
+    
+    // Kiểm tra exact match với keywords
+    if (symptom.keywords && symptom.keywords.length > 0) {
+      for (const keyword of symptom.keywords) {
+        const normalizedKeyword = this.normalizeText(keyword);
+        if (normalizedInput === normalizedKeyword) {
+          return 100;
+        }
+      }
+    }
+    
+    // Nếu không có exact match, tính similarity thông thường
+    let maxScore = this.calculateSimilarity(input, symptom.name);
+    
+    if (symptom.keywords && symptom.keywords.length > 0) {
+      symptom.keywords.forEach(keyword => {
+        const keywordScore = this.calculateSimilarity(normalizedInput, keyword);
+        maxScore = Math.max(maxScore, keywordScore);
+      });
+    }
+    
+    // Giảm điểm nếu chỉ là partial match
+    // Nếu input dài hơn và chứa keyword, giảm điểm
+    if (maxScore === 100) {
+      const inputWords = normalizedInput.split(/\s+/);
+      const nameWords = normalizedName.split(/\s+/);
+      
+      // Nếu input có nhiều từ hơn tên triệu chứng, có thể là partial match
+      if (inputWords.length > nameWords.length) {
+        // Kiểm tra xem có phải tất cả từ của tên triệu chứng đều có trong input không
+        const allWordsMatch = nameWords.every(word => 
+          inputWords.some(iw => iw.includes(word) || word.includes(iw))
+        );
+        
+        if (allWordsMatch && inputWords.length > nameWords.length) {
+          // Đây là partial match, giảm điểm
+          maxScore = 90;
+        }
+      }
+    }
+    
+    return maxScore;
+  }
 
   /**
    * Lấy danh sách triệu chứng phổ biến
@@ -25,39 +130,165 @@ class SymptomAnalysisService {
   }
 
   /**
-   * Tìm kiếm triệu chứng theo từ khóa
+   * Tìm kiếm triệu chứng theo từ khóa với fuzzy matching
    */
   searchSymptoms(keyword: string): SymptomItem[] {
-    const lowerKeyword = keyword.toLowerCase().trim();
-    if (!lowerKeyword) return [];
+    const normalizedKeyword = this.normalizeText(keyword);
+    if (!normalizedKeyword) return [];
     
-    return this.symptoms.filter(symptom =>
-      symptom.name.toLowerCase().includes(lowerKeyword)
-    );
+    return this.symptoms
+      .map(symptom => ({
+        symptom,
+        similarity: this.calculateSimilarityWithKeywords(keyword, symptom)
+      }))
+      .filter(item => item.similarity >= 50) // Chỉ lấy độ tương đồng >= 50%
+      .sort((a, b) => b.similarity - a.similarity) // Sắp xếp theo độ tương đồng
+      .slice(0, 10) // Lấy top 10
+      .map(item => item.symptom);
   }
 
   /**
-   * Phân tích triệu chứng và gợi ý chuyên khoa
+   * Phân tích triệu chứng từ text tự do (không cần tách thành mảng)
+   * Tự động tìm keywords trong text và match với database
+   */
+  analyzeSymptomText(inputText: string): SpecialtyRecommendation[] {
+    console.log('🔍 [SYMPTOM_ANALYSIS] Analyzing text:', inputText);
+
+    const normalizedInput = this.normalizeText(inputText);
+    const matchedSymptoms: Set<number> = new Set();
+    const matchedSymptomNames: string[] = [];
+
+    // Tìm tất cả triệu chứng có keyword xuất hiện trong text
+    this.symptoms.forEach(symptom => {
+      // Kiểm tra tên triệu chứng
+      const normalizedName = this.normalizeText(symptom.name);
+      if (normalizedInput.includes(normalizedName)) {
+        matchedSymptoms.add(symptom.id);
+        matchedSymptomNames.push(symptom.name);
+        console.log(`✅ [SYMPTOM_ANALYSIS] Found: "${symptom.name}" (from name)`);
+        return;
+      }
+
+      // Kiểm tra keywords
+      if (symptom.keywords && symptom.keywords.length > 0) {
+        for (const keyword of symptom.keywords) {
+          const normalizedKeyword = this.normalizeText(keyword);
+          if (normalizedInput.includes(normalizedKeyword)) {
+            matchedSymptoms.add(symptom.id);
+            matchedSymptomNames.push(symptom.name);
+            console.log(`✅ [SYMPTOM_ANALYSIS] Found: "${symptom.name}" (keyword: "${keyword}")`);
+            break;
+          }
+        }
+      }
+    });
+
+    console.log('✅ [SYMPTOM_ANALYSIS] Matched symptoms:', matchedSymptomNames);
+
+    if (matchedSymptoms.size === 0) {
+      console.warn('⚠️ [SYMPTOM_ANALYSIS] No symptoms matched');
+      return [];
+    }
+
+    // Tính điểm cho mỗi chuyên khoa
+    const specialtyScores: Map<number, { name: string; matchCount: number; matchedSymptoms: string[] }> = new Map();
+
+    this.mappings.forEach(mapping => {
+      let matchCount = 0;
+      const matchedInThisSpecialty: string[] = [];
+
+      mapping.symptomIds.forEach((symptomId: number) => {
+        if (matchedSymptoms.has(symptomId)) {
+          matchCount++;
+          const symptomName = this.symptoms.find(s => s.id === symptomId)?.name;
+          if (symptomName) {
+            matchedInThisSpecialty.push(symptomName);
+          }
+        }
+      });
+
+      if (matchCount > 0) {
+        specialtyScores.set(mapping.specialtyId, {
+          name: mapping.specialtyName,
+          matchCount,
+          matchedSymptoms: matchedInThisSpecialty
+        });
+      }
+    });
+
+    // Chuyển đổi thành mảng và tính % confidence
+    const recommendations: SpecialtyRecommendation[] = Array.from(specialtyScores.entries())
+      .map(([id, data]) => {
+        // Công thức đơn giản: mỗi triệu chứng = 30%, tối đa 100%
+        const confidence = Math.min(100, data.matchCount * 30);
+        
+        return {
+          specialtyId: id,
+          specialtyName: data.name,
+          confidence,
+          matchedSymptoms: data.matchedSymptoms
+        };
+      })
+      .sort((a, b) => {
+        // Sắp xếp theo số triệu chứng khớp trước, sau đó theo confidence
+        const countDiff = b.matchedSymptoms.length - a.matchedSymptoms.length;
+        if (countDiff !== 0) return countDiff;
+        return b.confidence - a.confidence;
+      });
+
+    console.log('📊 [SYMPTOM_ANALYSIS] Recommendations:', recommendations);
+    return recommendations;
+  }
+
+  /**
+   * Phân tích triệu chứng và gợi ý chuyên khoa với fuzzy matching nâng cao
+   * (Giữ lại để backward compatibility)
    */
   analyzeSymptoms(symptomNames: string[]): SpecialtyRecommendation[] {
+    // Nếu chỉ có 1 phần tử và nó là câu dài, dùng analyzeSymptomText
+    if (symptomNames.length === 1 && symptomNames[0].split(' ').length > 3) {
+      return this.analyzeSymptomText(symptomNames[0]);
+    }
+
     console.log('🔍 [SYMPTOM_ANALYSIS] Analyzing symptoms:', symptomNames);
 
     // Chuẩn hóa tên triệu chứng
-    const normalizedSymptoms = symptomNames.map(s => s.toLowerCase().trim());
+    const normalizedSymptoms = symptomNames.map(s => this.normalizeText(s));
 
-    // Tìm ID của các triệu chứng
+    // Tìm ID của các triệu chứng với fuzzy matching
     const matchedSymptomIds: number[] = [];
     const matchedSymptomNames: string[] = [];
+    const matchScores: { [key: number]: number } = {}; // Lưu điểm khớp
 
     normalizedSymptoms.forEach(symptomName => {
-      const found = this.symptoms.find(s => s.name.toLowerCase() === symptomName);
-      if (found) {
-        matchedSymptomIds.push(found.id);
-        matchedSymptomNames.push(found.name);
+      let bestMatch: SymptomMatch | null = null;
+
+      // Tìm triệu chứng khớp nhất
+      this.symptoms.forEach(symptom => {
+        const score = this.calculateSimilarityWithKeywords(symptomName, symptom);
+        
+        if (score >= 50) { // Ngưỡng tối thiểu 50%
+          if (bestMatch === null || score > bestMatch.score) {
+            bestMatch = { symptom, score } as SymptomMatch;
+          }
+        }
+      });
+
+      if (bestMatch !== null) {
+        const match = bestMatch as SymptomMatch;
+        if (!matchedSymptomIds.includes(match.symptom.id)) {
+          matchedSymptomIds.push(match.symptom.id);
+          matchedSymptomNames.push(match.symptom.name);
+          matchScores[match.symptom.id] = match.score;
+          console.log(`✅ [SYMPTOM_ANALYSIS] Match: "${symptomName}" → "${match.symptom.name}" (${match.score}%)`);
+        }
+      } else {
+        console.log(`⚠️ [SYMPTOM_ANALYSIS] No match for: "${symptomName}"`);
       }
     });
 
     console.log('✅ [SYMPTOM_ANALYSIS] Matched symptom IDs:', matchedSymptomIds);
+    console.log('✅ [SYMPTOM_ANALYSIS] Matched symptom names:', matchedSymptomNames);
 
     if (matchedSymptomIds.length === 0) {
       console.warn('⚠️ [SYMPTOM_ANALYSIS] No symptoms matched');
@@ -73,7 +304,12 @@ class SymptomAnalysisService {
       ).length;
 
       if (matchCount > 0) {
-        const score = (matchCount / mapping.symptomIds.length) * mapping.confidence;
+        // Tính điểm dựa trên:
+        // 1. Số lượng triệu chứng khớp
+        // 2. Tỷ lệ khớp so với tổng triệu chứng của chuyên khoa
+        // 3. Độ tin cậy của mapping
+        const matchRatio = matchCount / mapping.symptomIds.length;
+        const score = matchRatio * mapping.confidence;
         
         if (!specialtyScores.has(mapping.specialtyId)) {
           specialtyScores.set(mapping.specialtyId, {

@@ -14,32 +14,9 @@ import {
 } from 'react-native';
 import { getAllDocuments } from './services/firebaseService';
 
-const doctorImages = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
-};
-
 const hospitalImages: any = {
-  'benhvien.png': require('@/assets/images/benhvien.png'),
-  'benhvienbachmai.png': require('@/assets/images/benhvienbachmai.png'),
-  'benviennhitrunguong.png': require('@/assets/images/benviennhitrunguong.png'),
-  'benhvienphusanhonoi.png': require('@/assets/images/benhvienphusanhonoi.png'),
-  'benhviendalieutrunguong.png': require('@/assets/images/benhviendalieutrunguong.png'),
-  'benhvienquany103.png': require('@/assets/images/benhvienquany103.png'),
+  'benhvien.png': require('@/assets/images/benhviendhtv.png'),
+  'benhviendhtv.png': require('@/assets/images/benhviendhtv.png'),
 };
 
 export default function HospitalDetailScreen() {
@@ -53,6 +30,7 @@ export default function HospitalDetailScreen() {
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [hospitalData, setHospitalData] = useState<any>(null);
   const [loadingHospital, setLoadingHospital] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     loadHospital();
@@ -116,11 +94,6 @@ export default function HospitalDetailScreen() {
     }
   };
 
-  const getDoctorImage = (imageName: string | undefined) => {
-    if (!imageName) return require('@/assets/images/logo.png');
-    return doctorImages[imageName as keyof typeof doctorImages] || require('@/assets/images/logo.png');
-  };
-
   const getSpecialtyIcon = (specialty: string) => {
     const iconMap: { [key: string]: string } = {
       'Tim mạch': '❤️',
@@ -162,7 +135,7 @@ export default function HospitalDetailScreen() {
 
   const hospital = hospitalData ? {
     ...hospitalData,
-    image: hospitalImages[hospitalData.image] || require('@/assets/images/benhvien.png'),
+    image: hospitalImages[hospitalData.image] || require('@/assets/images/benhviendhtv.png'),
     distance: hospitalData.distance || '0 km',
     reviews: hospitalData.reviewCount || 0,
     openTime: hospitalData.workingHours || '24/7',
@@ -173,7 +146,7 @@ export default function HospitalDetailScreen() {
     phone: '0000000000',
     email: 'email@hospital.vn',
     website: 'www.hospital.vn',
-    image: require('@/assets/images/benhvien.png'),
+    image: require('@/assets/images/benhviendhtv.png'),
     rating: 4.6,
     reviews: 0,
     openTime: '24/7',
@@ -239,8 +212,18 @@ export default function HospitalDetailScreen() {
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.favoriteButton}>
-            <Ionicons name="heart-outline" size={24} color="#fff" />
+          <TouchableOpacity 
+            style={[
+              styles.favoriteButton,
+              isFavorite && styles.favoriteButtonActive
+            ]}
+            onPress={() => setIsFavorite(!isFavorite)}
+          >
+            <Ionicons 
+              name={isFavorite ? "heart" : "heart-outline"} 
+              size={24} 
+              color="#fff" 
+            />
           </TouchableOpacity>
         </View>
 
@@ -386,7 +369,7 @@ export default function HospitalDetailScreen() {
                     }
                   })}
                 >
-                  <Image source={getDoctorImage(doctor.image)} style={styles.doctorAvatar} />
+                  <Image source={getDoctorAvatarSmart(doctor.ten, doctor.image)} style={styles.doctorAvatar} />
                   <View style={styles.doctorInfo}>
                     <Text style={styles.doctorName}>{doctor.ten}</Text>
                     <Text style={styles.doctorSpecialty}>{doctor.chuyen_khoa}</Text>
@@ -580,6 +563,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  favoriteButtonActive: {
+    backgroundColor: '#E91E63',
   },
   infoSection: {
     backgroundColor: '#fff',

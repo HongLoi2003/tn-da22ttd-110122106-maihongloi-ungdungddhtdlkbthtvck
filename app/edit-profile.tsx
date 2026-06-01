@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Alert,
+    Image,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -15,6 +15,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import CustomToast from './components/CustomToast';
 import { useAuth } from './context/AuthContext';
 
 export default function EditProfileScreen() {
@@ -22,6 +23,14 @@ export default function EditProfileScreen() {
   const { userData, updateUserData } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
+  
+  // Toast state
+  const [toast, setToast] = useState({
+    visible: false,
+    type: 'success' as 'success' | 'error' | 'warning' | 'info',
+    title: '',
+    message: '',
+  });
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -115,12 +124,26 @@ export default function EditProfileScreen() {
         avatar: formData.avatar,
       });
       
-      Alert.alert('Thành công', 'Đã cập nhật thông tin cá nhân', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
+      // Hiển thị toast thành công
+      setToast({
+        visible: true,
+        type: 'success',
+        title: 'Cập nhật thành công!',
+        message: 'Thông tin cá nhân đã được lưu',
+      });
+      
+      // Quay lại sau 2 giây
+      setTimeout(() => {
+        router.back();
+      }, 2000);
     } catch (error) {
       console.error('Update profile error:', error);
-      Alert.alert('Lỗi', 'Không thể cập nhật thông tin. Vui lòng thử lại');
+      setToast({
+        visible: true,
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể cập nhật thông tin. Vui lòng thử lại!',
+      });
     } finally {
       setLoading(false);
     }
@@ -131,10 +154,20 @@ export default function EditProfileScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      {/* Toast Notification */}
+      <CustomToast
+        visible={toast.visible}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        onHide={() => setToast({ ...toast, visible: false })}
+        duration={3000}
+      />
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chỉnh sửa thông tin</Text>
         <View style={{ width: 24 }} />
@@ -144,14 +177,18 @@ export default function EditProfileScreen() {
         {/* Avatar Section */}
         <View style={styles.avatarSection}>
           <View style={styles.avatarContainer}>
-            <Image
-              source={
-                formData.avatar 
-                  ? { uri: formData.avatar }
-                  : require('@/assets/images/logo.png')
-              }
-              style={styles.avatar}
-            />
+            {formData.avatar ? (
+              <Image
+                source={{ uri: formData.avatar }}
+                style={styles.avatar}
+              />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Text style={styles.avatarPlaceholderText}>
+                  {formData.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                </Text>
+              </View>
+            )}
             <TouchableOpacity 
               style={styles.cameraButton}
               onPress={handleChangeAvatar}
@@ -329,16 +366,18 @@ export default function EditProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f9ff',
+    backgroundColor: '#fff',
   },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     paddingTop: 50,
     paddingBottom: 16,
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
   backButton: {
     padding: 4,
@@ -346,7 +385,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0f172a',
   },
   content: {
     flex: 1,
@@ -364,6 +403,19 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+  },
+  avatarPlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#e0f2f1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarPlaceholderText: {
+    fontSize: 40,
+    fontWeight: '700',
+    color: '#00BCD4',
   },
   cameraButton: {
     position: 'absolute',

@@ -67,13 +67,13 @@ class Validator {
     const errors: Record<string, string> = {};
 
     if (!name || name.trim().length === 0) {
-      errors.fullName = 'Full name is required';
+      errors.fullName = 'Họ và tên không được để trống';
     } else if (name.trim().length < 2) {
-      errors.fullName = 'Full name must be at least 2 characters';
+      errors.fullName = 'Họ và tên phải có ít nhất 2 ký tự';
     } else if (name.trim().length > 100) {
-      errors.fullName = 'Full name must not exceed 100 characters';
-    } else if (!/^[a-zA-Z\s\u0100-\u017F\u0180-\u024F]+$/.test(name)) {
-      errors.fullName = 'Full name can only contain letters and spaces';
+      errors.fullName = 'Họ và tên không được vượt quá 100 ký tự';
+    } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(name)) {
+      errors.fullName = 'Họ và tên chỉ được chứa chữ cái và khoảng trắng';
     }
 
     return {

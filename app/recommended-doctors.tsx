@@ -1,28 +1,10 @@
-import { getAllDocuments } from '@/app/services/firebaseService';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
-const doctorImages: any = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
-};
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { getAllDocuments } from './services/firebaseService';
+import { getDoctorAvatarSmart } from './utils/doctorAvatars';
 
 // Map triệu chứng sang chuyên khoa
 const symptomToSpecialty: any = {
@@ -43,6 +25,8 @@ export default function RecommendedDoctorsScreen() {
   const [doctors, setDoctors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSpecialty, setSelectedSpecialty] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
 
   // Load doctors chỉ 1 lần khi component mount
   useEffect(() => {
@@ -215,10 +199,11 @@ export default function RecommendedDoctorsScreen() {
           rating: doc.rating || 4.8,
           reviews: 100,
           experience: `${doc.kinh_nghiem || doc.experience || 5} năm`,
-          hospital: 'Bệnh viện Đa khoa',
+          hospital: 'Bệnh viện Trường Đại học Trà Vinh',
           image: doc.image || 'nguyenvanam.png',
           online: doc.trang_thai !== false,
-          price: '300.000đ',
+          price: (doc.phi_kham || doc.gia_kham) ? `${(doc.phi_kham || doc.gia_kham).toLocaleString('vi-VN')}đ` : '200.000đ',
+          phone: doc.sdt || doc.phone || '',
         };
       });
 
@@ -258,75 +243,131 @@ export default function RecommendedDoctorsScreen() {
     { id: 'noi_tiet', name: 'Nội tiết' },
   ];
   
-  const filteredDoctors = selectedSpecialty === 'all' 
-    ? doctors 
-    : doctors.filter(doc => {
+  // Apply search first if there's a query, then filter by specialty
+  const searchedDoctors = searchQuery.trim() 
+    ? doctors.filter(doc => {
+        const query = searchQuery.toLowerCase().trim();
+        const name = (doc.name || '').toLowerCase();
+        const specialty = (doc.specialty || '').toLowerCase();
+        const chuyenKhoa = (doc.chuyenKhoa || '').toLowerCase();
+        
+        // Normalize Vietnamese characters for better search
+        const normalizeVietnamese = (str: string) => {
+          if (!str) return '';
+          return str
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'D');
+        };
+        
+        const normalizedQuery = normalizeVietnamese(query);
+        const normalizedName = normalizeVietnamese(name);
+        const normalizedSpecialty = normalizeVietnamese(specialty);
+        const normalizedChuyenKhoa = normalizeVietnamese(chuyenKhoa);
+        
+        // Debug log
+        console.log('🔍 Search:', {
+          query,
+          name: doc.name,
+          specialty: doc.specialty,
+          chuyenKhoa: doc.chuyenKhoa,
+          normalizedQuery,
+          normalizedSpecialty,
+          match: normalizedSpecialty.includes(normalizedQuery)
+        });
+        
+        // Tìm kiếm cả có dấu và không dấu
+        const match = (
+          name.includes(query) ||
+          normalizedName.includes(normalizedQuery) ||
+          specialty.includes(query) ||
+          normalizedSpecialty.includes(normalizedQuery) ||
+          chuyenKhoa.includes(query) ||
+          normalizedChuyenKhoa.includes(normalizedQuery)
+        );
+        
+        if (match) {
+          console.log('✅ Found match:', doc.name, '-', doc.specialty);
+        }
+        
+        return match;
+      })
+    : doctors;
+  
+  // Then apply specialty filter if not searching or if "all" is selected
+  const filteredDoctors = selectedSpecialty === 'all' || searchQuery.trim()
+    ? searchedDoctors 
+    : searchedDoctors.filter(doc => {
         console.log(`Filtering: ${doc.name} - specialtyId: "${doc.specialtyId}" vs selected: "${selectedSpecialty}"`);
         return doc.specialtyId === selectedSpecialty;
       });
+  
+  console.log('📊 Final results:', filteredDoctors.length, 'doctors found');
 
-  const renderDoctorCard = ({ item }: any) => (
-    <TouchableOpacity 
-      style={styles.doctorCard}
-      onPress={() => router.push({
+  const renderDoctorCard = ({ item }: any) => {
+    const handleChatPress = () => {
+      router.push({
         pathname: '/doctor-chat',
         params: {
-          doctorName: item.name,
+          doctorId: item.id,
+          doctorName: `BS. ${item.name}`,
           doctorSpecialty: item.specialty,
           doctorImage: item.image || 'logo.png',
+          doctorPhone: item.phone || '',
         }
-      })}
-    >
-      <View style={styles.cardContent}>
-        <View style={styles.doctorAvatarContainer}>
-          <Image source={doctorImages[item.image] || doctorImages['nguyenvanam.png']} style={styles.doctorAvatar} />
-          {item.online && <View style={styles.onlineBadge} />}
+      });
+    };
+
+    return (
+      <TouchableOpacity 
+        style={styles.doctorCard}
+        onPress={handleChatPress}
+      >
+        <View style={styles.cardContent}>
+          <View style={styles.doctorAvatarContainer}>
+            <Image source={getDoctorAvatarSmart(item.name, item.image)} style={styles.doctorAvatar} />
+            {item.online && <View style={styles.onlineBadge} />}
+          </View>
+          <View style={styles.doctorInfo}>
+            <View style={styles.doctorHeader}>
+              <Text style={styles.doctorName}>{item.name}</Text>
+              <View style={styles.ratingBadge}>
+                <Ionicons name="star" size={12} color="#FFB800" />
+                <Text style={styles.ratingText}>{item.rating}</Text>
+              </View>
+            </View>
+            <Text style={styles.specialty}>{item.specialty}</Text>
+            <View style={styles.doctorMeta}>
+              <View style={styles.metaItem}>
+                <Ionicons name="briefcase-outline" size={14} color="#64748b" />
+                <Text style={styles.metaText}>{item.experience}</Text>
+              </View>
+              <View style={styles.metaItem}>
+                <Ionicons name="location-outline" size={14} color="#64748b" />
+                <Text style={styles.metaText}>{item.hospital}</Text>
+              </View>
+            </View>
+            <View style={styles.cardFooter}>
+              <View style={styles.priceContainer}>
+                <Text style={styles.priceLabel}>Phí tư vấn:</Text>
+                <Text style={styles.priceValue}>{item.price}</Text>
+              </View>
+              <View style={styles.cardActions}>
+                <TouchableOpacity 
+                  style={styles.chatButton}
+                  onPress={handleChatPress}
+                >
+                  <Ionicons name="chatbubble-outline" size={18} color="#fff" />
+                  <Text style={styles.chatButtonText}>Nhắn tin</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         </View>
-        <View style={styles.doctorInfo}>
-          <View style={styles.doctorHeader}>
-            <Text style={styles.doctorName}>{item.name}</Text>
-            <View style={styles.ratingBadge}>
-              <Ionicons name="star" size={12} color="#FFB800" />
-              <Text style={styles.ratingText}>{item.rating}</Text>
-            </View>
-          </View>
-          <Text style={styles.specialty}>{item.specialty}</Text>
-          <View style={styles.doctorMeta}>
-            <View style={styles.metaItem}>
-              <Ionicons name="briefcase-outline" size={14} color="#64748b" />
-              <Text style={styles.metaText}>{item.experience}</Text>
-            </View>
-            <View style={styles.metaItem}>
-              <Ionicons name="location-outline" size={14} color="#64748b" />
-              <Text style={styles.metaText}>{item.hospital}</Text>
-            </View>
-          </View>
-          <View style={styles.cardFooter}>
-            <View style={styles.priceContainer}>
-              <Text style={styles.priceLabel}>Phí tư vấn:</Text>
-              <Text style={styles.priceValue}>{item.price}</Text>
-            </View>
-            <View style={styles.cardActions}>
-              <TouchableOpacity 
-                style={styles.chatButton}
-                onPress={() => router.push({
-                  pathname: '/doctor-chat',
-                  params: {
-                    doctorName: item.name,
-                    doctorSpecialty: item.specialty,
-                    doctorImage: item.image || 'logo.png',
-                  }
-                })}
-              >
-                <Ionicons name="chatbubble-outline" size={18} color="#fff" />
-                <Text style={styles.chatButtonText}>Nhắn tin</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   if (loading) {
     return (
@@ -354,8 +395,35 @@ export default function RecommendedDoctorsScreen() {
         <Text style={styles.headerTitle}>
           {symptom ? `Bác sĩ chuyên ${specialtyParam || symptomToSpecialty[symptom] || 'khoa'}` : 'Bác sĩ gợi ý'}
         </Text>
-        <View style={styles.placeholder} />
+        <TouchableOpacity 
+          onPress={() => setShowSearch(!showSearch)} 
+          style={styles.searchBtn}
+        >
+          <Ionicons name={showSearch ? "close" : "search"} size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
+
+      {/* Search Bar */}
+      {showSearch && (
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBox}>
+            <Ionicons name="search-outline" size={20} color="#64748b" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Tìm bác sĩ theo tên hoặc chuyên khoa..."
+              placeholderTextColor="#94a3b8"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity onPress={() => setSearchQuery('')}>
+                <Ionicons name="close-circle" size={20} color="#94a3b8" />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      )}
 
       {symptom && (
         <View style={styles.infoCard}>
@@ -427,7 +495,14 @@ export default function RecommendedDoctorsScreen() {
       ) : filteredDoctors.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="search-outline" size={64} color="#cbd5e1" />
-          <Text style={styles.emptyText}>Không có bác sĩ chuyên khoa này</Text>
+          <Text style={styles.emptyText}>
+            {searchQuery ? 'Không tìm thấy bác sĩ' : 'Không có bác sĩ chuyên khoa này'}
+          </Text>
+          {searchQuery && (
+            <Text style={styles.emptySubtext}>
+              Không tìm thấy bác sĩ với từ khóa "{searchQuery}"
+            </Text>
+          )}
         </View>
       ) : (
         <FlatList
@@ -466,9 +541,35 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: '#fff',
+    flex: 1,
+    textAlign: 'center',
   },
-  placeholder: {
+  searchBtn: {
     width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+  },
+  searchContainer: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#0f172a',
   },
   infoCard: {
     flexDirection: 'row',

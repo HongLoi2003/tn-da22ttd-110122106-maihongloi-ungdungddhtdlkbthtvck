@@ -1,5 +1,3 @@
-import errorHandler from '@/app/utils/errorHandler';
-import validator from '@/app/utils/validation';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -17,6 +15,8 @@ import {
     View,
 } from 'react-native';
 import { useAuth } from './context/AuthContext';
+import errorHandler from './utils/errorHandler';
+import validator from './utils/validation';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -26,13 +26,10 @@ export default function RegisterScreen() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [gender, setGender] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
-  const [showGenderPicker, setShowGenderPicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleRegister = async () => {
@@ -59,46 +56,59 @@ export default function RegisterScreen() {
     setErrors({});
     setLoading(true);
     try {
-      await register(email, password, {
+      console.log('🔄 Đang đăng ký tài khoản...');
+      const userCredential = await register(email, password, {
         fullName,
         phone,
-        dateOfBirth,
-        gender,
       });
+      
+      // Gửi email xác minh
+      if (userCredential?.user) {
+        try {
+          console.log('📧 Đang gửi email xác minh...');
+          await sendEmailVerification(userCredential.user);
+          console.log('✅ Đã gửi email xác minh thành công!');
+        } catch (emailError: any) {
+          console.error('❌ Lỗi gửi email xác minh:', emailError);
+          // Không dừng flow nếu gửi email thất bại
+        }
+      }
       
       // Đăng xuất sau khi đăng ký để user phải đăng nhập lại
       await logout();
-      setTimeout(() => {
-        Alert.alert(
-          'Đăng ký thành công!', 
-          'Tài khoản của bạn đã được tạo. Vui lòng đăng nhập để tiếp tục.'
-        );
-      }, 500);
+      setLoading(false);
+      
+      Alert.alert(
+        'Đăng ký thành công!', 
+        `Tài khoản của bạn đã được tạo.\n\n📧 Chúng tôi đã gửi email xác minh đến:\n${email}\n\nVui lòng kiểm tra hộp thư (kể cả thư mục Spam) và xác minh email trước khi đăng nhập.`,
+        [{ 
+          text: 'OK',
+          onPress: () => router.replace('/login')
+        }]
+      );
     } catch (error: any) {
       const appError = errorHandler.handleError(error);
       errorHandler.logError(appError);
       Alert.alert('Đăng ký thất bại', appError.message);
-    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+    <View style={styles.container}>
+      <Image
+        source={require('@/assets/images/bckgour.png')}
+        style={styles.backgroundImage}
+        contentFit="cover"
+      />
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#0f172a" />
-          </TouchableOpacity>
-        </View>
-
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
         {/* Logo */}
         <View style={styles.logoContainer}>
           <Image
@@ -169,67 +179,6 @@ export default function RegisterScreen() {
               />
             </View>
             {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
-          </View>
-
-          {/* Date of Birth */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Ngày sinh (tùy chọn)</Text>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="calendar-outline" size={20} color="#64748b" style={styles.inputIcon} />
-              <TextInput
-                style={styles.input}
-                placeholder="DD/MM/YYYY"
-                value={dateOfBirth}
-                onChangeText={setDateOfBirth}
-                keyboardType="numeric"
-              />
-            </View>
-          </View>
-
-          {/* Gender */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Giới tính (tùy chọn)</Text>
-            <TouchableOpacity 
-              style={styles.inputWrapper}
-              onPress={() => setShowGenderPicker(!showGenderPicker)}
-            >
-              <Ionicons name="male-female-outline" size={20} color="#64748b" style={styles.inputIcon} />
-              <Text style={[styles.input, { paddingTop: 15, color: gender ? '#0f172a' : '#94a3b8' }]}>
-                {gender || 'Chọn giới tính'}
-              </Text>
-              <Ionicons name="chevron-down" size={20} color="#64748b" />
-            </TouchableOpacity>
-            {showGenderPicker && (
-              <View style={styles.pickerContainer}>
-                <TouchableOpacity 
-                  style={styles.pickerItem}
-                  onPress={() => {
-                    setGender('Nam');
-                    setShowGenderPicker(false);
-                  }}
-                >
-                  <Text style={styles.pickerText}>Nam</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.pickerItem}
-                  onPress={() => {
-                    setGender('Nữ');
-                    setShowGenderPicker(false);
-                  }}
-                >
-                  <Text style={styles.pickerText}>Nữ</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.pickerItem}
-                  onPress={() => {
-                    setGender('Khác');
-                    setShowGenderPicker(false);
-                  }}
-                >
-                  <Text style={styles.pickerText}>Khác</Text>
-                </TouchableOpacity>
-              </View>
-            )}
           </View>
 
           {/* Password */}
@@ -340,9 +289,8 @@ export default function RegisterScreen() {
             >
               <Image
                 source={require('@/assets/images/Google.png')}
-                style={styles.socialIcon}
+                style={styles.googleIcon}
               />
-              <Text style={styles.socialText}>Google</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.socialButton}
@@ -354,118 +302,139 @@ export default function RegisterScreen() {
             >
               <Image
                 source={require('@/assets/images/Facebook.png')}
-                style={styles.socialIcon}
+                style={styles.facebookIcon}
               />
-              <Text style={styles.socialText}>Facebook</Text>
             </TouchableOpacity>
           </View>
 
           {/* Login Link */}
           <View style={styles.loginContainer}>
             <Text style={styles.loginText}>Đã có tài khoản? </Text>
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity onPress={() => router.push('/login')}>
               <Text style={styles.loginLink}>Đăng nhập ngay</Text>
             </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: -1,
+  },
+  keyboardAvoidingView: {
   },
   scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    paddingTop: 40,
   },
   header: {
-    paddingTop: 50,
-    marginBottom: 20,
+    paddingTop: 40,
+    marginBottom: 24,
   },
   backButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
+    alignItems: 'flex-start',
   },
   logoContainer: {
     alignItems: 'center',
-    marginBottom: 32,
-  },
-  logo: {
-    width: 100,
-    height: 100,
     marginBottom: 16,
   },
+  logo: {
+    width: 160,
+    height: 160,
+    marginBottom: 12,
+  },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 26,
+    fontWeight: '700',
     color: '#0f172a',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#64748b',
+    fontWeight: '500',
   },
   formContainer: {
     flex: 1,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: 12,
   },
   label: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#0f172a',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f8fafc',
-    borderRadius: 12,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
+    height: 48,
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: 10,
   },
   input: {
     flex: 1,
-    height: 50,
-    fontSize: 16,
+    fontSize: 15,
     color: '#0f172a',
   },
   eyeIcon: {
     padding: 4,
   },
   errorText: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#ef4444',
-    marginTop: 4,
+    marginTop: 3,
     marginLeft: 4,
+    fontWeight: '500',
   },
   inputError: {
     borderColor: '#ef4444',
+    backgroundColor: '#fef2f2',
   },
   termsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
+    alignItems: 'flex-start',
+    marginBottom: 20,
+    marginTop: 8,
   },
   checkbox: {
-    width: 20,
-    height: 20,
+    width: 18,
+    height: 18,
     borderRadius: 4,
     borderWidth: 2,
     borderColor: '#e2e8f0',
-    marginRight: 12,
+    marginRight: 10,
+    marginTop: 2,
     justifyContent: 'center',
     alignItems: 'center',
+    flexShrink: 0,
   },
   checkboxChecked: {
     backgroundColor: '#00BCD4',
@@ -473,9 +442,9 @@ const styles = StyleSheet.create({
   },
   termsText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 12,
     color: '#64748b',
-    lineHeight: 20,
+    lineHeight: 18,
   },
   termsLink: {
     color: '#00BCD4',
@@ -483,28 +452,29 @@ const styles = StyleSheet.create({
   },
   registerButton: {
     backgroundColor: '#00BCD4',
-    height: 56,
-    borderRadius: 12,
+    height: 52,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#00BCD4',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
+    marginBottom: 16,
   },
   registerButtonDisabled: {
-    backgroundColor: '#94a3b8',
+    backgroundColor: '#cbd5e1',
   },
   registerButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 15,
+    fontWeight: '700',
     color: '#fff',
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 24,
+    marginVertical: 20,
   },
   dividerLine: {
     flex: 1,
@@ -512,54 +482,64 @@ const styles = StyleSheet.create({
     backgroundColor: '#e2e8f0',
   },
   dividerText: {
-    marginHorizontal: 16,
-    fontSize: 14,
-    color: '#64748b',
+    marginHorizontal: 12,
+    fontSize: 12,
+    color: '#94a3b8',
+    fontWeight: '500',
   },
   socialContainer: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
+    gap: 16,
+    marginBottom: 8,
   },
   socialButton: {
     flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 50,
+    height: 52,
+    width: 52,
     backgroundColor: '#f8fafc',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    gap: 8,
   },
   socialIcon: {
-    width: 24,
-    height: 24,
+    width: 28,
+    height: 28,
+  },
+  googleIcon: {
+    width: 45,
+    height: 45,
+  },
+  facebookIcon: {
+    width: 35,
+    height: 35,
   },
   socialText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#0f172a',
   },
   loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 24,
+    paddingVertical: 12,
+    marginTop: 12,
   },
   loginText: {
-    fontSize: 14,
-    color: '#64748b',
+    fontSize: 13,
+    color: '#fff',
+    fontWeight: '500',
   },
   loginLink: {
-    fontSize: 14,
-    color: '#00BCD4',
-    fontWeight: '600',
+    fontSize: 13,
+    color: '#000',
+    fontWeight: '700',
   },
   pickerContainer: {
     backgroundColor: '#fff',
     borderRadius: 8,
-    marginTop: 8,
+    marginTop: 6,
     borderWidth: 1,
     borderColor: '#e2e8f0',
     overflow: 'hidden',

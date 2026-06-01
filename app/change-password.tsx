@@ -70,6 +70,7 @@ export default function ChangePasswordScreen() {
             text: 'OK', 
             onPress: async () => {
               await logout();
+              router.replace('/login');
             }
           }
         ]
@@ -102,7 +103,7 @@ export default function ChangePasswordScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Đổi mật khẩu</Text>
         <View style={{ width: 24 }} />
@@ -207,16 +208,18 @@ export default function ChangePasswordScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f9ff',
+    backgroundColor: '#fff',
   },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     paddingTop: 50,
     paddingBottom: 16,
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
   backButton: {
     padding: 4,
@@ -224,7 +227,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0f172a',
   },
   content: {
     flex: 1,

@@ -1,47 +1,82 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { where } from 'firebase/firestore';
+import { useCallback, useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from './context/AuthContext';
+import { getDocumentsWithQuery } from './services/firebaseService';
 
 export default function MedicalRecordsScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const [records, setRecords] = useState<any[]>([]);
+  const [testResults, setTestResults] = useState<any[]>([]);
+  const [prescriptions, setPrescriptions] = useState<any[]>([]);
+  const [healthInfo, setHealthInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const records = [
-    { 
-      id: '1', 
-      date: '15/04/2026', 
-      doctor: 'BS. Nguyễn Văn An', 
-      specialty: 'Tim mạch',
-      diagnosis: 'Khám sức khỏe định kỳ',
-      status: 'completed'
-    },
-    { 
-      id: '2', 
-      date: '10/03/2026', 
-      doctor: 'BS. Trần Thị Mai', 
-      specialty: 'Da liễu',
-      diagnosis: 'Viêm da cơ địa',
-      status: 'completed'
-    },
-    { 
-      id: '3', 
-      date: '05/02/2026', 
-      doctor: 'BS. Lê Hoàng Nam', 
-      specialty: 'Tiêu hóa',
-      diagnosis: 'Đau dạ dày',
-      status: 'completed'
-    },
-  ];
+  useFocusEffect(
+    useCallback(() => {
+      loadMedicalData();
+    }, [user])
+  );
 
-  const testResults = [
-    { id: '1', name: 'Xét nghiệm máu', date: '15/04/2026', status: 'available' },
-    { id: '2', name: 'Siêu âm bụng', date: '10/03/2026', status: 'available' },
-    { id: '3', name: 'X-quang phổi', date: '05/02/2026', status: 'available' },
-  ];
+  const loadMedicalData = async () => {
+    try {
+      setLoading(true);
+      if (!user) {
+        setRecords([]);
+        setTestResults([]);
+        setPrescriptions([]);
+        setHealthInfo(null);
+        return;
+      }
 
-  const prescriptions = [
-    { id: '1', medicine: 'Paracetamol 500mg', quantity: '20 viên', date: '15/04/2026' },
-    { id: '2', medicine: 'Amoxicillin 250mg', quantity: '14 viên', date: '10/03/2026' },
-  ];
+      // Load medical records (lịch sử khám bệnh)
+      const medicalRecords = await getDocumentsWithQuery('medical-records', [
+        where('userId', '==', user.uid)
+      ]);
+      const sortedRecords = medicalRecords.sort((a: any, b: any) => {
+        return new Date(b.createdAt || b.date).getTime() - new Date(a.createdAt || a.date).getTime();
+      });
+      setRecords(sortedRecords);
+
+      // Load test results (kết quả xét nghiệm)
+      const tests = await getDocumentsWithQuery('test-results', [
+        where('userId', '==', user.uid)
+      ]);
+      const sortedTests = tests.sort((a: any, b: any) => {
+        return new Date(b.createdAt || b.date).getTime() - new Date(a.createdAt || a.date).getTime();
+      });
+      setTestResults(sortedTests);
+
+      // Load prescriptions (đơn thuốc)
+      const presc = await getDocumentsWithQuery('prescriptions', [
+        where('userId', '==', user.uid)
+      ]);
+      const sortedPresc = presc.sort((a: any, b: any) => {
+        return new Date(b.createdAt || b.date).getTime() - new Date(a.createdAt || a.date).getTime();
+      });
+      setPrescriptions(sortedPresc);
+
+      // Load health info (thông tin sức khỏe)
+      const healthData = await getDocumentsWithQuery('health-info', [
+        where('userId', '==', user.uid)
+      ]);
+      if (healthData.length > 0) {
+        setHealthInfo(healthData[0]);
+      }
+    } catch (error) {
+      console.error('Error loading medical data:', error);
+      setRecords([]);
+      setTestResults([]);
+      setPrescriptions([]);
+      setHealthInfo(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleRecordPress = (record: any) => {
     Alert.alert(
@@ -69,13 +104,19 @@ export default function MedicalRecordsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Hồ sơ y tế</Text>
         <View style={{ width: 24 }} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#00BCD4" />
+          </View>
+        ) : (
+          <>
         {/* Health Summary */}
         <View style={styles.summaryCard}>
           <Text style={styles.summaryTitle}>Thông tin sức khỏe</Text>
@@ -83,22 +124,22 @@ export default function MedicalRecordsScreen() {
             <View style={styles.summaryItem}>
               <Ionicons name="water" size={24} color="#00BCD4" />
               <Text style={styles.summaryLabel}>Nhóm máu</Text>
-              <Text style={styles.summaryValue}>O+</Text>
+              <Text style={styles.summaryValue}>{healthInfo?.bloodType || 'N/A'}</Text>
             </View>
             <View style={styles.summaryItem}>
               <Ionicons name="fitness" size={24} color="#06D6A0" />
               <Text style={styles.summaryLabel}>Chiều cao</Text>
-              <Text style={styles.summaryValue}>165 cm</Text>
+              <Text style={styles.summaryValue}>{healthInfo?.height || 'N/A'}</Text>
             </View>
             <View style={styles.summaryItem}>
               <Ionicons name="scale" size={24} color="#FFB800" />
               <Text style={styles.summaryLabel}>Cân nặng</Text>
-              <Text style={styles.summaryValue}>55 kg</Text>
+              <Text style={styles.summaryValue}>{healthInfo?.weight || 'N/A'}</Text>
             </View>
             <View style={styles.summaryItem}>
               <Ionicons name="heart" size={24} color="#EF4444" />
               <Text style={styles.summaryLabel}>Huyết áp</Text>
-              <Text style={styles.summaryValue}>120/80</Text>
+              <Text style={styles.summaryValue}>{healthInfo?.bloodPressure || 'N/A'}</Text>
             </View>
           </View>
         </View>
@@ -111,7 +152,13 @@ export default function MedicalRecordsScreen() {
               <Text style={styles.seeAll}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>
-          {records.map((record) => (
+          {records.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="document-text-outline" size={48} color="#cbd5e1" />
+              <Text style={styles.emptyText}>Chưa có lịch sử khám bệnh</Text>
+            </View>
+          ) : (
+            records.slice(0, 3).map((record) => (
             <TouchableOpacity 
               key={record.id} 
               style={styles.recordCard}
@@ -128,7 +175,8 @@ export default function MedicalRecordsScreen() {
               </View>
               <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
             </TouchableOpacity>
-          ))}
+          ))
+          )}
         </View>
 
         {/* Test Results */}
@@ -139,7 +187,13 @@ export default function MedicalRecordsScreen() {
               <Text style={styles.seeAll}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>
-          {testResults.map((test) => (
+          {testResults.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="flask-outline" size={48} color="#cbd5e1" />
+              <Text style={styles.emptyText}>Chưa có kết quả xét nghiệm</Text>
+            </View>
+          ) : (
+            testResults.slice(0, 3).map((test) => (
             <TouchableOpacity 
               key={test.id} 
               style={styles.testCard}
@@ -156,7 +210,8 @@ export default function MedicalRecordsScreen() {
                 <Text style={styles.availableText}>Có sẵn</Text>
               </View>
             </TouchableOpacity>
-          ))}
+          ))
+          )}
         </View>
 
         {/* Prescriptions */}
@@ -167,7 +222,13 @@ export default function MedicalRecordsScreen() {
               <Text style={styles.seeAll}>Xem tất cả</Text>
             </TouchableOpacity>
           </View>
-          {prescriptions.map((prescription) => (
+          {prescriptions.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="medical-outline" size={48} color="#cbd5e1" />
+              <Text style={styles.emptyText}>Chưa có đơn thuốc</Text>
+            </View>
+          ) : (
+            prescriptions.slice(0, 2).map((prescription) => (
             <TouchableOpacity 
               key={prescription.id} 
               style={styles.prescriptionCard}
@@ -183,10 +244,13 @@ export default function MedicalRecordsScreen() {
               </View>
               <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
             </TouchableOpacity>
-          ))}
+          ))
+          )}
         </View>
 
         <View style={{ height: 40 }} />
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -198,9 +262,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f9ff',
   },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     paddingTop: 50,
     paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
@@ -212,7 +278,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0f172a',
   },
   content: {
     flex: 1,
@@ -409,5 +475,22 @@ const styles = StyleSheet.create({
   prescriptionDate: {
     fontSize: 12,
     color: '#64748b',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 32,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 12,
+    textAlign: 'center',
   },
 });

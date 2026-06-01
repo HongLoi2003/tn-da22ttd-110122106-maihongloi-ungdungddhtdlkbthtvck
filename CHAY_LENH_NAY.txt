@@ -1,0 +1,37 @@
+========================================
+  CHẠY 1 TRONG CÁC LỆNH SAU
+========================================
+
+CÁCH 1: Script tự động (Khuyến nghị)
+------------------------------------
+.\build-with-eas.ps1
+
+
+CÁCH 2: Thủ công (3 lệnh)
+--------------------------
+npx eas login
+npx eas build -p android --profile development
+
+
+CÁCH 3: Local build (Cần Android Studio)
+-----------------------------------------
+npx expo run:android
+
+
+========================================
+  SAU KHI BUILD XONG
+========================================
+
+1. Download APK từ link
+2. Cài APK lên điện thoại
+3. Mở app và test Google Sign-In
+4. ✅ Hoàn thành!
+
+
+========================================
+  XEM HƯỚNG DẪN CHI TIẾT
+========================================
+
+BAT_DAU_BUILD_NGAY.md
+TINH_TRANG_HIEN_TAI.md
+CHECKLIST_CUOI_CUNG.md

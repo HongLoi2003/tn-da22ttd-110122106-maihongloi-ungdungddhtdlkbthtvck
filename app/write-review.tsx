@@ -2,8 +2,29 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import CustomToast from './components/CustomToast';
 import { useAuth } from './context/AuthContext';
 import { createDocument, getDocumentById } from './services/firebaseService';
+
+// Mapping ảnh bác sĩ
+const doctorImages: any = {
+  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
+  'tranthilan.png': require('@/assets/images/tranthilan.png'),
+  'leminhtam.png': require('@/assets/images/leminhtam.png'),
+  'tranthimai.png': require('@/assets/images/tranthimai.png'),
+  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
+  'phamthuha.png': require('@/assets/images/phamthuha.png'),
+  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
+  'vuthilan.png': require('@/assets/images/vuthilan.png'),
+  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
+  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
+  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
+  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
+  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
+  'lethihang.png': require('@/assets/images/lethihang.png'),
+  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
+  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
+};
 
 export default function WriteReviewScreen() {
   const router = useRouter();
@@ -16,6 +37,46 @@ export default function WriteReviewScreen() {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  
+  // Toast state
+  const [toast, setToast] = useState({
+    visible: false,
+    type: 'success' as 'success' | 'error' | 'warning' | 'info',
+    title: '',
+    message: '',
+  });
+
+  // Hàm tìm ảnh bác sĩ dựa trên tên
+  const getDoctorImage = (doctorName: string, imageField?: string) => {
+    // Nếu có trường image và tồn tại trong mapping
+    if (imageField && doctorImages[imageField]) {
+      return doctorImages[imageField];
+    }
+
+    // Tạo tên file từ tên bác sĩ
+    const cleanName = doctorName
+      .replace('BS. ', '')
+      .replace('Bs. ', '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/đ/g, 'd')
+      .replace(/\s+/g, '');
+
+    // Thử các định dạng file
+    const possibleFiles = [
+      `${cleanName}.png`,
+      `${cleanName}.jpg`,
+    ];
+
+    for (const file of possibleFiles) {
+      if (doctorImages[file]) {
+        return doctorImages[file];
+      }
+    }
+
+    return null;
+  };
 
   useEffect(() => {
     loadAppointment();
@@ -85,14 +146,26 @@ export default function WriteReviewScreen() {
         date: new Date().toLocaleDateString('vi-VN'),
       });
 
-      Alert.alert(
-        'Thành công',
-        'Cảm ơn bạn đã đánh giá!',
-        [{ text: 'OK', onPress: () => router.back() }]
-      );
+      // Hiển thị toast thành công với tên bác sĩ
+      setToast({
+        visible: true,
+        type: 'success',
+        title: 'Đánh giá thành công!',
+        message: `Cảm ơn bạn đã đánh giá ${appointment.doctor}`,
+      });
+
+      // Quay lại sau 2 giây
+      setTimeout(() => {
+        router.back();
+      }, 2000);
     } catch (error) {
       console.error('Error submitting review:', error);
-      Alert.alert('Lỗi', 'Không thể gửi đánh giá');
+      setToast({
+        visible: true,
+        type: 'error',
+        title: 'Lỗi',
+        message: 'Không thể gửi đánh giá. Vui lòng thử lại!',
+      });
     } finally {
       setSubmitting(false);
     }
@@ -100,9 +173,19 @@ export default function WriteReviewScreen() {
 
   return (
     <View style={styles.container}>
+      {/* Toast Notification */}
+      <CustomToast
+        visible={toast.visible}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        onHide={() => setToast({ ...toast, visible: false })}
+        duration={3000}
+      />
+
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Viết đánh giá</Text>
         <View style={{ width: 24 }} />
@@ -121,10 +204,18 @@ export default function WriteReviewScreen() {
           <>
         {/* Doctor Info */}
         <View style={styles.doctorCard}>
-          <Image
-            source={require('@/assets/images/logo.png')}
-            style={styles.doctorAvatar}
-          />
+          {getDoctorImage(appointment.doctor, appointment.image) ? (
+            <Image
+              source={getDoctorImage(appointment.doctor, appointment.image)}
+              style={styles.doctorAvatar}
+            />
+          ) : (
+            <View style={styles.doctorAvatarPlaceholder}>
+              <Text style={styles.doctorAvatarText}>
+                {appointment.doctor?.replace('BS. ', '').replace('Bs. ', '').charAt(0)?.toUpperCase() || 'BS'}
+              </Text>
+            </View>
+          )}
           <View style={styles.doctorInfo}>
             <Text style={styles.doctorName}>{appointment.doctor}</Text>
             <Text style={styles.specialty}>{appointment.specialty}</Text>
@@ -227,9 +318,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f9ff',
   },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     paddingTop: 50,
     paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
@@ -241,7 +334,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0f172a',
   },
   content: {
     flex: 1,
@@ -264,6 +357,20 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: 32,
     marginRight: 12,
+  },
+  doctorAvatarPlaceholder: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    marginRight: 12,
+    backgroundColor: '#e0f2f1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  doctorAvatarText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#00BCD4',
   },
   doctorInfo: {
     flex: 1,

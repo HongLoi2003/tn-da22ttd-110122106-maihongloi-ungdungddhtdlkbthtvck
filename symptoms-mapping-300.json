@@ -1,0 +1,1078 @@
+{
+  "symptoms": [
+    {
+      "id": 1,
+      "name": "đau đầu"
+    },
+    {
+      "id": 2,
+      "name": "nhức đầu"
+    },
+    {
+      "id": 3,
+      "name": "đau nửa đầu"
+    },
+    {
+      "id": 4,
+      "name": "chóng mặt"
+    },
+    {
+      "id": 5,
+      "name": "hoa mắt"
+    },
+    {
+      "id": 6,
+      "name": "choáng váng"
+    },
+    {
+      "id": 7,
+      "name": "mất ngủ"
+    },
+    {
+      "id": 8,
+      "name": "khó ngủ"
+    },
+    {
+      "id": 9,
+      "name": "hay quên"
+    },
+    {
+      "id": 10,
+      "name": "mất trí nhớ"
+    },
+    {
+      "id": 11,
+      "name": "run tay"
+    },
+    {
+      "id": 12,
+      "name": "run chân"
+    },
+    {
+      "id": 13,
+      "name": "co giật"
+    },
+    {
+      "id": 14,
+      "name": "tê tay"
+    },
+    {
+      "id": 15,
+      "name": "tê chân"
+    },
+    {
+      "id": 16,
+      "name": "mất thăng bằng"
+    },
+    {
+      "id": 17,
+      "name": "đau dây thần kinh"
+    },
+    {
+      "id": 18,
+      "name": "liệt mặt"
+    },
+    {
+      "id": 19,
+      "name": "khó tập trung"
+    },
+    {
+      "id": 20,
+      "name": "lo âu"
+    },
+    {
+      "id": 21,
+      "name": "stress kéo dài"
+    },
+    {
+      "id": 22,
+      "name": "đau ngực"
+    },
+    {
+      "id": 23,
+      "name": "tức ngực"
+    },
+    {
+      "id": 24,
+      "name": "tim đập nhanh"
+    },
+    {
+      "id": 25,
+      "name": "tim đập chậm"
+    },
+    {
+      "id": 26,
+      "name": "hồi hộp"
+    },
+    {
+      "id": 27,
+      "name": "khó thở"
+    },
+    {
+      "id": 28,
+      "name": "phù chân"
+    },
+    {
+      "id": 29,
+      "name": "đau vai trái"
+    },
+    {
+      "id": 30,
+      "name": "tê tay trái"
+    },
+    {
+      "id": 31,
+      "name": "ngất xỉu"
+    },
+    {
+      "id": 32,
+      "name": "đổ mồ hôi lạnh"
+    },
+    {
+      "id": 33,
+      "name": "hụt hơi"
+    },
+    {
+      "id": 34,
+      "name": "nhịp tim bất thường"
+    },
+    {
+      "id": 35,
+      "name": "mệt khi vận động"
+    },
+    {
+      "id": 36,
+      "name": "khó thở về đêm"
+    },
+    {
+      "id": 37,
+      "name": "đau bụng"
+    },
+    {
+      "id": 38,
+      "name": "đầy hơi"
+    },
+    {
+      "id": 39,
+      "name": "khó tiêu"
+    },
+    {
+      "id": 40,
+      "name": "buồn nôn"
+    },
+    {
+      "id": 41,
+      "name": "nôn ói"
+    },
+    {
+      "id": 42,
+      "name": "tiêu chảy"
+    },
+    {
+      "id": 43,
+      "name": "táo bón"
+    },
+    {
+      "id": 44,
+      "name": "đau dạ dày"
+    },
+    {
+      "id": 45,
+      "name": "ợ chua"
+    },
+    {
+      "id": 46,
+      "name": "ợ nóng"
+    },
+    {
+      "id": 47,
+      "name": "chướng bụng"
+    },
+    {
+      "id": 48,
+      "name": "phân đen"
+    },
+    {
+      "id": 49,
+      "name": "đi ngoài ra máu"
+    },
+    {
+      "id": 50,
+      "name": "sụt cân"
+    },
+    {
+      "id": 51,
+      "name": "trào ngược dạ dày"
+    },
+    {
+      "id": 52,
+      "name": "đắng miệng"
+    },
+    {
+      "id": 53,
+      "name": "đau quanh rốn"
+    },
+    {
+      "id": 54,
+      "name": "ăn không ngon"
+    },
+    {
+      "id": 55,
+      "name": "vàng da"
+    },
+    {
+      "id": 56,
+      "name": "đau gan"
+    },
+    {
+      "id": 57,
+      "name": "ho"
+    },
+    {
+      "id": 58,
+      "name": "ho khan"
+    },
+    {
+      "id": 59,
+      "name": "ho có đờm"
+    },
+    {
+      "id": 60,
+      "name": "khó thở"
+    },
+    {
+      "id": 61,
+      "name": "đau họng"
+    },
+    {
+      "id": 62,
+      "name": "viêm họng"
+    },
+    {
+      "id": 63,
+      "name": "nghẹt mũi"
+    },
+    {
+      "id": 64,
+      "name": "sổ mũi"
+    },
+    {
+      "id": 65,
+      "name": "hắt hơi"
+    },
+    {
+      "id": 66,
+      "name": "thở khò khè"
+    },
+    {
+      "id": 67,
+      "name": "tức ngực"
+    },
+    {
+      "id": 68,
+      "name": "viêm phế quản"
+    },
+    {
+      "id": 69,
+      "name": "viêm phổi"
+    },
+    {
+      "id": 70,
+      "name": "hen suyễn"
+    },
+    {
+      "id": 71,
+      "name": "ho kéo dài"
+    },
+    {
+      "id": 72,
+      "name": "khàn tiếng"
+    },
+    {
+      "id": 73,
+      "name": "mất tiếng"
+    },
+    {
+      "id": 74,
+      "name": "thở gấp"
+    },
+    {
+      "id": 75,
+      "name": "ho ra máu"
+    },
+    {
+      "id": 76,
+      "name": "đờm nhiều"
+    },
+    {
+      "id": 77,
+      "name": "nổi mẩn đỏ"
+    },
+    {
+      "id": 78,
+      "name": "ngứa da"
+    },
+    {
+      "id": 79,
+      "name": "mụn trứng cá"
+    },
+    {
+      "id": 80,
+      "name": "dị ứng da"
+    },
+    {
+      "id": 81,
+      "name": "phát ban"
+    },
+    {
+      "id": 82,
+      "name": "da khô"
+    },
+    {
+      "id": 83,
+      "name": "da bong tróc"
+    },
+    {
+      "id": 84,
+      "name": "nổi mề đay"
+    },
+    {
+      "id": 85,
+      "name": "viêm da"
+    },
+    {
+      "id": 86,
+      "name": "nấm da"
+    },
+    {
+      "id": 87,
+      "name": "lang ben"
+    },
+    {
+      "id": 88,
+      "name": "chàm da"
+    },
+    {
+      "id": 89,
+      "name": "mụn nước"
+    },
+    {
+      "id": 90,
+      "name": "da sưng đỏ"
+    },
+    {
+      "id": 91,
+      "name": "rụng tóc"
+    },
+    {
+      "id": 92,
+      "name": "gàu nhiều"
+    },
+    {
+      "id": 93,
+      "name": "da nhờn"
+    },
+    {
+      "id": 94,
+      "name": "viêm nang lông"
+    },
+    {
+      "id": 95,
+      "name": "nứt da"
+    },
+    {
+      "id": 96,
+      "name": "mụn viêm"
+    },
+    {
+      "id": 97,
+      "name": "đau mắt"
+    },
+    {
+      "id": 98,
+      "name": "mắt đỏ"
+    },
+    {
+      "id": 99,
+      "name": "mờ mắt"
+    },
+    {
+      "id": 100,
+      "name": "khô mắt"
+    },
+    {
+      "id": 101,
+      "name": "ngứa mắt"
+    },
+    {
+      "id": 102,
+      "name": "chảy nước mắt"
+    },
+    {
+      "id": 103,
+      "name": "nhìn đôi"
+    },
+    {
+      "id": 104,
+      "name": "sưng mắt"
+    },
+    {
+      "id": 105,
+      "name": "cộm mắt"
+    },
+    {
+      "id": 106,
+      "name": "nhạy cảm ánh sáng"
+    },
+    {
+      "id": 107,
+      "name": "mỏi mắt"
+    },
+    {
+      "id": 108,
+      "name": "giảm thị lực"
+    },
+    {
+      "id": 109,
+      "name": "đau khi nhìn"
+    },
+    {
+      "id": 110,
+      "name": "mắt có ghèn"
+    },
+    {
+      "id": 111,
+      "name": "viêm kết mạc"
+    },
+    {
+      "id": 112,
+      "name": "viêm bờ mi"
+    },
+    {
+      "id": 113,
+      "name": "chớp mắt nhiều"
+    },
+    {
+      "id": 114,
+      "name": "đốm đen trước mắt"
+    },
+    {
+      "id": 115,
+      "name": "cay mắt"
+    },
+    {
+      "id": 116,
+      "name": "co giật mí mắt"
+    },
+    {
+      "id": 117,
+      "name": "đau họng"
+    },
+    {
+      "id": 118,
+      "name": "viêm họng"
+    },
+    {
+      "id": 119,
+      "name": "khàn tiếng"
+    },
+    {
+      "id": 120,
+      "name": "mất tiếng"
+    },
+    {
+      "id": 121,
+      "name": "nghẹt mũi"
+    },
+    {
+      "id": 122,
+      "name": "sổ mũi"
+    },
+    {
+      "id": 123,
+      "name": "đau tai"
+    },
+    {
+      "id": 124,
+      "name": "ù tai"
+    },
+    {
+      "id": 125,
+      "name": "nghe kém"
+    },
+    {
+      "id": 126,
+      "name": "viêm tai giữa"
+    },
+    {
+      "id": 127,
+      "name": "chảy mủ tai"
+    },
+    {
+      "id": 128,
+      "name": "viêm xoang"
+    },
+    {
+      "id": 129,
+      "name": "đau vùng xoang"
+    },
+    {
+      "id": 130,
+      "name": "khó nuốt"
+    },
+    {
+      "id": 131,
+      "name": "hôi miệng"
+    },
+    {
+      "id": 132,
+      "name": "viêm amidan"
+    },
+    {
+      "id": 133,
+      "name": "sưng amidan"
+    },
+    {
+      "id": 134,
+      "name": "ngứa họng"
+    },
+    {
+      "id": 135,
+      "name": "chảy máu cam"
+    },
+    {
+      "id": 136,
+      "name": "dị ứng mũi"
+    },
+    {
+      "id": 137,
+      "name": "tiểu nhiều"
+    },
+    {
+      "id": 138,
+      "name": "khát nước nhiều"
+    },
+    {
+      "id": 139,
+      "name": "sụt cân bất thường"
+    },
+    {
+      "id": 140,
+      "name": "tăng cân nhanh"
+    },
+    {
+      "id": 141,
+      "name": "mệt mỏi kéo dài"
+    },
+    {
+      "id": 142,
+      "name": "run tay"
+    },
+    {
+      "id": 143,
+      "name": "đổ mồ hôi nhiều"
+    },
+    {
+      "id": 144,
+      "name": "tim đập nhanh"
+    },
+    {
+      "id": 145,
+      "name": "rụng tóc"
+    },
+    {
+      "id": 146,
+      "name": "da khô"
+    },
+    {
+      "id": 147,
+      "name": "khó ngủ"
+    },
+    {
+      "id": 148,
+      "name": "ăn nhiều"
+    },
+    {
+      "id": 149,
+      "name": "chán ăn"
+    },
+    {
+      "id": 150,
+      "name": "mờ mắt"
+    },
+    {
+      "id": 151,
+      "name": "tê tay chân"
+    },
+    {
+      "id": 152,
+      "name": "yếu cơ"
+    },
+    {
+      "id": 153,
+      "name": "hạ đường huyết"
+    },
+    {
+      "id": 154,
+      "name": "khô miệng"
+    },
+    {
+      "id": 155,
+      "name": "da sạm màu"
+    },
+    {
+      "id": 156,
+      "name": "rối loạn hormone"
+    },
+    {
+      "id": 157,
+      "name": "sốt"
+    },
+    {
+      "id": 158,
+      "name": "ho"
+    },
+    {
+      "id": 159,
+      "name": "sổ mũi"
+    },
+    {
+      "id": 160,
+      "name": "nghẹt mũi"
+    },
+    {
+      "id": 161,
+      "name": "đau họng"
+    },
+    {
+      "id": 162,
+      "name": "khó thở"
+    },
+    {
+      "id": 163,
+      "name": "biếng ăn"
+    },
+    {
+      "id": 164,
+      "name": "quấy khóc"
+    },
+    {
+      "id": 165,
+      "name": "tiêu chảy"
+    },
+    {
+      "id": 166,
+      "name": "nôn ói"
+    },
+    {
+      "id": 167,
+      "name": "đau bụng"
+    },
+    {
+      "id": 168,
+      "name": "phát ban"
+    },
+    {
+      "id": 169,
+      "name": "dị ứng"
+    },
+    {
+      "id": 170,
+      "name": "khò khè"
+    },
+    {
+      "id": 171,
+      "name": "táo bón"
+    },
+    {
+      "id": 172,
+      "name": "chậm tăng cân"
+    },
+    {
+      "id": 173,
+      "name": "co giật"
+    },
+    {
+      "id": 174,
+      "name": "viêm tai"
+    },
+    {
+      "id": 175,
+      "name": "sốt cao"
+    },
+    {
+      "id": 176,
+      "name": "bé bỏ bú"
+    },
+    {
+      "id": 177,
+      "name": "đau bụng dưới"
+    },
+    {
+      "id": 178,
+      "name": "rối loạn kinh nguyệt"
+    },
+    {
+      "id": 179,
+      "name": "trễ kinh"
+    },
+    {
+      "id": 180,
+      "name": "đau bụng kinh"
+    },
+    {
+      "id": 181,
+      "name": "rong kinh"
+    },
+    {
+      "id": 182,
+      "name": "khí hư bất thường"
+    },
+    {
+      "id": 183,
+      "name": "ngứa vùng kín"
+    },
+    {
+      "id": 184,
+      "name": "đau vùng chậu"
+    },
+    {
+      "id": 185,
+      "name": "ra máu bất thường"
+    },
+    {
+      "id": 186,
+      "name": "tiểu buốt"
+    },
+    {
+      "id": 187,
+      "name": "đau khi quan hệ"
+    },
+    {
+      "id": 188,
+      "name": "buồn nôn khi mang thai"
+    },
+    {
+      "id": 189,
+      "name": "mệt mỏi khi mang thai"
+    },
+    {
+      "id": 190,
+      "name": "căng tức ngực"
+    },
+    {
+      "id": 191,
+      "name": "khó thụ thai"
+    },
+    {
+      "id": 192,
+      "name": "viêm âm đạo"
+    },
+    {
+      "id": 193,
+      "name": "nấm âm đạo"
+    },
+    {
+      "id": 194,
+      "name": "chậm kinh"
+    },
+    {
+      "id": 195,
+      "name": "kinh nguyệt không đều"
+    },
+    {
+      "id": 196,
+      "name": "ra dịch bất thường"
+    },
+    {
+      "id": 197,
+      "name": "đau răng"
+    },
+    {
+      "id": 198,
+      "name": "sâu răng"
+    },
+    {
+      "id": 199,
+      "name": "chảy máu chân răng"
+    },
+    {
+      "id": 200,
+      "name": "sưng nướu"
+    },
+    {
+      "id": 201,
+      "name": "hôi miệng"
+    },
+    {
+      "id": 202,
+      "name": "ê buốt răng"
+    },
+    {
+      "id": 203,
+      "name": "viêm nướu"
+    },
+    {
+      "id": 204,
+      "name": "viêm nha chu"
+    },
+    {
+      "id": 205,
+      "name": "đau hàm"
+    },
+    {
+      "id": 206,
+      "name": "mọc răng khôn"
+    },
+    {
+      "id": 207,
+      "name": "răng lung lay"
+    },
+    {
+      "id": 208,
+      "name": "khó nhai"
+    },
+    {
+      "id": 209,
+      "name": "viêm tủy răng"
+    },
+    {
+      "id": 210,
+      "name": "mẻ răng"
+    },
+    {
+      "id": 211,
+      "name": "áp xe răng"
+    },
+    {
+      "id": 212,
+      "name": "nhiệt miệng"
+    },
+    {
+      "id": 213,
+      "name": "loét miệng"
+    },
+    {
+      "id": 214,
+      "name": "đau lợi"
+    },
+    {
+      "id": 215,
+      "name": "khó há miệng"
+    },
+    {
+      "id": 216,
+      "name": "răng nhạy cảm"
+    },
+    {
+      "id": 217,
+      "name": "đau lưng"
+    },
+    {
+      "id": 218,
+      "name": "đau cổ vai gáy"
+    },
+    {
+      "id": 219,
+      "name": "đau khớp gối"
+    },
+    {
+      "id": 220,
+      "name": "đau vai"
+    },
+    {
+      "id": 221,
+      "name": "đau cột sống"
+    },
+    {
+      "id": 222,
+      "name": "tê tay chân"
+    },
+    {
+      "id": 223,
+      "name": "cứng khớp"
+    },
+    {
+      "id": 224,
+      "name": "đau cơ"
+    },
+    {
+      "id": 225,
+      "name": "sưng khớp"
+    },
+    {
+      "id": 226,
+      "name": "viêm khớp"
+    },
+    {
+      "id": 227,
+      "name": "khó vận động"
+    },
+    {
+      "id": 228,
+      "name": "đau thắt lưng"
+    },
+    {
+      "id": 229,
+      "name": "đau bàn chân"
+    },
+    {
+      "id": 230,
+      "name": "đau bàn tay"
+    },
+    {
+      "id": 231,
+      "name": "chuột rút"
+    },
+    {
+      "id": 232,
+      "name": "yếu cơ"
+    },
+    {
+      "id": 233,
+      "name": "đau hông"
+    },
+    {
+      "id": 234,
+      "name": "đau xương"
+    },
+    {
+      "id": 235,
+      "name": "thoái hóa khớp"
+    },
+    {
+      "id": 236,
+      "name": "đau dây thần kinh tọa"
+    },
+    {
+      "id": 237,
+      "name": "triệu chứng mở rộng 237"
+    },
+    {
+      "id": 238,
+      "name": "triệu chứng mở rộng 238"
+    },
+    {
+      "id": 239,
+      "name": "triệu chứng mở rộng 239"
+    },
+    {
+      "id": 240,
+      "name": "triệu chứng mở rộng 240"
+    },
+    {
+      "id": 241,
+      "name": "triệu chứng mở rộng 241"
+    },
+    {
+      "id": 242,
+      "name": "triệu chứng mở rộng 242"
+    },
+    {
+      "id": 243,
+      "name": "triệu chứng mở rộng 243"
+    },
+    {
+      "id": 244,
+      "name": "triệu chứng mở rộng 244"
+    },
+    {
+      "id": 245,
+      "name": "triệu chứng mở rộng 245"
+    },
+    {
+      "id": 246,
+      "name": "triệu chứng mở rộng 246"
+    },
+    {
+      "id": 247,
+      "name": "triệu chứng mở rộng 247"
+    },
+    {
+      "id": 248,
+      "name": "triệu chứng mở rộng 248"
+    },
+    {
+      "id": 249,
+      "name": "triệu chứng mở rộng 249"
+    },
+    {
+      "id": 250,
+      "name": "triệu chứng mở rộng 250"
+    }
+  ],
+  "mappings": [
+  {
+    "symptomIds": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
+    "specialtyId": 4,
+    "specialtyName": "Thần kinh",
+    "confidence": 95
+  },
+  {
+    "symptomIds": [22,23,24,25,26,27,28,29,30,31,32,33,34,35,36],
+    "specialtyId": 1,
+    "specialtyName": "Tim mạch",
+    "confidence": 95
+  },
+  {
+    "symptomIds": [37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56],
+    "specialtyId": 2,
+    "specialtyName": "Tiêu hóa",
+    "confidence": 95
+  },
+  {
+    "symptomIds": [57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76],
+    "specialtyId": 3,
+    "specialtyName": "Hô hấp",
+    "confidence": 95
+  },
+  {
+    "symptomIds": [77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96],
+    "specialtyId": 5,
+    "specialtyName": "Da liễu",
+    "confidence": 95
+  },
+  {
+    "symptomIds": [97,98,99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116],
+    "specialtyId": 8,
+    "specialtyName": "Mắt",
+    "confidence": 95
+  },
+  {
+    "symptomIds": [117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136],
+    "specialtyId": 7,
+    "specialtyName": "Tai mũi họng",
+    "confidence": 95
+  },
+  {
+    "symptomIds": [137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156],
+    "specialtyId": 10,
+    "specialtyName": "Nội tiết",
+    "confidence": 90
+  },
+  {
+    "symptomIds": [157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176],
+    "specialtyId": 12,
+    "specialtyName": "Nhi khoa",
+    "confidence": 90
+  },
+  {
+    "symptomIds": [177,178,179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196],
+    "specialtyId": 11,
+    "specialtyName": "Sản phụ khoa",
+    "confidence": 95
+  },
+  {
+    "symptomIds": [197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216],
+    "specialtyId": 9,
+    "specialtyName": "Răng hàm mặt",
+    "confidence": 95
+  },
+  {
+    "symptomIds": [217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236],
+    "specialtyId": 6,
+    "specialtyName": "Cơ xương khớp",
+    "confidence": 95
+  }
+]
+}

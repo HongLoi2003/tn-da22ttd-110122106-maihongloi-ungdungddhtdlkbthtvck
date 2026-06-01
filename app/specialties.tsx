@@ -14,39 +14,120 @@ import {
     View
 } from 'react-native';
 import { getAllDocuments } from './services/firebaseService';
+import { getDoctorAvatarSmart } from './utils/doctorAvatars';
+
+// Map hình ảnh chuyên khoa
+const specialtyImages: any = {
+  'tim-mach.png': require('@/assets/images/tim-mach.png'),
+  'nhi-khoa.png': require('@/assets/images/nhi-khoa.png'),
+  'san-phu-khoa.png': require('@/assets/images/san-phu-khoa.png'),
+  'da-lieu.png': require('@/assets/images/da-lieu.png'),
+  'mat.png': require('@/assets/images/mat.png'),
+  'rang-ham-mat.png': require('@/assets/images/rang-ham-mat.png'),
+  'tai-mui-hong.png': require('@/assets/images/tai-mui-hong.png'),
+  'tieu-hoa.png': require('@/assets/images/tieu-hoa.png'),
+  'than-kinh.png': require('@/assets/images/than-kinh.png'),
+  'co-xuong-khop.png': require('@/assets/images/co-xuong-khop.png'),
+  'ho-hap.png': require('@/assets/images/ho-hap.png'),
+  'noi-tiet.png': require('@/assets/images/noi-tiet.png'),
+  'khoa.png': require('@/assets/images/khoa.png'),
+};
 
 export default function SpecialtiesScreen() {
   const router = useRouter();
   const [searchText, setSearchText] = useState('');
   const [showAllSpecialties, setShowAllSpecialties] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
   
   const [allSpecialties, setAllSpecialties] = useState<any[]>([]);
   const [popularSpecialties, setPopularSpecialties] = useState<any[]>([]);
-  const [commonSymptoms, setCommonSymptoms] = useState<any[]>([]);
-  const [hospitals, setHospitals] = useState<any[]>([]);
+  const [featuredDoctors, setFeaturedDoctors] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<any[]>([]);
 
   useFocusEffect(
     useCallback(() => {
       loadSpecialtiesData();
+      loadUnreadNotifications();
     }, [])
   );
+
+  const loadUnreadNotifications = async () => {
+    try {
+      const { auth } = await import('./config/firebase');
+      const user = auth?.currentUser;
+      
+      if (!user) {
+        setUnreadCount(0);
+        return;
+      }
+
+      const allNotifications = await getAllDocuments('notifications');
+      const userUnreadNotifications = allNotifications.filter(
+        (n: any) => n.userId === user.uid && !n.read
+      );
+      setUnreadCount(userUnreadNotifications.length);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+      setUnreadCount(0);
+    }
+  };
 
   const loadSpecialtiesData = async () => {
     try {
       setLoading(true);
       
-      const [allSpecialtiesData, popularData, symptomsData, hospitalsData] = await Promise.all([
+      const [allSpecialtiesData, popularData, doctorsData] = await Promise.all([
         getAllDocuments('specialties'),
         getAllDocuments('popular-specialties'),
-        getAllDocuments('common-symptoms'),
-        getAllDocuments('hospitals'),
+        getAllDocuments('doctors'),
       ]);
 
+      // Debug: Log dữ liệu bác sĩ để kiểm tra
+      console.log('📊 Dữ liệu bác sĩ từ Firebase:', doctorsData);
+      if (doctorsData.length > 0) {
+        console.log('📋 Ví dụ bác sĩ đầu tiên:', doctorsData[0]);
+        console.log('📋 Các trường có sẵn:', Object.keys(doctorsData[0]));
+      }
+
+      // Đếm số lượng bác sĩ theo chuyên khoa
+      const doctorCountBySpecialty: Record<string, number> = {};
+      doctorsData.forEach((doctor: any) => {
+        const specialty = doctor.chuyen_khoa || doctor.chuyenKhoa;
+        if (specialty) {
+          doctorCountBySpecialty[specialty] = (doctorCountBySpecialty[specialty] || 0) + 1;
+        }
+      });
+
+      // Cập nhật số lượng bác sĩ thực tế cho popular specialties
+      const updatedPopularSpecialties = popularData.map((specialty: any) => {
+        const actualDoctorCount = doctorCountBySpecialty[specialty.name] || 0;
+        return {
+          ...specialty,
+          doctors: actualDoctorCount,
+        };
+      });
+
+      // Loại bỏ chuyên khoa trùng lặp dựa trên tên
+      const uniqueSpecialties = updatedPopularSpecialties.reduce((acc: any[], current: any) => {
+        const exists = acc.find(item => item.name === current.name);
+        if (!exists) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+
       setAllSpecialties(allSpecialtiesData);
-      setPopularSpecialties(popularData);
-      setCommonSymptoms(symptomsData);
-      setHospitals(hospitalsData);
+      setPopularSpecialties(uniqueSpecialties);
+      
+      // Lấy 6 bác sĩ nổi bật (rating cao nhất)
+      const topDoctors = doctorsData
+        .filter((doctor: any) => doctor.rating >= 4.5)
+        .sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0))
+        .slice(0, 6);
+      
+      setFeaturedDoctors(topDoctors);
+      setDoctors(doctorsData);
     } catch (error) {
       console.error('Error loading specialties data:', error);
     } finally {
@@ -62,8 +143,15 @@ export default function SpecialtiesScreen() {
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chuyên khoa</Text>
-        <TouchableOpacity onPress={() => router.push('/symptom-checker')}>
-          <Ionicons name="medical" size={24} color="#00BCD4" />
+        <TouchableOpacity onPress={() => router.push('/notifications')}>
+          <View style={styles.notificationBadge}>
+            <Ionicons name="notifications-outline" size={24} color="#000" />
+            {unreadCount > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{unreadCount}</Text>
+              </View>
+            )}
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -89,149 +177,136 @@ export default function SpecialtiesScreen() {
             {/* Quick Symptom Checker Banner */}
             <View style={styles.bannerContainer}>
               <View style={styles.bannerContent}>
-                <View style={styles.bannerIcon}>
-                  <Ionicons name="medical" size={32} color="#00BCD4" />
-                </View>
                 <View style={styles.bannerTextContainer}>
                   <Text style={styles.bannerTitle}>Không chắc nên khám khoa nào?</Text>
                   <Text style={styles.bannerSubtitle}>Kiểm tra triệu chứng để được tư vấn</Text>
                 </View>
                 <TouchableOpacity 
                   style={styles.bannerButton}
-                  onPress={() => router.push('/symptom-checker')}
+                  onPress={() => router.push('/(tabs)/chat')}
                 >
-                  <Ionicons name="arrow-forward" size={20} color="#fff" />
+                  <Text style={styles.bannerButtonText}>Kiểm tra ngay</Text>
                 </TouchableOpacity>
               </View>
             </View>
 
-            {/* Common Symptoms */}
-            {commonSymptoms.length > 0 && (
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View>
-                    <Text style={styles.sectionTitle}>Triệu chứng thường gặp</Text>
-                    <Text style={styles.sectionSubtitle}>Chọn triệu chứng để được tư vấn chuyên khoa</Text>
-                  </View>
-                </View>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.horizontalScroll}
-                >
-                  {commonSymptoms.map((symptom) => (
-                    <TouchableOpacity
-                      key={symptom.id}
-                      style={styles.symptomCard}
-                      onPress={() => router.push({
-                        pathname: '/all-doctors',
-                        params: { 
-                          symptom: symptom.name,
-                          specialty: symptom.specialty 
-                        }
-                      })}
-                    >
-                      <View style={[styles.symptomIconContainer, { backgroundColor: symptom.color + '15' }]}>
-                        <Ionicons name={symptom.icon as any} size={28} color={symptom.color} />
-                      </View>
-                      <Text style={styles.symptomName}>{symptom.name}</Text>
-                      <Text style={styles.symptomDescription} numberOfLines={2}>
-                        {symptom.description}
-                      </Text>
-                      <View style={styles.symptomFooter}>
-                        <View style={styles.symptomSpecialty}>
-                          <Ionicons name="arrow-forward-circle" size={14} color="#00BCD4" />
-                          <Text style={styles.symptomSpecialtyText}>{symptom.specialty}</Text>
-                        </View>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
-              </View>
-            )}
-
-            {/* Popular Specialties */}
+            {/* Danh mục chuyên khoa - Grid 4 cột */}
             {popularSpecialties.length > 0 && (
               <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Chuyên khoa phổ biến</Text>
-                  <TouchableOpacity onPress={() => setShowAllSpecialties(true)}>
-                    <Text style={styles.seeAllText}>Xem tất cả</Text>
-                  </TouchableOpacity>
+                <View style={styles.sectionHeaderNoButton}>
+                  <Text style={styles.sectionTitle}>Danh mục chuyên khoa</Text>
                 </View>
-                <View style={styles.specialtiesGrid}>
-                  {popularSpecialties.map((specialty) => (
-                    <TouchableOpacity
-                      key={specialty.id}
-                      style={styles.specialtyCardNew}
-                      onPress={() => router.push('/specialty-detail')}
-                    >
-                      <Image source={require('@/assets/images/khoa.png')} style={styles.specialtyImageNew} />
-                      <View style={styles.specialtyOverlay}>
-                        <Text style={styles.specialtyNameNew}>{specialty.name}</Text>
-                        <View style={styles.doctorCountNew}>
-                          <Ionicons name="people" size={12} color="#fff" />
-                          <Text style={styles.doctorCountTextNew}>{specialty.doctors} bác sĩ</Text>
+                <View style={styles.specialtiesGridNew}>
+                  {popularSpecialties.map((specialty) => {
+                    const imageName = specialty.image || 'khoa.png';
+                    const imageSource = specialtyImages[imageName] || specialtyImages['khoa.png'];
+                    
+                    return (
+                      <TouchableOpacity
+                        key={specialty.id}
+                        style={styles.specialtyItemNew}
+                        onPress={() => router.push('/(tabs)/chat')}
+                      >
+                        <View style={styles.specialtyIconContainerNew}>
+                          <Image source={imageSource} style={styles.specialtyIconNew} />
                         </View>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
+                        <Text style={styles.specialtyNameNew} numberOfLines={2}>
+                          {specialty.name}
+                        </Text>
+                        <Text style={styles.specialtyDoctorsNew}>
+                          {specialty.doctors} bác sĩ
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </View>
             )}
 
-            {/* Hospitals with Specialties */}
-            {hospitals.length > 0 && (
+            {/* Featured Doctors */}
+            {featuredDoctors.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Bệnh viện có chuyên khoa</Text>
-                  <TouchableOpacity onPress={() => router.push('/find-hospital')}>
+                  <Text style={styles.sectionTitle}>Bác sĩ nổi bật</Text>
+                  <TouchableOpacity onPress={() => router.push('/all-doctors')}>
                     <Text style={styles.seeAllText}>Xem tất cả</Text>
                   </TouchableOpacity>
                 </View>
-                {hospitals.map((hospital, index) => (
-                  <TouchableOpacity
-                    key={`${hospital.id}-${index}`}
-                    style={styles.hospitalCard}
-                    onPress={() => router.push({
-                      pathname: '/hospital-detail',
-                      params: { name: hospital.name, id: hospital.id }
-                    })}
-                  >
-                    <Image source={require('@/assets/images/benhvien.png')} style={styles.hospitalImage} />
-                    <View style={styles.hospitalInfo}>
-                      <View style={styles.hospitalHeader}>
-                        <Text style={styles.hospitalName} numberOfLines={1}>
-                          {hospital.name}
-                        </Text>
-                        <View style={[styles.hospitalBadge, { backgroundColor: hospital.badgeColor }]}>
-                          <Text style={styles.hospitalBadgeText}>{hospital.badge}</Text>
+                {featuredDoctors.map((doctor, index) => {
+                  const avatarSource = getDoctorAvatarSmart(
+                    doctor.ten || doctor.name || doctor.ho_ten,
+                    doctor.image || doctor.hinh_anh
+                  );
+                  const doctorName = doctor.ten || doctor.name || doctor.ho_ten || 'Bác sĩ';
+                  const specialty = doctor.chuyen_khoa || doctor.chuyenKhoa || doctor.specialty || 'Đa khoa';
+                  const experience = doctor.kinh_nghiem || doctor.experience || '5+';
+                  const hospital = doctor.benh_vien || doctor.hospital || 'Bệnh viện Trường Đại học Trà Vinh';
+                  const doctorImage = doctor.image || doctor.hinh_anh || 'logo.png';
+                  const doctorPhone = doctor.sdt || doctor.phone || '';
+                  
+                  const handleChatPress = () => {
+                    router.push({
+                      pathname: '/doctor-chat',
+                      params: { 
+                        doctorId: doctor.id,
+                        doctorName: `BS. ${doctorName}`,
+                        doctorSpecialty: specialty,
+                        doctorImage: doctorImage,
+                        doctorPhone: doctorPhone
+                      }
+                    });
+                  };
+                  
+                  return (
+                    <TouchableOpacity 
+                      key={`${doctor.id}-${index}`}
+                      style={styles.doctorCard}
+                      onPress={handleChatPress}
+                    >
+                      <View style={styles.cardContent}>
+                        <View style={styles.doctorAvatarContainer}>
+                          <Image source={avatarSource} style={styles.doctorAvatar} />
+                          <View style={styles.onlineBadge} />
+                        </View>
+                        <View style={styles.doctorInfo}>
+                          <View style={styles.doctorHeader}>
+                            <Text style={styles.doctorName}>{doctorName}</Text>
+                            <View style={styles.ratingBadge}>
+                              <Ionicons name="star" size={12} color="#FFB800" />
+                              <Text style={styles.ratingText}>{doctor.rating || 4.8}</Text>
+                            </View>
+                          </View>
+                          <Text style={styles.specialty}>Chuyên khoa {specialty}</Text>
+                          <View style={styles.doctorMeta}>
+                            <View style={styles.metaItem}>
+                              <Ionicons name="briefcase-outline" size={14} color="#64748b" />
+                              <Text style={styles.metaText}>{experience} năm</Text>
+                            </View>
+                            <View style={styles.metaItem}>
+                              <Ionicons name="location-outline" size={14} color="#64748b" />
+                              <Text style={styles.metaText}>{hospital}</Text>
+                            </View>
+                          </View>
+                          <View style={styles.cardFooter}>
+                            <View style={styles.priceContainer}>
+                              <Text style={styles.priceLabel}>Phí tư vấn:</Text>
+                              <Text style={styles.priceValue}>200.000đ</Text>
+                            </View>
+                            <View style={styles.cardActions}>
+                              <TouchableOpacity 
+                                style={styles.chatButton}
+                                onPress={handleChatPress}
+                              >
+                                <Ionicons name="chatbubble-outline" size={18} color="#fff" />
+                                <Text style={styles.chatButtonText}>Nhắn tin</Text>
+                              </TouchableOpacity>
+                            </View>
+                          </View>
                         </View>
                       </View>
-                      <View style={styles.ratingRow}>
-                        <Ionicons name="star" size={14} color="#FFB800" />
-                        <Text style={styles.ratingText}>
-                          {hospital.rating} ({hospital.reviews} đánh giá)
-                        </Text>
-                      </View>
-                      <Text style={styles.hospitalAddress} numberOfLines={1}>
-                        {hospital.address}
-                      </Text>
-                      <View style={styles.specialtyTags}>
-                        {hospital.specialties?.map((spec: string, index: number) => (
-                          <View key={index} style={styles.specialtyTag}>
-                            <Text style={styles.specialtyTagText}>{spec}</Text>
-                          </View>
-                        ))}
-                        <Text style={styles.moreTag}>...</Text>
-                      </View>
-                    </View>
-                    <View style={styles.distanceContainer}>
-                      <Text style={styles.distanceText}>{hospital.distance}</Text>
-                      <Ionicons name="chevron-forward" size={20} color="#999" />
-                    </View>
-                  </TouchableOpacity>
-                ))}
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             )}
           </>
@@ -293,6 +368,25 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#000',
   },
+  notificationBadge: {
+    position: 'relative',
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#FF4444',
+    borderRadius: 10,
+    width: 18,
+    height: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -350,12 +444,17 @@ const styles = StyleSheet.create({
     color: '#00897B',
   },
   bannerButton: {
-    width: 40,
-    height: 40,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     borderRadius: 20,
     backgroundColor: '#00BCD4',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  bannerButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#fff',
   },
   section: {
     marginTop: 24,
@@ -365,6 +464,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  sectionHeaderNoButton: {
     marginBottom: 16,
   },
   sectionTitle: {
@@ -382,186 +484,147 @@ const styles = StyleSheet.create({
     color: '#00BCD4',
     fontWeight: '600',
   },
-  horizontalScroll: {
-    paddingRight: 16,
-  },
-  symptomCard: {
-    width: 140,
+  doctorCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
-    padding: 16,
-    marginRight: 12,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  symptomIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-    alignSelf: 'center',
-  },
-  symptomName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  symptomDescription: {
-    fontSize: 11,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 12,
-    lineHeight: 14,
-    minHeight: 28,
-  },
-  symptomFooter: {
-    borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
-    paddingTop: 8,
-  },
-  symptomSpecialty: {
+  cardContent: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
+    padding: 16,
   },
-  symptomSpecialtyText: {
-    fontSize: 11,
-    color: '#00BCD4',
-    fontWeight: '600',
-  },
-  specialtiesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  specialtyCardNew: {
-    width: '48%',
-    height: 120,
-    borderRadius: 16,
-    overflow: 'hidden',
+  doctorAvatarContainer: {
     position: 'relative',
+    marginRight: 12,
   },
-  specialtyImageNew: {
-    width: '100%',
-    height: '100%',
+  doctorAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
     resizeMode: 'cover',
   },
-  specialtyOverlay: {
+  onlineBadge: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 12,
+    bottom: 4,
+    right: 4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#06D6A0',
+    borderWidth: 2,
+    borderColor: '#fff',
   },
-  specialtyNameNew: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#fff',
+  doctorInfo: {
+    flex: 1,
+  },
+  doctorHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 4,
   },
-  doctorCountNew: {
+  doctorName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#0f172a',
+    flex: 1,
+  },
+  ratingBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-  },
-  doctorCountTextNew: {
-    fontSize: 11,
-    color: '#fff',
-    fontWeight: '500',
-  },
-  hospitalCard: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 12,
-    overflow: 'hidden',
-    padding: 12,
-    gap: 12,
-  },
-  hospitalImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    resizeMode: 'cover',
-  },
-  hospitalInfo: {
-    flex: 1,
-  },
-  hospitalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
-  },
-  hospitalName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#000',
-    flex: 1,
-  },
-  hospitalBadge: {
+    backgroundColor: '#FFF9E6',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 4,
-  },
-  hospitalBadgeText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#fff',
-  },
-  ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 6,
+    borderRadius: 12,
   },
   ratingText: {
     fontSize: 12,
-    color: '#666',
+    fontWeight: '600',
+    color: '#0f172a',
   },
-  hospitalAddress: {
-    fontSize: 12,
-    color: '#666',
+  specialty: {
+    fontSize: 13,
+    color: '#64748b',
     marginBottom: 8,
   },
-  specialtyTags: {
+  doctorMeta: {
+    gap: 4,
+    marginBottom: 12,
+  },
+  metaItem: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    alignItems: 'center',
     gap: 6,
+  },
+  metaText: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  specialtyTag: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
-  specialtyTagText: {
-    fontSize: 10,
-    color: '#666',
-  },
-  moreTag: {
+  priceLabel: {
     fontSize: 12,
-    color: '#999',
-    fontWeight: '700',
+    color: '#64748b',
   },
-  distanceContainer: {
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
+  priceValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#00BCD4',
   },
-  distanceText: {
-    fontSize: 12,
-    color: '#666',
+  cardActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  chatButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#00BCD4',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  chatButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  doctorRatingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     marginBottom: 4,
+  },
+  doctorRating: {
+    fontSize: 12,
+    color: '#666',
+  },
+  doctorExperience: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  doctorExperienceText: {
+    fontSize: 12,
+    color: '#666',
+  },
+  doctorActions: {
+    alignItems: 'flex-end',
+    justifyContent: 'center',
   },
   modalOverlay: {
     position: 'absolute',
@@ -615,5 +678,51 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     color: '#333',
+  },
+  // Styles mới cho grid 4 cột
+  specialtiesGridNew: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  specialtyItemNew: {
+    width: '23%',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  specialtyIconContainerNew: {
+    width: 75,
+    height: 75,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#00BCD4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#E0F7FA',
+  },
+  specialtyIconNew: {
+    width: 55,
+    height: 55,
+    borderRadius: 12,
+  },
+  specialtyNameNew: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#0f172a',
+    textAlign: 'center',
+    marginBottom: 3,
+    lineHeight: 14,
+  },
+  specialtyDoctorsNew: {
+    fontSize: 10,
+    color: '#00BCD4',
+    textAlign: 'center',
+    fontWeight: '600',
   },
 });

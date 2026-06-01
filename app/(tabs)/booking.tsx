@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     Image,
     SafeAreaView,
@@ -14,9 +15,11 @@ import {
     View
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import doctorService, { Doctor } from '../services/doctorService';
+import doctorListService, { doctor } from '../services/doctorListService';
 import { createDocument, getDocumentsWithQuery } from '../services/firebaseService';
+import geminiService from '../services/geminiService';
 import { scheduleAppointmentReminder } from '../services/notificationService';
+import { getDoctorAvailability } from '../services/scheduleService';
 import symptomAnalysisService, { SpecialtyRecommendation, SymptomItem } from '../services/symptomAnalysisService';
 
 const doctorImages = {
@@ -52,13 +55,15 @@ export default function BookingScreen() {
   const [selectedHospital, setSelectedHospital] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [selectedConsultationType, setSelectedConsultationType] = useState('in-person'); // 'in-person' or 'online'
   const [patientName, setPatientName] = useState('');
   const [patientPhone, setPatientPhone] = useState('');
   const [patientEmail, setPatientEmail] = useState('');
   const [patientAddress, setPatientAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [availableDates, setAvailableDates] = useState<any[]>([]);
-  const [availableTimes, setAvailableTimes] = useState<any[]>([]);
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [timesByDate, setTimesByDate] = useState<{ [key: string]: string[] }>({});
   const [hospitals, setHospitals] = useState<any[]>([]);
   const [appointmentId, setAppointmentId] = useState('');
 
@@ -68,7 +73,13 @@ export default function BookingScreen() {
   const [recommendations, setRecommendations] = useState<SpecialtyRecommendation[]>([]);
   const [showSymptomSuggestions, setShowSymptomSuggestions] = useState(false);
   const [symptomSuggestions, setSymptomSuggestions] = useState<SymptomItem[]>([]);
-  const [recommendedDoctors, setRecommendedDoctors] = useState<Doctor[]>([]);
+  const [recommendedDoctors, setRecommendedDoctors] = useState<doctor[]>([]);
+  const [selectedDoctorData, setSelectedDoctorData] = useState<doctor | null>(null);
+  const [showOtherSpecialties, setShowOtherSpecialties] = useState(false);
+  const [allSpecialtyRecommendations, setAllSpecialtyRecommendations] = useState<SpecialtyRecommendation[]>([]);
+  const [bookedTimes, setBookedTimes] = useState<string[]>([]); // Danh sách giờ đã được đặt
+  const [isAnalyzing, setIsAnalyzing] = useState(false); // Loading state for AI analysis
+  const [aiExplanation, setAiExplanation] = useState<string>(''); // AI explanation for specialty recommendation
 
   // Load user data on mount
   useEffect(() => {
@@ -93,36 +104,74 @@ export default function BookingScreen() {
       
       console.log('🔍 [BOOKING] Loading available dates and times for doctor:', selectedDoctorId);
       
-      // Lấy danh sách ngày khám từ Firebase
-      const datesSnapshot = await getDocumentsWithQuery('availableDates', [
-        where('doctorId', '==', selectedDoctorId)
-      ]);
+      // Get doctor availability from schedule service
+      const availability = await getDoctorAvailability(selectedDoctorId);
       
-      if (datesSnapshot.length > 0) {
-        setAvailableDates(datesSnapshot);
-        console.log('✅ [BOOKING] Loaded dates:', datesSnapshot);
+      if (availability.dates.length > 0) {
+        setAvailableDates(availability.dates);
+        setTimesByDate(availability.timesByDate);
+        console.log('✅ [BOOKING] Loaded availability:', availability);
       } else {
-        // Nếu không có dữ liệu, dùng dữ liệu mặc định
-        setAvailableDates([
-          { day: 'T2', date: '20/05', fullDate: '20/05/2025' },
-          { day: 'T3', date: '21/05', fullDate: '21/05/2025' },
-          { day: 'T4', date: '22/05', fullDate: '22/05/2025' },
-          { day: 'T5', date: '23/05', fullDate: '23/05/2025' },
-          { day: 'T6', date: '24/05', fullDate: '24/05/2025' },
-          { day: 'T7', date: '25/05', fullDate: '25/05/2025' },
-        ]);
+        // Fallback: Generate default dates if no schedule found
+        const today = new Date();
+        const dates = [];
+        const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        const defaultTimes: { [key: string]: string[] } = {};
+        
+        for (let i = 0; i < 7; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() + i);
+          
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          const dayOfWeek = dayNames[date.getDay()];
+          
+          const fullDate = `${day}/${month}/${year}`;
+          
+          dates.push({
+            day: dayOfWeek,
+            date: `${day}/${month}`,
+            fullDate: fullDate
+          });
+          
+          defaultTimes[fullDate] = ['08:00', '09:30', '10:30', '14:00', '15:30'];
+        }
+        
+        setAvailableDates(dates);
+        setTimesByDate(defaultTimes);
+        console.log('✅ [BOOKING] Using default availability');
       }
     } catch (error) {
       console.error('❌ [BOOKING] Error loading dates:', error);
-      // Dùng dữ liệu mặc định nếu có lỗi
-      setAvailableDates([
-        { day: 'T2', date: '20/05', fullDate: '20/05/2025' },
-        { day: 'T3', date: '21/05', fullDate: '21/05/2025' },
-        { day: 'T4', date: '22/05', fullDate: '22/05/2025' },
-        { day: 'T5', date: '23/05', fullDate: '23/05/2025' },
-        { day: 'T6', date: '24/05', fullDate: '24/05/2025' },
-        { day: 'T7', date: '25/05', fullDate: '25/05/2025' },
-      ]);
+      // Use default data on error
+      const today = new Date();
+      const dates = [];
+      const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+      const defaultTimes: { [key: string]: string[] } = {};
+      
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(today);
+        date.setDate(today.getDate() + i);
+        
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const dayOfWeek = dayNames[date.getDay()];
+        
+        const fullDate = `${day}/${month}/${year}`;
+        
+        dates.push({
+          day: dayOfWeek,
+          date: `${day}/${month}`,
+          fullDate: fullDate
+        });
+        
+        defaultTimes[fullDate] = ['08:00', '09:30', '10:30', '14:00', '15:30'];
+      }
+      
+      setAvailableDates(dates);
+      setTimesByDate(defaultTimes);
     }
   };
 
@@ -145,7 +194,7 @@ export default function BookingScreen() {
     if (text.trim()) {
       const suggestions = symptomAnalysisService.searchSymptoms(text);
       setSymptomSuggestions(suggestions);
-      setShowSymptomSuggestions(true);
+      setShowSymptomSuggestions(suggestions.length > 0);
     } else {
       setShowSymptomSuggestions(false);
     }
@@ -163,35 +212,172 @@ export default function BookingScreen() {
     setSelectedSymptoms(selectedSymptoms.filter(s => s.id !== symptomId));
   };
 
-  const analyzeSymptoms = () => {
-    if (selectedSymptoms.length === 0) {
-      Alert.alert('Thông báo', 'Vui lòng chọn ít nhất một triệu chứng');
+  const analyzeSymptoms = async () => {
+    // Phân tích trực tiếp từ text người dùng nhập
+    const symptomText = symptomInput.trim();
+    
+    if (!symptomText) {
+      Alert.alert('Thông báo', 'Vui lòng nhập triệu chứng của bạn');
       return;
     }
 
-    const symptomNames = selectedSymptoms.map(s => s.name);
-    const result = symptomAnalysisService.analyzeSymptoms(symptomNames);
-    setRecommendations(result);
+    console.log('🔍 [BOOKING] Analyzing symptoms:', symptomText);
+    setIsAnalyzing(true);
+    setAiExplanation('');
+    
+    let result: SpecialtyRecommendation[] = [];
+    let usedAI = false;
+    
+    // Try Gemini AI first if available
+    if (geminiService.isAvailable()) {
+      try {
+        console.log('🤖 [BOOKING] Using Gemini AI for analysis...');
+        const aiResult = await geminiService.analyzeSymptoms(symptomText);
+        
+        if (aiResult && aiResult.specialties && aiResult.specialties.length > 0) {
+          console.log('✅ [BOOKING] Gemini AI result:', aiResult);
+          console.log('✅ [BOOKING] Found', aiResult.specialties.length, 'matching specialties');
+          
+          // Convert AI result to SpecialtyRecommendation format
+          result = aiResult.specialties.map((spec, index) => ({
+            specialtyId: index,
+            specialtyName: spec.specialty,
+            confidence: spec.confidence,
+            matchedSymptoms: spec.matchedSymptoms
+          }));
+          
+          // Lưu explanation của chuyên khoa phù hợp nhất (đầu tiên)
+          setAiExplanation(aiResult.specialties[0].explanation);
+          usedAI = true;
+          
+          console.log('✅ [BOOKING] Converted to', result.length, 'recommendations');
+        }
+      } catch (error) {
+        console.error('❌ [BOOKING] Gemini AI error:', error);
+        // Fall through to keyword matching
+      }
+    }
+    
+    // Fallback to keyword matching if AI not available or failed
+    if (!usedAI) {
+      console.log('🔍 [BOOKING] Using keyword matching...');
+      // Sử dụng phương thức mới: analyzeSymptomText
+      result = symptomAnalysisService.analyzeSymptomText(symptomText);
+    }
+    
+    setIsAnalyzing(false);
+    
+    console.log('📊 [BOOKING] Analysis result:', result);
+    
+    // Lưu tất cả kết quả phân tích (bao gồm cả chuyên khoa có confidence thấp)
+    setAllSpecialtyRecommendations(result);
+    
+    // Luôn hiển thị ít nhất 1 chuyên khoa nếu có kết quả
+    // Chỉ lọc nếu có nhiều hơn 3 kết quả
+    let topRecommendations = result;
+    if (result.length > 3) {
+      topRecommendations = result.filter(r => r.confidence >= 30);
+      // Nếu sau khi lọc không còn gì, lấy top 3
+      if (topRecommendations.length === 0) {
+        topRecommendations = result.slice(0, 3);
+      }
+    }
+    
+    setRecommendations(topRecommendations);
+    
+    console.log('📊 [BOOKING] Top recommendations:', topRecommendations);
+    
+    // Tự động chọn chuyên khoa phù hợp nhất (confidence cao nhất)
+    if (topRecommendations.length > 0) {
+      const bestMatch = topRecommendations[0];
+      setSelectedSpecialty(bestMatch.specialtyName);
+      const doctors = doctorListService.getdoctorsBySpecialty(bestMatch.specialtyName);
+      setRecommendedDoctors(doctors);
+      console.log('✅ [BOOKING] Auto-selected specialty:', bestMatch.specialtyName);
+      console.log('👨‍⚕️ [BOOKING] Found doctors:', doctors.length);
+      
+      // Nếu không tìm thấy bác sĩ, thử tìm với tên tương tự
+      if (doctors.length === 0) {
+        console.warn('⚠️ [BOOKING] No doctors found for:', bestMatch.specialtyName);
+        console.log('🔍 [BOOKING] Trying to find similar specialty...');
+        
+        // Thử các biến thể tên chuyên khoa
+        const specialtyVariants = [
+          bestMatch.specialtyName,
+          bestMatch.specialtyName.replace('Khoa ', ''),
+          'Khoa ' + bestMatch.specialtyName,
+        ];
+        
+        for (const variant of specialtyVariants) {
+          const foundDoctors = doctorListService.getdoctorsBySpecialty(variant);
+          if (foundDoctors.length > 0) {
+            console.log('✅ [BOOKING] Found doctors with variant:', variant);
+            setRecommendedDoctors(foundDoctors);
+            setSelectedSpecialty(variant);
+            break;
+          }
+        }
+      }
+    }
+    
+    // Tự động chuyển sang bước 2 để xem chuyên khoa
+    if (result.length > 0) {
+      setCurrentStep(2);
+    } else {
+      Alert.alert(
+        'Không tìm thấy chuyên khoa phù hợp', 
+        'Vui lòng thử mô tả triệu chứng chi tiết hơn hoặc chọn từ danh sách gợi ý.'
+      );
+    }
   };
 
   const selectSpecialtyFromRecommendation = (specialty: SpecialtyRecommendation) => {
     handleSpecialtyChange(specialty);
+    // Tự động chuyển sang bước 3 để xem danh sách bác sĩ
+    setCurrentStep(3);
   };
 
   const handleContinue = async () => {
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
-    } else if (currentStep === 4) {
+    } else if (currentStep === 5) {
       // Lưu lịch khám vào Firebase
       await saveAppointmentToFirebase();
     }
   };
 
   const handleConfirmBooking = async () => {
-    // This is called from Step 3 confirmation button
     console.log('💾 [BOOKING] handleConfirmBooking called');
-    // Move to Step 4 (success screen) first
-    setCurrentStep(4);
+    
+    // Kiểm tra lại xem khung giờ có bị trùng không trước khi lưu
+    try {
+      console.log('🔍 [BOOKING] Double-checking for conflicts...');
+      const conflictCheck = await getDocumentsWithQuery('appointments', [
+        where('doctorId', '==', selectedDoctorId),
+        where('date', '==', selectedDate),
+        where('time', '==', selectedTime),
+        where('status', 'in', ['pending', 'confirmed'])
+      ]);
+      
+      if (conflictCheck.length > 0) {
+        console.error('❌ [BOOKING] Conflict detected! Time slot already booked');
+        Alert.alert(
+          'Lỗi đặt lịch',
+          'Khung giờ này vừa được đặt bởi người khác. Vui lòng chọn khung giờ khác.',
+          [{ text: 'OK', onPress: () => setCurrentStep(4) }]
+        );
+        return;
+      }
+      
+      console.log('✅ [BOOKING] No conflicts, proceeding with booking');
+    } catch (error) {
+      console.error('❌ [BOOKING] Error checking conflicts:', error);
+      Alert.alert('Lỗi', 'Không thể kiểm tra lịch trùng. Vui lòng thử lại.');
+      return;
+    }
+    
+    // Move to Step 5 (success screen) first
+    setCurrentStep(5);
     // Then save appointment to Firebase
     await saveAppointmentToFirebase();
   };
@@ -212,33 +398,78 @@ export default function BookingScreen() {
   // Smart reset logic khi thay đổi dữ liệu
   const handleSpecialtyChange = (specialty: SpecialtyRecommendation) => {
     setSelectedSpecialty(specialty.specialtyName);
-    const doctors = doctorService.getDoctorsBySpecialty(specialty.specialtyName);
+    const doctors = doctorListService.getdoctorsBySpecialty(specialty.specialtyName);
     setRecommendedDoctors(doctors);
     // Reset bác sĩ và giờ khi đổi chuyên khoa
     setSelectedDoctor('');
     setSelectedDoctorId('');
     setSelectedDoctorImage('');
+    setSelectedDoctorData(null);
     setSelectedDate('');
     setSelectedTime('');
     console.log('🔄 [BOOKING] Specialty changed, reset doctor and time');
   };
 
-  const handleDoctorSelect = (doctor: Doctor) => {
+  const handleDoctorSelect = (doctor: doctor) => {
     setSelectedDoctor(doctor.ten);
     setSelectedDoctorId(doctor.id);
     setSelectedDoctorImage(doctor.image);
+    setSelectedDoctorData(doctor);
     // Set default hospital
-    setSelectedHospital('Bệnh viện Đa khoa Tâm Anh');
+    setSelectedHospital('Bệnh viện Trường Đại học Trà Vinh');
     // Reset giờ khi đổi bác sĩ
     setSelectedTime('');
-    console.log('🔄 [BOOKING] Doctor changed, reset time');
+    console.log('🔄 [BOOKING] Doctor selected:', doctor.ten);
+    console.log('💰 [BOOKING] Doctor fee:', doctor.phi_kham);
+    // Không tự động chuyển bước nữa, để người dùng bấm nút "Chọn bác sĩ"
   };
 
-  const handleDateSelect = (date: string) => {
-    setSelectedDate(date);
-    // Reset giờ khi đổi ngày
-    setSelectedTime('');
-    console.log('🔄 [BOOKING] Date changed, reset time');
+  const handleDateSelect = async (date: string) => {
+    // Toggle selection: nếu đã chọn ngày này thì bỏ chọn
+    if (selectedDate === date) {
+      setSelectedDate('');
+      setAvailableTimes([]);
+      setSelectedTime('');
+      setBookedTimes([]);
+      console.log('🔄 [BOOKING] Date deselected');
+    } else {
+      setSelectedDate(date);
+      // Load available times for selected date
+      const times = timesByDate[date] || [];
+      setAvailableTimes(times);
+      // Reset giờ khi đổi ngày
+      setSelectedTime('');
+      console.log('🔄 [BOOKING] Date selected:', date);
+      console.log('🔄 [BOOKING] Available times:', times);
+      console.log('🔄 [BOOKING] Doctor ID:', selectedDoctorId);
+      
+      // Load danh sách giờ đã được đặt cho bác sĩ này vào ngày này
+      if (!selectedDoctorId) {
+        console.warn('⚠️ [BOOKING] No doctor selected, cannot check booked times');
+        setBookedTimes([]);
+        return;
+      }
+      
+      try {
+        console.log('🔍 [BOOKING] Querying appointments for doctor:', selectedDoctorId, 'date:', date);
+        const appointments = await getDocumentsWithQuery('appointments', [
+          where('doctorId', '==', selectedDoctorId),
+          where('date', '==', date),
+          where('status', 'in', ['pending', 'confirmed'])
+        ]);
+        
+        console.log('📋 [BOOKING] Found appointments:', appointments.length);
+        const booked = appointments.map((apt: any) => {
+          console.log('  - Appointment:', apt.time, 'status:', apt.status);
+          return apt.time;
+        });
+        setBookedTimes(booked);
+        console.log('📅 [BOOKING] Booked times:', booked);
+      } catch (error) {
+        console.error('❌ [BOOKING] Error loading booked times:', error);
+        setBookedTimes([]);
+      }
+    }
   };
 
   const saveAppointmentToFirebase = async () => {
@@ -419,248 +650,464 @@ export default function BookingScreen() {
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Đặt lịch khám</Text>
+          <Text style={styles.headerTitle}>
+            {currentStep === 1 && 'Nhập triệu chứng'}
+            {currentStep === 2 && 'Chọn chuyên khoa'}
+            {currentStep === 3 && 'Chọn bác sĩ'}
+            {currentStep === 4 && 'Thông tin đặt lịch'}
+            {currentStep === 5 && 'Đặt lịch thành công'}
+          </Text>
           <View style={{ width: 24 }} />
-        </View>
-
-        {/* Progress Steps */}
-        <View style={styles.progressContainer}>
-          <View style={styles.stepsRow}>
-            {/* Background lines */}
-            <View style={styles.linesContainer}>
-              {[0, 1, 2].map((index) => (
-                <View
-                  key={`line-${index}`}
-                  style={[
-                    styles.stepLineBackground,
-                    currentStep > index + 1 && styles.stepLineBackgroundActive
-                  ]}
-                />
-              ))}
-            </View>
-
-            {/* Steps */}
-            {[1, 2, 3, 4].map((step, index) => (
-              <TouchableOpacity 
-                key={step} 
-                style={styles.stepWrapper}
-                onPress={() => handleStepClick(step)}
-                disabled={step >= currentStep}
-              >
-                <View style={[
-                  styles.stepCircle,
-                  currentStep >= step && styles.stepCircleActive
-                ]}>
-                  <Text style={[
-                    styles.stepNumber,
-                    currentStep >= step && styles.stepNumberActive
-                  ]}>
-                    {step}
-                  </Text>
-                </View>
-                <Text style={[
-                  styles.stepLabelText,
-                  currentStep >= step && styles.stepLabelActive
-                ]}>
-                  {['Thông tin', 'Thời gian', 'Xác nhận', 'Hoàn thành'][index]}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
         </View>
 
         {/* Step 1: Symptom Input */}
         {currentStep === 1 && (
           <>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Nhập triệu chứng của bạn</Text>
+              <Text style={styles.sectionTitle}>Bạn đang gặp vấn đề gì?</Text>
+              <Text style={styles.sectionSubtitle}>Mô tả triệu chứng của bạn (gõ tự do hoặc chọn từ gợi ý)</Text>
               
               {/* Symptom Input */}
               <View style={styles.symptomInputContainer}>
                 <TextInput
                   style={styles.symptomInput}
-                  placeholder="Tôi bị đau đầu, chóng mặt và mất ngủ"
+                  placeholder="Ví dụ: Tôi bị đau đầu dữ dội, chóng mặt, buồn nôn và mất ngủ trong 2 tuần..."
                   placeholderTextColor="#999"
                   value={symptomInput}
-                  onChangeText={handleSymptomInputChange}
+                  onChangeText={setSymptomInput}
+                  multiline
+                  numberOfLines={4}
+                  textAlignVertical="top"
                 />
-                {symptomInput.length > 0 && (
-                  <TouchableOpacity onPress={() => {
-                    setSymptomInput('');
-                    setShowSymptomSuggestions(false);
-                  }}>
-                    <Ionicons name="close-circle" size={20} color="#999" />
-                  </TouchableOpacity>
-                )}
+                <Text style={styles.charCount}>{symptomInput.length}/300</Text>
               </View>
 
-              <Text style={styles.helperText}>Vd dụ: đau đầu, ho, sốt, đau bụng...</Text>
-
-              {/* Symptom Suggestions */}
-              {showSymptomSuggestions && symptomSuggestions.length > 0 && (
-                <View style={styles.suggestionsList}>
-                  {symptomSuggestions.map((symptom) => (
-                    <TouchableOpacity
-                      key={symptom.id}
-                      style={styles.suggestionItem}
-                      onPress={() => addSymptom(symptom)}
-                    >
-                      <Text style={styles.suggestionIcon}>{symptom.icon}</Text>
-                      <Text style={styles.suggestionText}>{symptom.name}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-
-              {/* Common Symptoms */}
-              <Text style={styles.commonSymptomsLabel}>Triệu chứng phổ biến</Text>
-              <View style={styles.commonSymptomsGrid}>
-                {symptomAnalysisService.getCommonSymptoms().slice(0, 8).map((symptom) => (
-                  <TouchableOpacity
-                    key={symptom.id}
-                    style={styles.commonSymptomButton}
-                    onPress={() => addSymptom(symptom)}
-                  >
-                    <Text style={styles.commonSymptomText}>{symptom.name}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {/* Selected Symptoms */}
-              {selectedSymptoms.length > 0 && (
-                <View style={styles.selectedSymptomsContainer}>
-                  <View style={styles.symptomTagsContainer}>
-                    {selectedSymptoms.map((symptom) => (
-                      <View key={symptom.id} style={styles.symptomTag}>
-                        <Text style={styles.symptomTagText}>{symptom.name}</Text>
-                        <TouchableOpacity onPress={() => removeSymptom(symptom.id)}>
-                          <Ionicons name="close" size={14} color="#fff" />
-                        </TouchableOpacity>
-                      </View>
-                    ))}
-                  </View>
-                </View>
-              )}
-
-              {/* Analyze Button */}
-              {selectedSymptoms.length > 0 && (
-                <TouchableOpacity style={styles.analyzeButton} onPress={analyzeSymptoms}>
-                  <Ionicons name="search" size={18} color="#fff" />
-                  <Text style={styles.analyzeButtonText}>Phân tích triệu chứng</Text>
+              {/* Analyze Button - Hiển thị khi có text */}
+              {symptomInput.trim() && (
+                <TouchableOpacity 
+                  style={[styles.analyzeButton, isAnalyzing && styles.analyzeButtonDisabled]} 
+                  onPress={analyzeSymptoms}
+                  disabled={isAnalyzing}
+                >
+                  {isAnalyzing ? (
+                    <>
+                      <ActivityIndicator size="small" color="#fff" />
+                      <Text style={styles.analyzeButtonText}>
+                        {geminiService.isAvailable() ? 'AI đang phân tích...' : 'Đang phân tích...'}
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      {geminiService.isAvailable() && (
+                        <Ionicons name="sparkles" size={18} color="#fff" />
+                      )}
+                      <Text style={styles.analyzeButtonText}>
+                        {geminiService.isAvailable() ? 'Phân tích bằng AI' : 'Xem chuyên khoa'}
+                      </Text>
+                    </>
+                  )}
                 </TouchableOpacity>
               )}
             </View>
+          </>
+        )}
 
-            {/* Analysis Results */}
-            {recommendations.length > 0 && (
-              <View style={styles.section}>
-                <View style={styles.resultHeader}>
-                  <Ionicons name="checkmark-circle" size={24} color="#00BCD4" />
-                  <Text style={styles.resultTitle}>Kết quả phân tích</Text>
-                </View>
+        {/* Step 2: Choose Specialty */}
+        {currentStep === 2 && (
+          <>
+            {recommendations.length > 0 ? (
+              <>
+                <View style={styles.section}>
+                  <View style={styles.resultHeader}>
+                    <Ionicons name="checkmark-circle" size={24} color="#00BCD4" />
+                    <Text style={styles.resultTitle}>Chuyên khoa phù hợp nhất</Text>
+                  </View>
 
-                <Text style={styles.resultNote}>
-                  Dựa trên triệu chứng của bạn, chúng tôi gợi ý các chuyên khoa phù hợp
-                </Text>
+                  <Text style={styles.resultNote}>
+                    {geminiService.isAvailable() && aiExplanation 
+                      ? '🤖 Phân tích bằng AI: ' + aiExplanation
+                      : 'Dựa trên triệu chứng của bạn, chúng tôi gợi ý chuyên khoa sau'}
+                  </Text>
 
-                {recommendations.map((rec, index) => (
+                  {/* Hiển thị chuyên khoa phù hợp nhất */}
                   <TouchableOpacity
-                    key={index}
-                    style={styles.recommendationCard}
-                    onPress={() => selectSpecialtyFromRecommendation(rec)}
+                    style={[
+                      styles.recommendationCard, 
+                      selectedSpecialty === recommendations[0].specialtyName && styles.recommendationCardSelected
+                    ]}
+                    onPress={() => {
+                      const bestMatch = recommendations[0];
+                      if (selectedSpecialty === bestMatch.specialtyName) {
+                        // Không cho phép bỏ chọn chuyên khoa phù hợp nhất
+                        // setSelectedSpecialty('');
+                        // setRecommendedDoctors([]);
+                      } else {
+                        handleSpecialtyChange(bestMatch);
+                      }
+                    }}
                   >
                     <View style={styles.recLeft}>
-                      <View style={[styles.recIcon, { backgroundColor: getSpecialtyColor(rec.specialtyName) }]}>
-                        <Text style={styles.recIconText}>{getSpecialtyIcon(rec.specialtyName)}</Text>
+                      <View style={[styles.recIcon, { backgroundColor: getSpecialtyColor(recommendations[0].specialtyName) }]}>
+                        <Text style={styles.recIconText}>{getSpecialtyIcon(recommendations[0].specialtyName)}</Text>
                       </View>
                       <View style={styles.recContent}>
-                        <Text style={styles.recTitle}>{rec.specialtyName}</Text>
-                        <Text style={styles.recSubtitle}>Phù hợp: {rec.confidence}%</Text>
-                        <Text style={styles.recSymptoms}>{rec.matchedSymptoms.join(', ')}</Text>
+                        <Text style={styles.recTitle}>{recommendations[0].specialtyName}</Text>
+                        <Text style={styles.recSubtitle}>Phù hợp: {recommendations[0].confidence}%</Text>
+                        <Text style={styles.recSymptoms}>Triệu chứng: {recommendations[0].matchedSymptoms.join(', ')}</Text>
                       </View>
                     </View>
-                    <Ionicons name="chevron-forward" size={20} color="#00BCD4" />
+                    {selectedSpecialty === recommendations[0].specialtyName && (
+                      <Ionicons name="checkmark-circle" size={24} color="#00BCD4" />
+                    )}
                   </TouchableOpacity>
-                ))}
+
+                  {/* Hiển thị các chuyên khoa phù hợp khác (nếu có) */}
+                  {recommendations.length > 1 && (
+                    <>
+                      <Text style={styles.otherRecommendationsLabel}>Các chuyên khoa phù hợp khác:</Text>
+                      {recommendations.slice(1).map((rec, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={[
+                            styles.recommendationCard,
+                            selectedSpecialty === rec.specialtyName && styles.recommendationCardSelected
+                          ]}
+                          onPress={() => {
+                            if (selectedSpecialty === rec.specialtyName) {
+                              setSelectedSpecialty('');
+                              setRecommendedDoctors([]);
+                            } else {
+                              handleSpecialtyChange(rec);
+                            }
+                          }}
+                        >
+                          <View style={styles.recLeft}>
+                            <View style={[styles.recIcon, { backgroundColor: getSpecialtyColor(rec.specialtyName) }]}>
+                              <Text style={styles.recIconText}>{getSpecialtyIcon(rec.specialtyName)}</Text>
+                            </View>
+                            <View style={styles.recContent}>
+                              <Text style={styles.recTitle}>{rec.specialtyName}</Text>
+                              <Text style={styles.recSubtitle}>Phù hợp: {rec.confidence}%</Text>
+                              <Text style={styles.recSymptoms}>Triệu chứng: {rec.matchedSymptoms.join(', ')}</Text>
+                            </View>
+                          </View>
+                          {selectedSpecialty === rec.specialtyName && (
+                            <Ionicons name="checkmark-circle" size={24} color="#00BCD4" />
+                          )}
+                        </TouchableOpacity>
+                      ))}
+                    </>
+                  )}
+                </View>
+              </>
+            ) : (
+              <View style={styles.section}>
+                <View style={styles.noResultContainer}>
+                  <Ionicons name="alert-circle-outline" size={64} color="#FF9800" />
+                  <Text style={styles.noResultTitle}>Không tìm thấy chuyên khoa phù hợp</Text>
+                  <Text style={styles.noResultText}>
+                    Vui lòng thử mô tả triệu chứng chi tiết hơn hoặc chọn chuyên khoa từ danh sách bên dưới
+                  </Text>
+                </View>
               </View>
             )}
 
-            {/* Recommended Doctors */}
-            {recommendedDoctors.length > 0 && (
-              <View style={styles.section}>
-                <View style={styles.doctorsHeader}>
-                  <Text style={styles.doctorsTitle}>Bác sĩ gợi ý</Text>
-                  <TouchableOpacity>
-                    <Text style={styles.seeAll}>Xem tất cả</Text>
-                  </TouchableOpacity>
-                </View>
+            {/* Các chuyên khoa khác (dropdown) */}
+            <View style={styles.section}>
+              <TouchableOpacity 
+                style={styles.otherSpecialtiesHeader}
+                onPress={() => setShowOtherSpecialties(!showOtherSpecialties)}
+              >
+                <Text style={styles.otherSpecialtiesTitle}>Các chuyên khoa khác</Text>
+                <Ionicons 
+                  name={showOtherSpecialties ? "chevron-up" : "chevron-down"} 
+                  size={20} 
+                  color="#666" 
+                />
+              </TouchableOpacity>
 
-                {recommendedDoctors.slice(0, 3).map((doctor) => (
-                  <TouchableOpacity
-                    key={doctor.id}
-                    style={styles.doctorCard}
-                    onPress={async () => {
-                      handleDoctorSelect(doctor);
-                      await handleContinue();
-                    }}
-                  >
-                    <Image
-                      source={doctorImages[doctor.image as keyof typeof doctorImages]}
-                      style={styles.doctorAvatar}
-                    />
-                    <View style={styles.doctorInfo}>
-                      <Text style={styles.doctorName}>{doctor.ten}</Text>
-                      <Text style={styles.doctorSpecialty}>{doctor.chuyen_khoa}</Text>
-                      <View style={styles.doctorMeta}>
-                        <Ionicons name="star" size={14} color="#FFB800" />
-                        <Text style={styles.doctorRating}>{doctor.rating} ({doctor.kinh_nghiem} năm kinh nghiệm)</Text>
-                      </View>
-                    </View>
-                    <TouchableOpacity style={styles.bookButton}>
-                      <Text style={styles.bookButtonText}>Chọn đặt lịch</Text>
-                    </TouchableOpacity>
-                  </TouchableOpacity>
-                ))}
-              </View>
+              {showOtherSpecialties && (
+                <View style={styles.otherSpecialtiesList}>
+                  {(() => {
+                    // Lấy các chuyên khoa chưa hiển thị ở phần recommendations
+                    const otherSpecialties = allSpecialtyRecommendations
+                      .filter(rec => !recommendations.some(r => r.specialtyName === rec.specialtyName));
+                    
+                    // Nếu không có dữ liệu phân tích, hiển thị danh sách mặc định
+                    if (otherSpecialties.length === 0) {
+                      const defaultSpecialties = [
+                        'Tim mạch', 'Tai mũi họng', 'Nội tiết', 'Mắt', 
+                        'Nhi khoa', 'Sản phụ khoa', 'Da liễu', 'Tiêu hóa',
+                        'Thần kinh', 'Cơ xương khớp', 'Hô hấp', 'Tiết niệu'
+                      ];
+                      
+                      return defaultSpecialties
+                        .filter(name => !recommendations.some(r => r.specialtyName === name))
+                        .map((specialtyName, index) => (
+                          <TouchableOpacity
+                            key={index}
+                            style={[
+                              styles.otherSpecialtyItem,
+                              selectedSpecialty === specialtyName && styles.otherSpecialtyItemSelected
+                            ]}
+                            onPress={() => {
+                              if (selectedSpecialty === specialtyName) {
+                                setSelectedSpecialty('');
+                                setRecommendedDoctors([]);
+                              } else {
+                                setSelectedSpecialty(specialtyName);
+                                const doctors = doctorListService.getdoctorsBySpecialty(specialtyName);
+                                setRecommendedDoctors(doctors);
+                              }
+                            }}
+                          >
+                            <View style={styles.otherSpecialtyLeft}>
+                              <Text style={styles.otherSpecialtyName}>{specialtyName}</Text>
+                              <Text style={styles.otherSpecialtyMatch}>Có thể phù hợp</Text>
+                            </View>
+                            <Ionicons 
+                              name={selectedSpecialty === specialtyName ? "checkmark-circle" : "chevron-forward"} 
+                              size={20} 
+                              color={selectedSpecialty === specialtyName ? "#00BCD4" : "#999"} 
+                            />
+                          </TouchableOpacity>
+                        ));
+                    }
+                    
+                    // Hiển thị các chuyên khoa từ phân tích
+                    return otherSpecialties.slice(0, 10).map((specialty, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={[
+                          styles.otherSpecialtyItem,
+                          selectedSpecialty === specialty.specialtyName && styles.otherSpecialtyItemSelected
+                        ]}
+                        onPress={() => {
+                          if (selectedSpecialty === specialty.specialtyName) {
+                            setSelectedSpecialty('');
+                            setRecommendedDoctors([]);
+                          } else {
+                            setSelectedSpecialty(specialty.specialtyName);
+                            const doctors = doctorListService.getdoctorsBySpecialty(specialty.specialtyName);
+                            setRecommendedDoctors(doctors);
+                          }
+                        }}
+                      >
+                        <View style={styles.otherSpecialtyLeft}>
+                          <Text style={styles.otherSpecialtyName}>{specialty.specialtyName}</Text>
+                          <Text style={styles.otherSpecialtyMatch}>Phù hợp: {specialty.confidence}%</Text>
+                        </View>
+                        <Ionicons 
+                          name={selectedSpecialty === specialty.specialtyName ? "checkmark-circle" : "chevron-forward"} 
+                          size={20} 
+                          color={selectedSpecialty === specialty.specialtyName ? "#00BCD4" : "#999"} 
+                        />
+                      </TouchableOpacity>
+                    ));
+                  })()}
+                </View>
+              )}
+            </View>
+
+            {selectedSpecialty && (
+              <TouchableOpacity 
+                style={styles.continueButton}
+                onPress={() => setCurrentStep(3)}
+              >
+                <Text style={styles.continueButtonText}>Xem bác sĩ chuyên khoa</Text>
+              </TouchableOpacity>
             )}
 
             <TouchableOpacity 
-              style={[styles.continueButton, !selectedDoctor && styles.continueButtonDisabled]}
-              onPress={handleContinue}
-              disabled={!selectedDoctor}
+              style={[styles.continueButton, styles.backButton]} 
+              onPress={handleGoBack}
             >
-              <Text style={styles.continueButtonText}>Tiếp tục</Text>
-              <Ionicons name="arrow-forward" size={20} color="#fff" />
+              <Ionicons name="arrow-back" size={20} color="#00BCD4" />
+              <Text style={[styles.continueButtonText, styles.backButtonText]}>Quay lại</Text>
             </TouchableOpacity>
           </>
         )}
 
-        {/* Step 2: Date & Time */}
-        {currentStep === 2 && (
+        {/* Step 3: Choose Doctor */}
+        {currentStep === 3 && (
           <>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Chọn thời gian khám</Text>
-              
-              {/* Doctor Info */}
-              <View style={styles.doctorInfoCard}>
-                <Image
-                  source={doctorImages[selectedDoctorImage as keyof typeof doctorImages]}
-                  style={styles.doctorInfoAvatar}
-                />
-                <View style={styles.doctorInfoContent}>
-                  <Text style={styles.doctorInfoName}>{selectedDoctor}</Text>
-                  <Text style={styles.doctorInfoSpecialty}>{selectedSpecialty}</Text>
-                  <View style={styles.doctorInfoMeta}>
-                    <Ionicons name="star" size={12} color="#FFB800" />
-                    <Text style={styles.doctorInfoRating}>4.9 (128 đánh giá)</Text>
-                  </View>
-                  <Text style={styles.doctorInfoExp}>15 năm kinh nghiệm</Text>
-                </View>
+              <View style={styles.specialtyBadge}>
+                <Text style={styles.specialtyBadgeText}>Chuyên khoa: {selectedSpecialty}</Text>
               </View>
+
+              <Text style={styles.sectionTitle}>Bác sĩ phù hợp</Text>
+
+              {recommendedDoctors.map((doctor) => {
+                // Generate earliest available date for display
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(today.getDate() + 1);
+                const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+                const day = String(tomorrow.getDate()).padStart(2, '0');
+                const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+                const year = tomorrow.getFullYear();
+                const dayOfWeek = dayNames[tomorrow.getDay()];
+                const earliestDate = `${dayOfWeek}, ${day}/${month}/${year}`;
+
+                return (
+                  <TouchableOpacity
+                    key={doctor.id}
+                    style={[
+                      styles.doctorCardLarge,
+                      selectedDoctorId === doctor.id && styles.doctorCardSelected
+                    ]}
+                    onPress={() => handleDoctorSelect(doctor)}
+                  >
+                    <View style={styles.doctorCardHeader}>
+                      <Image
+                        source={doctorImages[doctor.image as keyof typeof doctorImages]}
+                        style={styles.doctorAvatarLarge}
+                      />
+                      <View style={styles.doctorInfoLarge}>
+                        <Text style={styles.doctorNameLarge}>{doctor.ten}</Text>
+                        <Text style={styles.doctorSpecialtyLarge}>{doctor.chuyen_khoa}</Text>
+                        <View style={styles.doctorMetaRow}>
+                          <Ionicons name="star" size={14} color="#FFB800" />
+                          <Text style={styles.doctorRatingText}>{doctor.rating} (120 đánh giá)</Text>
+                        </View>
+                        <Text style={styles.doctorExpText}>{doctor.kinh_nghiem} năm kinh nghiệm</Text>
+                      </View>
+                      {selectedDoctorId === doctor.id && (
+                        <Ionicons name="checkmark-circle" size={24} color="#00BCD4" />
+                      )}
+                    </View>
+
+                    <View style={styles.doctorCardBody}>
+                      <Text style={styles.doctorDetailLabel}>Lịch khám sớm nhất:</Text>
+                      <Text style={styles.doctorDetailValue}>{earliestDate}</Text>
+                    </View>
+
+                    {selectedDoctorId === doctor.id && (
+                      <TouchableOpacity 
+                        style={styles.selectDoctorButton}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          setCurrentStep(4);
+                        }}
+                      >
+                        <Text style={styles.selectDoctorButtonText}>Chọn bác sĩ</Text>
+                      </TouchableOpacity>
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
 
+            <TouchableOpacity 
+              style={[styles.continueButton, styles.backButton]} 
+              onPress={handleGoBack}
+            >
+              <Ionicons name="arrow-back" size={20} color="#00BCD4" />
+              <Text style={[styles.continueButtonText, styles.backButtonText]}>Quay lại</Text>
+            </TouchableOpacity>
+          </>
+        )}
+
+        {/* Step 4: Booking Information & Confirmation */}
+        {currentStep === 4 && (
+          <>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Chọn ngày khám</Text>
+              {/* Selected Doctor Info */}
+              {selectedDoctorData && (
+                <View style={styles.selectedDoctorCard}>
+                  <View style={styles.specialtyBadge}>
+                    <Text style={styles.specialtyBadgeTextSmall}>Chuyên khoa: {selectedSpecialty}</Text>
+                  </View>
+                  
+                  <View style={styles.doctorCardHeader}>
+                    <Image
+                      source={doctorImages[selectedDoctorImage as keyof typeof doctorImages]}
+                      style={styles.doctorAvatarMedium}
+                    />
+                    <View style={styles.doctorInfoMedium}>
+                      <Text style={styles.doctorNameMedium}>{selectedDoctor}</Text>
+                      <Text style={styles.doctorSpecialtyMedium}>{selectedDoctorData.chuyen_khoa}</Text>
+                      <View style={styles.doctorMetaRow}>
+                        <Ionicons name="star" size={12} color="#FFB800" />
+                        <Text style={styles.doctorRatingTextSmall}>{selectedDoctorData.rating} (120 đánh giá)</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+              )}
+            </View>
+
+            {/* Consultation Type Selection */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Hình thức khám</Text>
+              
+              <TouchableOpacity
+                style={[
+                  styles.consultationTypeCard,
+                  selectedConsultationType === 'in-person' && styles.consultationTypeCardActive
+                ]}
+                onPress={() => setSelectedConsultationType('in-person')}
+              >
+                <View style={styles.consultationTypeIcon}>
+                  <Ionicons 
+                    name="business" 
+                    size={24} 
+                    color={selectedConsultationType === 'in-person' ? '#00BCD4' : '#666'} 
+                  />
+                </View>
+                <View style={styles.consultationTypeContent}>
+                  <Text style={[
+                    styles.consultationTypeTitle,
+                    selectedConsultationType === 'in-person' && styles.consultationTypeTitleActive
+                  ]}>
+                    Khám tại bệnh viện
+                  </Text>
+                  <Text style={styles.consultationTypeDesc}>
+                    Gặp bác sĩ trực tiếp tại bệnh viện
+                  </Text>
+                </View>
+                {selectedConsultationType === 'in-person' && (
+                  <Ionicons name="checkmark-circle" size={24} color="#00BCD4" />
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.consultationTypeCard,
+                  selectedConsultationType === 'online' && styles.consultationTypeCardActive
+                ]}
+                onPress={() => setSelectedConsultationType('online')}
+              >
+                <View style={styles.consultationTypeIcon}>
+                  <Ionicons 
+                    name="videocam" 
+                    size={24} 
+                    color={selectedConsultationType === 'online' ? '#00BCD4' : '#666'} 
+                  />
+                </View>
+                <View style={styles.consultationTypeContent}>
+                  <Text style={[
+                    styles.consultationTypeTitle,
+                    selectedConsultationType === 'online' && styles.consultationTypeTitleActive
+                  ]}>
+                    Khám trực tuyến
+                  </Text>
+                  <Text style={styles.consultationTypeDesc}>
+                    Tư vấn qua video call với bác sĩ
+                  </Text>
+                </View>
+                {selectedConsultationType === 'online' && (
+                  <Ionicons name="checkmark-circle" size={24} color="#00BCD4" />
+                )}
+              </TouchableOpacity>
+            </View>
+
+            {/* Time Selection */}
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Thời gian khám</Text>
+              
+              <Text style={styles.timeLabel}>Chọn ngày khám</Text>
               <ScrollView 
                 horizontal 
                 showsHorizontalScrollIndicator={false}
@@ -694,41 +1141,77 @@ export default function BookingScreen() {
                   <Text style={styles.noDataText}>Đang tải dữ liệu...</Text>
                 )}
               </ScrollView>
-            </View>
 
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Chọn khung giờ</Text>
+              <Text style={styles.timeLabel}>Chọn giờ khám</Text>
               <View style={styles.timeGrid}>
-                {[
-                  '07:30', '08:00', '08:30', '09:00',
-                  '09:30', '10:00', '10:30', '11:00',
-                  '13:30', '14:00', '14:30', '15:00',
-                  '15:30', '16:00', '16:30', '17:00',
-                ].map((time, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={[
-                      styles.timeSlot,
-                      selectedTime === time && styles.timeSlotActive
-                    ]}
-                    onPress={() => setSelectedTime(time)}
-                  >
-                    <Text style={[
-                      styles.timeText,
-                      selectedTime === time && styles.timeTextActive
-                    ]}>
-                      {time}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                {availableTimes.length > 0 ? (
+                  availableTimes.map((time, index) => {
+                    const isBooked = bookedTimes.includes(time);
+                    return (
+                      <TouchableOpacity
+                        key={index}
+                        style={[
+                          styles.timeSlot,
+                          selectedTime === time && styles.timeSlotActive,
+                          isBooked && styles.timeSlotDisabled
+                        ]}
+                        onPress={() => {
+                          if (isBooked) {
+                            Alert.alert('Thông báo', 'Khung giờ này đã được đặt. Vui lòng chọn khung giờ khác.');
+                            return;
+                          }
+                          // Toggle selection: nếu đã chọn thì bỏ chọn, nếu chưa chọn thì chọn
+                          if (selectedTime === time) {
+                            setSelectedTime('');
+                          } else {
+                            setSelectedTime(time);
+                          }
+                        }}
+                        disabled={isBooked}
+                      >
+                        <Text style={[
+                          styles.timeText,
+                          selectedTime === time && styles.timeTextActive,
+                          isBooked && styles.timeTextDisabled
+                        ]}>
+                          {time}
+                        </Text>
+                        {isBooked && (
+                          <Text style={styles.bookedLabel}>Đã đặt</Text>
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })
+                ) : (
+                  <Text style={styles.noDataText}>
+                    {selectedDate ? 'Không có giờ khám khả dụng' : 'Vui lòng chọn ngày khám'}
+                  </Text>
+                )}
               </View>
-              <Text style={styles.timeNote}>
-                <Ionicons name="information-circle" size={14} color="#00BCD4" />
-                {' '}Vui lòng đến trước giờ hẹn 15 phút để làm thủ tục.
-              </Text>
             </View>
 
-            <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
+            <TouchableOpacity 
+              style={[styles.continueButton, (!selectedDate || !selectedTime) && styles.continueButtonDisabled]}
+              onPress={() => {
+                if (selectedDate && selectedTime && selectedDoctorData) {
+                  router.push({
+                    pathname: '/booking-patient-info',
+                    params: {
+                      specialty: selectedSpecialty,
+                      doctor: selectedDoctor,
+                      doctorId: selectedDoctorId,
+                      doctorImage: selectedDoctorImage,
+                      date: selectedDate,
+                      time: selectedTime,
+                      hospital: selectedHospital,
+                      consultationType: selectedConsultationType,
+                      doctorFee: selectedDoctorData.phi_kham.toString(),
+                    }
+                  });
+                }
+              }}
+              disabled={!selectedDate || !selectedTime}
+            >
               <Text style={styles.continueButtonText}>Tiếp tục</Text>
               <Ionicons name="arrow-forward" size={20} color="#fff" />
             </TouchableOpacity>
@@ -743,8 +1226,8 @@ export default function BookingScreen() {
           </>
         )}
 
-        {/* Step 3: Confirmation */}
-        {currentStep === 3 && (
+        {/* Step 5: Success */}
+        {currentStep === 5 && (
           <>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Xác nhận thông tin đặt lịch</Text>
@@ -841,7 +1324,7 @@ export default function BookingScreen() {
                   <Ionicons name="location-outline" size={18} color="#00BCD4" />
                   <View style={styles.infoRowContent}>
                     <Text style={styles.infoRowLabel}>Địa điểm</Text>
-                    <Text style={styles.infoRowValue}>Bệnh viện Đa khoa Tâm Anh</Text>
+                    <Text style={styles.infoRowValue}>Bệnh viện Trường Đại học Trà Vinh</Text>
                   </View>
                 </View>
 
@@ -884,86 +1367,6 @@ export default function BookingScreen() {
               <Text style={[styles.continueButtonText, styles.backButtonText]}>Quay lại</Text>
             </TouchableOpacity>
           </>
-        )}
-
-        {/* Step 4: Success */}
-        {currentStep === 4 && (
-          <View style={styles.section}>
-            <View style={styles.successContainer}>
-              <View style={styles.successIcon}>
-                <Ionicons name="checkmark" size={60} color="#fff" />
-              </View>
-              
-              <Text style={styles.successTitle}>Đặt lịch thành công!</Text>
-              <Text style={styles.successSubtitle}>
-                Thông tin đặt lịch đã được gửi đến email và số điện thoại của bạn
-              </Text>
-
-              <View style={styles.successInfoCard}>
-                <Text style={styles.successInfoLabel}>Mã đặt lịch</Text>
-                <View style={styles.successInfoValue}>
-                  <Text style={styles.successInfoCode}>{appointmentId || 'DL...'}</Text>
-                  <TouchableOpacity>
-                    <Ionicons name="copy" size={20} color="#00BCD4" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              <View style={styles.successDetails}>
-                <View style={styles.successDetail}>
-                  <Text style={styles.successDetailLabel}>Bác sĩ</Text>
-                  <Text style={styles.successDetailValue}>{selectedDoctor}</Text>
-                </View>
-
-                <View style={styles.successDetail}>
-                  <Text style={styles.successDetailLabel}>Chuyên khoa</Text>
-                  <Text style={styles.successDetailValue}>{selectedSpecialty}</Text>
-                </View>
-
-                <View style={styles.successDetail}>
-                  <Text style={styles.successDetailLabel}>Thời gian</Text>
-                  <Text style={styles.successDetailValue}>{selectedTime} - Thứ 4, 22/05/2024</Text>
-                </View>
-
-                <View style={styles.successDetail}>
-                  <Text style={styles.successDetailLabel}>Địa điểm</Text>
-                  <Text style={styles.successDetailValue}>Bệnh viện Đa khoa Tâm Anh</Text>
-                </View>
-              </View>
-
-              <View style={styles.successNote}>
-                <Text style={styles.successNoteTitle}>Lưu ý</Text>
-                <Text style={styles.successNoteText}>
-                  • Vui lòng đến trước giờ hẹn 15 phút để làm thủ tục.
-                </Text>
-                <Text style={styles.successNoteText}>
-                  • Mang theo CMND/CCCD và thẻ bảo hiểm y tế (nếu có).
-                </Text>
-              </View>
-
-              <TouchableOpacity 
-                style={styles.successButtonSecondary}
-                onPress={() => {
-                  // Reset form to Step 1
-                  setCurrentStep(1);
-                  setSelectedSpecialty('');
-                  setSelectedDoctor('');
-                  setSelectedDoctorId('');
-                  setSelectedDoctorImage('');
-                  setSelectedHospital('');
-                  setSelectedDate('');
-                  setSelectedTime('');
-                  setSelectedSymptoms([]);
-                  setRecommendations([]);
-                  setRecommendedDoctors([]);
-                  setAppointmentId('');
-                  console.log('🔄 [BOOKING] Form reset for new booking');
-                }}
-              >
-                <Text style={styles.successButtonSecondaryText}>Đặt lịch mới</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -1116,19 +1519,21 @@ const styles = StyleSheet.create({
   },
   symptomInputContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     backgroundColor: '#f9f9f9',
     borderRadius: 12,
     paddingHorizontal: 12,
+    paddingVertical: 12,
     marginBottom: 8,
     borderWidth: 1,
     borderColor: '#e0e0e0',
+    minHeight: 120,
   },
   symptomInput: {
     flex: 1,
-    height: 48,
     fontSize: 14,
     color: '#000',
+    minHeight: 100,
   },
   helperText: {
     fontSize: 12,
@@ -1139,7 +1544,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     borderRadius: 12,
     marginBottom: 12,
-    maxHeight: 150,
+    maxHeight: 200,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  suggestionsTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#666',
+    padding: 10,
+    paddingBottom: 5,
   },
   suggestionItem: {
     flexDirection: 'row',
@@ -1155,6 +1569,7 @@ const styles = StyleSheet.create({
   suggestionText: {
     fontSize: 14,
     color: '#333',
+    flex: 1,
   },
   commonSymptomsLabel: {
     fontSize: 13,
@@ -1183,6 +1598,12 @@ const styles = StyleSheet.create({
   },
   selectedSymptomsContainer: {
     marginBottom: 12,
+  },
+  selectedSymptomsLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
   },
   symptomTagsContainer: {
     flexDirection: 'row',
@@ -1217,6 +1638,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
+  analyzeButtonDisabled: {
+    opacity: 0.7,
+  },
   resultHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1226,7 +1650,7 @@ const styles = StyleSheet.create({
   resultTitle: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#00BCD4',
+    color: '#000',
   },
   resultNote: {
     fontSize: 12,
@@ -1236,6 +1660,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     backgroundColor: '#E0F7FA',
     borderRadius: 8,
+  },
+  otherRecommendationsLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#666',
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  noResultContainer: {
+    alignItems: 'center',
+    padding: 32,
+  },
+  noResultTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#333',
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  noResultText: {
+    fontSize: 13,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   recommendationCard: {
     flexDirection: 'row',
@@ -1252,6 +1701,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+  },
+  viewDoctorButton: {
+    backgroundColor: '#00BCD4',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  viewDoctorButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#fff',
   },
   recIcon: {
     width: 48,
@@ -1479,6 +1940,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#00BCD4',
     borderColor: '#00BCD4',
   },
+  timeSlotDisabled: {
+    backgroundColor: '#f0f0f0',
+    borderColor: '#e0e0e0',
+    opacity: 0.6,
+  },
   timeText: {
     fontSize: 13,
     fontWeight: '600',
@@ -1486,6 +1952,14 @@ const styles = StyleSheet.create({
   },
   timeTextActive: {
     color: '#fff',
+  },
+  timeTextDisabled: {
+    color: '#999',
+  },
+  bookedLabel: {
+    fontSize: 10,
+    color: '#999',
+    marginTop: 2,
   },
   timeNote: {
     fontSize: 12,
@@ -1685,5 +2159,264 @@ const styles = StyleSheet.create({
     color: '#999',
     textAlign: 'center',
     paddingVertical: 16,
+  },
+  // New styles for redesigned booking flow
+  sectionSubtitle: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 12,
+  },
+  charCount: {
+    position: 'absolute',
+    bottom: 8,
+    right: 12,
+    fontSize: 11,
+    color: '#999',
+  },
+  recommendationCardSelected: {
+    borderLeftWidth: 4,
+    borderLeftColor: '#00BCD4',
+    backgroundColor: '#E0F7FA',
+  },
+  specialtyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E0F7FA',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    alignSelf: 'flex-start',
+    marginBottom: 12,
+    gap: 4,
+  },
+  specialtyBadgeText: {
+    fontSize: 13,
+    color: '#00BCD4',
+    fontWeight: '600',
+  },
+  specialtyBadgeTextSmall: {
+    fontSize: 12,
+    color: '#00BCD4',
+    fontWeight: '500',
+  },
+  doctorCardLarge: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  doctorCardSelected: {
+    borderColor: '#00BCD4',
+    backgroundColor: '#E0F7FA',
+  },
+  doctorCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  doctorAvatarLarge: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    marginRight: 12,
+  },
+  doctorAvatarMedium: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    marginRight: 12,
+  },
+  doctorInfoLarge: {
+    flex: 1,
+  },
+  doctorInfoMedium: {
+    flex: 1,
+  },
+  doctorNameLarge: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 4,
+  },
+  doctorNameMedium: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 2,
+  },
+  doctorSpecialtyLarge: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 4,
+  },
+  doctorSpecialtyMedium: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  doctorMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 2,
+  },
+  doctorRatingText: {
+    fontSize: 12,
+    color: '#666',
+  },
+  doctorRatingTextSmall: {
+    fontSize: 11,
+    color: '#666',
+  },
+  doctorExpText: {
+    fontSize: 11,
+    color: '#666',
+  },
+  doctorCardBody: {
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    marginBottom: 12,
+  },
+  doctorDetailLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginBottom: 4,
+  },
+  doctorDetailValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#000',
+  },
+  selectDoctorButton: {
+    backgroundColor: '#00BCD4',
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  selectDoctorButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  selectedDoctorCard: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+  },
+  timeLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 8,
+    marginTop: 12,
+  },
+  noteInput: {
+    height: 80,
+    paddingTop: 10,
+  },
+  successInfoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  successCodeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  successCodeValue: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#00BCD4',
+  },
+  consultationTypeCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  consultationTypeCardActive: {
+    backgroundColor: '#E0F7FA',
+    borderColor: '#00BCD4',
+  },
+  consultationTypeIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  consultationTypeContent: {
+    flex: 1,
+  },
+  consultationTypeTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 4,
+  },
+  consultationTypeTitleActive: {
+    color: '#00BCD4',
+  },
+  consultationTypeDesc: {
+    fontSize: 12,
+    color: '#666',
+  },
+  // Other specialties dropdown styles
+  otherSpecialtiesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f9f9f9',
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
+  otherSpecialtiesTitle: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#000',
+  },
+  otherSpecialtiesList: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  otherSpecialtyItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  otherSpecialtyItemSelected: {
+    backgroundColor: '#E0F7FA',
+  },
+  otherSpecialtyLeft: {
+    flex: 1,
+  },
+  otherSpecialtyName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 4,
+  },
+  otherSpecialtyMatch: {
+    fontSize: 12,
+    color: '#00BCD4',
+    fontWeight: '500',
   },
 });

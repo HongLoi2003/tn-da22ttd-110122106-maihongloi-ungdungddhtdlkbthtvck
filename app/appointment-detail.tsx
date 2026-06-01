@@ -12,9 +12,11 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import CustomToast from './components/CustomToast';
 import { getDocumentById, updateDocument } from './services/firebaseService';
 
-const doctorImages = {
+// Mapping ảnh bác sĩ
+const doctorImages: any = {
   'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
   'tranthilan.png': require('@/assets/images/tranthilan.png'),
   'leminhtam.png': require('@/assets/images/leminhtam.png'),
@@ -33,11 +35,30 @@ const doctorImages = {
   'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
 };
 
+// Hàm lấy avatar bác sĩ
+const getDoctorAvatarSmart = (doctorName?: string, imageName?: string) => {
+  // Nếu có imageName và tồn tại trong mapping
+  if (imageName && doctorImages[imageName]) {
+    return doctorImages[imageName];
+  }
+  
+  // Fallback: trả về ảnh mặc định
+  return doctorImages['nguyenvanam.png'];
+};
+
 export default function AppointmentDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [appointment, setAppointment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Toast state
+  const [toast, setToast] = useState({
+    visible: false,
+    type: 'success' as 'success' | 'error' | 'warning' | 'info',
+    title: '',
+    message: '',
+  });
 
   useEffect(() => {
     loadAppointment();
@@ -73,11 +94,27 @@ export default function AppointmentDetailScreen() {
                 status: 'cancelled',
                 updatedAt: new Date().toISOString(),
               });
-              Alert.alert('Thành công', 'Đã hủy lịch khám');
-              router.back();
+              
+              // Hiển thị toast thành công
+              setToast({
+                visible: true,
+                type: 'success',
+                title: 'Hủy lịch thành công!',
+                message: 'Lịch khám đã được hủy',
+              });
+              
+              // Quay lại sau 2 giây
+              setTimeout(() => {
+                router.back();
+              }, 2000);
             } catch (error) {
               console.error('Error cancelling appointment:', error);
-              Alert.alert('Lỗi', 'Không thể hủy lịch khám');
+              setToast({
+                visible: true,
+                type: 'error',
+                title: 'Lỗi',
+                message: 'Không thể hủy lịch khám. Vui lòng thử lại!',
+              });
             }
           },
         },
@@ -109,9 +146,7 @@ export default function AppointmentDetailScreen() {
     );
   }
 
-  const doctorImage = appointment.image && doctorImages[appointment.image as keyof typeof doctorImages]
-    ? doctorImages[appointment.image as keyof typeof doctorImages]
-    : require('@/assets/images/logo.png');
+  const doctorImage = getDoctorAvatarSmart(appointment.doctor, appointment.image || appointment.hinh_anh);
 
   const getStatusColor = (status: string) => {
     if (status === 'confirmed') return '#06D6A0';
@@ -144,15 +179,35 @@ export default function AppointmentDetailScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Chi tiết lịch khám</Text>
-        <View style={styles.placeholder} />
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {/* Toast Notification */}
+        <CustomToast
+          visible={toast.visible}
+          type={toast.type}
+          title={toast.title}
+          message={toast.message}
+          onHide={() => setToast({ ...toast, visible: false })}
+          duration={3000}
+        />
+
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+              } else {
+                router.replace('/(tabs)/');
+              }
+            }} 
+            style={styles.backBtn}
+          >
+            <Ionicons name="chevron-back" size={24} color="#0f172a" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Chi tiết lịch khám</Text>
+          <View style={styles.placeholder} />
+        </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Doctor Card */}
@@ -253,12 +308,16 @@ export default function AppointmentDetailScreen() {
           <View style={styles.paymentCard}>
             <View style={styles.paymentRow}>
               <Text style={styles.paymentLabel}>Phí khám</Text>
-              <Text style={styles.paymentValue}>{appointment.fee || '200.000đ'}</Text>
+              <Text style={styles.paymentValue}>
+                {appointment.fee ? `${appointment.fee.toLocaleString('vi-VN')}đ` : '200.000đ'}
+              </Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.paymentRow}>
               <Text style={styles.paymentLabelTotal}>Tổng cộng</Text>
-              <Text style={styles.paymentValueTotal}>{appointment.fee || '200.000đ'}</Text>
+              <Text style={styles.paymentValueTotal}>
+                {appointment.fee ? `${appointment.fee.toLocaleString('vi-VN')}đ` : '300.000đ'}
+              </Text>
             </View>
           </View>
         </View>
@@ -291,23 +350,30 @@ export default function AppointmentDetailScreen() {
           </TouchableOpacity>
         </View>
       )}
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   container: {
     flex: 1,
     backgroundColor: '#f0f9ff',
   },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: 50,
+    paddingTop: 30,
     paddingBottom: 16,
     paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
   backBtn: {
     width: 40,
@@ -318,7 +384,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0f172a',
   },
   placeholder: {
     width: 40,

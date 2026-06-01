@@ -1,18 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { auth } from './config/firebase';
 
@@ -52,7 +53,7 @@ export default function ForgotPasswordScreen() {
         [
           {
             text: 'OK',
-            onPress: () => router.back(),
+            onPress: () => router.push('/login'),
           },
         ]
       );
@@ -81,26 +82,34 @@ export default function ForgotPasswordScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+    <View style={styles.container}>
+      <Image
+        source={require('@/assets/images/bckgour.png')}
+        style={styles.backgroundImage}
+        contentFit="cover"
+      />
+      <KeyboardAvoidingView
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => router.push('/login')} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color="#0f172a" />
           </TouchableOpacity>
         </View>
 
-        {/* Illustration */}
-        <View style={styles.illustrationContainer}>
-          <View style={styles.iconCircle}>
-            <Ionicons name="lock-closed" size={60} color="#00BCD4" />
-          </View>
+        {/* Logo */}
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('@/assets/images/logo.png')}
+            style={styles.logo}
+            contentFit="contain"
+          />
           <Text style={styles.title}>Quên mật khẩu?</Text>
           <Text style={styles.subtitle}>
             Đừng lo lắng! Nhập email của bạn và chúng tôi sẽ gửi link để đặt lại mật khẩu
@@ -137,7 +146,7 @@ export default function ForgotPasswordScreen() {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.resetButtonText}>
-                {emailSent ? 'Đã gửi email' : 'Gửi link đặt lại mật khẩu'}
+                {emailSent ? 'Đã gửi email' : 'Gửi email đặt lại mật khẩu'}
               </Text>
             )}
           </TouchableOpacity>
@@ -149,42 +158,38 @@ export default function ForgotPasswordScreen() {
               Kiểm tra cả thư mục spam nếu bạn không thấy email trong hộp thư đến
             </Text>
           </View>
-
-          {/* Back to Login */}
-          <View style={styles.backToLoginContainer}>
-            <Ionicons name="arrow-back-outline" size={16} color="#00BCD4" />
-            <TouchableOpacity onPress={() => router.back()}>
-              <Text style={styles.backToLoginText}>Quay lại đăng nhập</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Help Section */}
-        <View style={styles.helpSection}>
-          <Text style={styles.helpTitle}>Cần trợ giúp?</Text>
-          <Text style={styles.helpText}>
-            Liên hệ với chúng tôi qua email: support@healthcare.vn
-          </Text>
-          <Text style={styles.helpText}>
-            Hoặc gọi hotline: 1900 xxxx (8:00 - 22:00)
-          </Text>
         </View>
       </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  backgroundImage: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
+    height: '100%',
+    zIndex: -1,
+  },
+  keyboardAvoidingView: {
   },
   scrollContent: {
-    flexGrow: 1,
     paddingHorizontal: 24,
+    paddingTop: 40,
+    paddingBottom: 24,
   },
   header: {
-    paddingTop: 50,
+    paddingTop: 20,
     marginBottom: 20,
   },
   backButton: {
@@ -192,18 +197,14 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
   },
-  illustrationContainer: {
+  logoContainer: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 32,
   },
-  iconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: '#E0F7FA',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
+  logo: {
+    width: 160,
+    height: 160,
+    marginBottom: 16,
   },
   title: {
     fontSize: 28,

@@ -64,11 +64,11 @@ export default function InsuranceScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Bảo hiểm y tế</Text>
         <TouchableOpacity onPress={() => router.push('/add-insurance')}>
-          <Ionicons name="add-circle-outline" size={24} color="#fff" />
+          <Ionicons name="add-circle-outline" size={24} color="#0f172a" />
         </TouchableOpacity>
       </View>
 
@@ -202,9 +202,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f9ff',
   },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     paddingTop: 50,
     paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
@@ -216,7 +218,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0f172a',
   },
   content: {
     flex: 1,

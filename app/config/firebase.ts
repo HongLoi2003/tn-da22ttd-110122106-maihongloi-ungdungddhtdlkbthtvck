@@ -12,10 +12,26 @@ interface FirebaseConfigType {
   appId: string;
 }
 
+// Detect if running on web
+const isWeb = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
 // Validate Firebase config
 const validateFirebaseConfig = (config: FirebaseConfigType): boolean => {
   const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
-  return requiredFields.every(field => config[field as keyof FirebaseConfigType]);
+  const isValid = requiredFields.every(field => {
+    const value = config[field as keyof FirebaseConfigType];
+    return value && value.trim() !== '';
+  });
+  
+  if (!isValid) {
+    console.log('🔍 Firebase Config Check:');
+    requiredFields.forEach(field => {
+      const value = config[field as keyof FirebaseConfigType];
+      console.log(`  ${field}: ${value ? '✅' : '❌'}`);
+    });
+  }
+  
+  return isValid;
 };
 
 // Firebase configuration from environment variables
@@ -44,20 +60,41 @@ if (!isConfigValid) {
 }
 
 // Initialize Firebase
-let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
-let storage: FirebaseStorage;
+let app: FirebaseApp | undefined;
+let auth: Auth | undefined;
+let db: Firestore | undefined;
+let storage: FirebaseStorage | undefined;
 
-try {
-  app = initializeApp(firebaseConfig);
-  auth = getAuth(app);
-  db = getFirestore(app);
-  storage = getStorage(app);
-  console.log('✅ Firebase initialized successfully');
-} catch (error) {
-  console.error('❌ Firebase initialization error:', error);
-  throw new Error('Failed to initialize Firebase. Check your configuration.');
+if (isConfigValid) {
+  try {
+    app = initializeApp(firebaseConfig);
+    console.log('✅ Firebase app initialized');
+    
+    // Initialize Auth based on platform
+    try {
+      // Just use getAuth for all platforms - Firebase SDK handles persistence automatically
+      auth = getAuth(app);
+      console.log(`✅ Firebase Auth initialized for ${isWeb ? 'WEB' : 'MOBILE'}`);
+    } catch (error: any) {
+      // If auth is already initialized, just get it
+      if (error.code === 'auth/already-initialized') {
+        auth = getAuth(app);
+        console.log('✅ Firebase Auth already initialized, using existing instance');
+      } else {
+        console.error('❌ Firebase Auth initialization error:', error);
+      }
+    }
+    
+    db = getFirestore(app);
+    storage = getStorage(app);
+    console.log('✅ Firebase Firestore and Storage initialized');
+    console.log(`🌐 Platform: ${isWeb ? 'WEB' : 'MOBILE'}`);
+  } catch (error) {
+    console.error('❌ Firebase initialization error:', error);
+    console.warn('⚠️ Firebase is not initialized. Some features may not work.');
+  }
+} else {
+  console.warn('⚠️ Firebase configuration is invalid. Firebase features will not work.');
 }
 
 export { app, auth, db, isConfigValid, storage };

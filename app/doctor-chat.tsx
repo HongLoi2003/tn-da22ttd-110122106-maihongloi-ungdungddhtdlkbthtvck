@@ -1,13 +1,24 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Timestamp, where } from 'firebase/firestore';
+import { useEffect, useRef, useState } from 'react';
+import {
+    Animated,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import { useAuth } from './context/AuthContext';
+import { createDocument, getDocumentsWithQuery, updateDocument } from './services/firebaseService';
 
 // Helper function to get doctor image
 const getDoctorImage = (imageName: string, doctorName?: string) => {
-  console.log('Doctor image name:', imageName, 'Doctor name:', doctorName); // Debug log
-  
   const images: { [key: string]: any } = {
     'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
     'tranthilan.png': require('@/assets/images/tranthilan.png'),
@@ -19,47 +30,18 @@ const getDoctorImage = (imageName: string, doctorName?: string) => {
     'tranthimai.png': require('@/assets/images/tranthimai.png'),
     'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
     'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
+    'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
+    'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
+    'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
+    'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
+    'lethihang.png': require('@/assets/images/lethihang.png'),
+    'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
   };
   
-  // Nếu có imageName và tìm thấy trong images
   if (imageName && images[imageName]) {
-    console.log('Using image from imageName:', imageName);
     return images[imageName];
   }
   
-  // Fallback: map dựa trên tên bác sĩ
-  if (doctorName) {
-    const nameMap: { [key: string]: string } = {
-      'Nguyễn Văn An': 'nguyenvanam.png',
-      'BS. Nguyễn Văn An': 'nguyenvanam.png',
-      'Trần Thị Lan': 'tranthilan.png',
-      'BS. Trần Thị Lan': 'tranthilan.png',
-      'Lê Minh Tâm': 'leminhtam.png',
-      'BS. Lê Minh Tâm': 'leminhtam.png',
-      'Phạm Thu Hà': 'phamthuha.png',
-      'BS. Phạm Thu Hà': 'phamthuha.png',
-      'Hoàng Văn Đức': 'hoangvanduc.png',
-      'BS. Hoàng Văn Đức': 'hoangvanduc.png',
-      'Vũ Thị Lan': 'vuthilan.png',
-      'BS. Vũ Thị Lan': 'vuthilan.png',
-      'Lê Hoàng Nam': 'lehoangnam.png',
-      'BS. Lê Hoàng Nam': 'lehoangnam.png',
-      'Trần Thị Mai': 'tranthimai.png',
-      'BS. Trần Thị Mai': 'tranthimai.png',
-      'Đỗ Minh Tuấn': 'dominhtuan.png',
-      'BS. Đỗ Minh Tuấn': 'dominhtuan.png',
-      'Ngô Thị Hương': 'ngothihuong.png',
-      'BS. Ngô Thị Hương': 'ngothihuong.png',
-    };
-    
-    const mappedImage = nameMap[doctorName];
-    if (mappedImage && images[mappedImage]) {
-      console.log('Using image from name mapping:', mappedImage);
-      return images[mappedImage];
-    }
-  }
-  
-  console.log('Using default logo');
   return require('@/assets/images/logo.png');
 };
 
@@ -67,72 +49,341 @@ export default function DoctorChatScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const scrollViewRef = useRef<ScrollView>(null);
+  const { userData } = useAuth();
   
+  const doctorId = params.doctorId as string;
   const doctorName = params.doctorName as string || 'BS. Nguyễn Văn An';
   const doctorSpecialty = params.doctorSpecialty as string || 'Chuyên khoa Hô hấp';
   const doctorImage = params.doctorImage as string || 'logo.png';
-  
-  console.log('Doctor params:', { doctorName, doctorSpecialty, doctorImage }); // Debug log
+  const doctorPhone = params.doctorPhone as string || '';
   
   const [message, setMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: `Xin chào! Tôi là ${doctorName}. Tôi có thể giúp gì cho bạn hôm nay?`,
-      sender: 'doctor',
-      time: '09:30',
-      seen: true,
-    },
-  ]);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [messageAnimations, setMessageAnimations] = useState<{ [key: string]: Animated.Value }>({});
+  const [patientAvatar, setPatientAvatar] = useState<string | null>(null);
 
-  const sendMessage = () => {
-    if (message.trim()) {
-      const newMessage = {
-        id: messages.length + 1,
-        text: message,
-        sender: 'user',
-        time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-        seen: false,
-      };
-      setMessages([...messages, newMessage]);
-      setMessage('');
+  const handlePhoneCall = async () => {
+    if (!doctorPhone) {
+      console.log('Không có số điện thoại của bác sĩ');
+      return;
+    }
+
+    const phoneNumber = doctorPhone.replace(/\s/g, '');
+    const phoneUrl = Platform.OS === 'ios' ? `telprompt:${phoneNumber}` : `tel:${phoneNumber}`;
+
+    try {
+      const supported = await Linking.canOpenURL(phoneUrl);
+      if (supported) {
+        await Linking.openURL(phoneUrl);
+      } else {
+        console.log('Không thể thực hiện cuộc gọi');
+      }
+    } catch (error) {
+      console.error('Error making phone call:', error);
+    }
+  };
+
+  const handleVideoCall = () => {
+    router.push({
+      pathname: '/video-call',
+      params: {
+        callerName: doctorName,
+        callerAvatar: doctorImage,
+        callType: 'outgoing'
+      }
+    });
+  };
+
+  useEffect(() => {
+    initializeChat();
+    
+    // Load patient avatar
+    if (userData?.avatar) {
+      setPatientAvatar(userData.avatar);
+    }
+    
+    const interval = setInterval(() => {
+      if (conversationId) {
+        loadMessages();
+      }
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, [conversationId]);
+
+  const initializeChat = async () => {
+    try {
+      if (!userData?.uid || !doctorId) {
+        console.log('Missing userData or doctorId');
+        console.log('userData:', userData);
+        console.log('doctorId:', doctorId);
+        setLoading(false);
+        return;
+      }
+
+      console.log('=== INITIALIZING CHAT ===');
+      console.log('Patient ID:', userData.uid);
+      console.log('Patient Name:', userData.fullName);
+      console.log('Doctor ID from params:', doctorId);
+      console.log('Doctor Name:', doctorName);
+
+      // Try to find existing conversation by patientId and doctorId
+      let existingConversations = await getDocumentsWithQuery('conversations', [
+        where('patientId', '==', userData.uid),
+        where('doctorId', '==', doctorId)
+      ]);
+
+      // If not found, also try with doctorIdOriginal (for backward compatibility)
+      if (existingConversations.length === 0) {
+        existingConversations = await getDocumentsWithQuery('conversations', [
+          where('patientId', '==', userData.uid),
+          where('doctorIdOriginal', '==', doctorId)
+        ]);
+      }
+
+      console.log('Existing conversations found:', existingConversations.length);
+
+      if (existingConversations.length > 0) {
+        const conv = existingConversations[0];
+        setConversationId(conv.id);
+        console.log('Using existing conversation:', conv.id);
+        console.log('Conversation data:', conv);
+        await loadMessagesForConversation(conv.id);
+      } else {
+        console.log('Creating new conversation...');
+        
+        // Cần map doctorId (bs004) sang Firebase Auth UID
+        // Lấy thông tin bác sĩ từ doctors collection
+        let doctorAuthUid = doctorId; // Default fallback
+        try {
+          const { getDocumentById } = await import('./services/firebaseService');
+          const doctorData = await getDocumentById('doctors', doctorId);
+          if (doctorData && (doctorData as any).authUid) {
+            doctorAuthUid = (doctorData as any).authUid;
+            console.log('Found doctor authUid:', doctorAuthUid);
+          } else {
+            console.log('Doctor document does not have authUid field');
+          }
+        } catch (error) {
+          console.log('Could not fetch doctor authUid:', error);
+        }
+        
+        // Lưu cả doctorId gốc (từ doctors collection) và doctorAuthUid (Firebase Auth UID)
+        const newConversation = await createDocument('conversations', {
+          patientId: userData.uid,
+          patientName: userData.fullName || 'Bệnh nhân',
+          patientAvatar: userData.avatar || '',
+          doctorId: doctorId, // ID từ doctors collection (bs004, bs005, etc.)
+          doctorAuthUid: doctorAuthUid, // Firebase Auth UID của bác sĩ
+          doctorIdOriginal: doctorId, // Backup để query
+          doctorName: doctorName,
+          doctorSpecialty: doctorSpecialty,
+          lastMessage: '',
+          lastMessageTimestamp: Timestamp.now(),
+          lastMessageSender: '',
+          unreadCountPatient: 0,
+          doctorUnreadCount: 0,
+          createdAt: Timestamp.now(),
+        });
+        
+        setConversationId(newConversation.id);
+        console.log('Created new conversation:', newConversation.id);
+        console.log('New conversation data:', newConversation);
+      }
+
+      setLoading(false);
+    } catch (error: any) {
+      // Xử lý lỗi permission-denied một cách graceful
+      if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+        console.log('Chat feature requires Firestore permissions - silently handling');
+        // Không hiển thị lỗi cho user, chỉ log để debug
+      } else {
+        console.error('Error initializing chat:', error);
+      }
+      setLoading(false);
+    }
+  };
+
+  const loadMessagesForConversation = async (convId: string) => {
+    try {
+      const messagesData = await getDocumentsWithQuery('messages', [
+        where('conversationId', '==', convId)
+      ]);
+
+      const sortedMessages = messagesData.sort((a: any, b: any) => {
+        const timeA = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0;
+        const timeB = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : 0;
+        return timeA - timeB;
+      });
+
+      const formattedMessages = sortedMessages.map((msg: any) => ({
+        id: msg.id,
+        text: msg.text || msg.message || '',
+        sender: msg.senderType,
+        time: msg.timestamp?.toDate ? 
+          msg.timestamp.toDate().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 
+          '',
+        timestamp: msg.timestamp,
+        seen: msg.read || false,
+      }));
+
+      // Chỉ animate tin nhắn MỚI (chưa có trong state)
+      const currentMessageIds = new Set(messages.map(m => m.id));
+      const newMessageIds = formattedMessages
+        .filter((msg: any) => !currentMessageIds.has(msg.id))
+        .map((msg: any) => msg.id);
       
+      if (newMessageIds.length > 0 && messages.length > 0) {
+        // Chỉ animate nếu đã có tin nhắn cũ (không phải lần load đầu)
+        const newAnimations: { [key: string]: Animated.Value } = {};
+        newMessageIds.forEach(id => {
+          const anim = new Animated.Value(0);
+          newAnimations[id] = anim;
+          
+          Animated.spring(anim, {
+            toValue: 1,
+            friction: 5,
+            tension: 40,
+            useNativeDriver: true,
+          }).start();
+        });
+        
+        setMessageAnimations(prev => ({ ...prev, ...newAnimations }));
+      }
+
+      setMessages(formattedMessages);
+
+      const unreadMessages = messagesData.filter((msg: any) => 
+        msg.senderType === 'doctor' && !msg.read
+      );
+
+      for (const msg of unreadMessages) {
+        await updateDocument('messages', msg.id, { read: true });
+      }
+
+      if (unreadMessages.length > 0) {
+        await updateDocument('conversations', convId, {
+          unreadCountPatient: 0,
+        });
+      }
+
       setTimeout(() => {
         scrollViewRef.current?.scrollToEnd({ animated: true });
       }, 100);
-      
-      setTimeout(() => {
-        setIsTyping(true);
-      }, 1000);
-
-      setTimeout(() => {
-        setIsTyping(false);
-        const doctorReply = {
-          id: messages.length + 2,
-          text: 'Cảm ơn bạn đã chia sẻ. Tôi sẽ tư vấn chi tiết cho bạn.',
-          sender: 'doctor',
-          time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-          seen: true,
-        };
-        setMessages(prev => [...prev, doctorReply]);
-        setTimeout(() => {
-          scrollViewRef.current?.scrollToEnd({ animated: true });
-        }, 100);
-      }, 2500);
+    } catch (error: any) {
+      if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+        console.log('Messages feature requires Firestore permissions - silently handling');
+      } else {
+        console.error('Error loading messages:', error);
+      }
     }
   };
+
+  const loadMessages = async () => {
+    if (conversationId) {
+      await loadMessagesForConversation(conversationId);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!message.trim() || !conversationId || !userData?.uid) return;
+
+    const messageText = message.trim();
+    const now = new Date();
+    const newMessage = {
+      id: 'temp-' + Date.now(),
+      text: messageText,
+      sender: 'patient',
+      time: now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      timestamp: Timestamp.now(),
+      seen: false,
+    };
+
+    // Thêm tin nhắn vào UI ngay lập tức
+    setMessages(prev => [...prev, newMessage]);
+    setMessage('');
+
+    // Scroll xuống cuối
+    setTimeout(() => {
+      scrollViewRef.current?.scrollToEnd({ animated: true });
+    }, 100);
+
+    try {
+      const createResult = await createDocument('messages', {
+        conversationId,
+        text: messageText,
+        message: messageText,
+        senderId: userData.uid,
+        senderType: 'patient',
+        timestamp: Timestamp.now(),
+        read: false,
+      });
+
+      // Get current conversation to increment unread count
+      const { getDocumentById } = await import('./services/firebaseService');
+      const conversation = await getDocumentById('conversations', conversationId);
+      const currentUnread = conversation ? ((conversation as any).doctorUnreadCount || 0) : 0;
+      
+      await updateDocument('conversations', conversationId, {
+        lastMessage: messageText,
+        lastMessageTimestamp: Timestamp.now(),
+        lastMessageSender: 'patient',
+        doctorUnreadCount: currentUnread + 1,
+      });
+
+      // Chỉ load lại nếu thực sự lưu được vào Firestore (không phải mock data)
+      if (createResult && !createResult.id.startsWith('mock-')) {
+        await loadMessages();
+      }
+    } catch (error: any) {
+      // Xử lý lỗi permission-denied một cách graceful
+      if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+        console.log('Send message requires Firestore permissions - using local state only');
+        // Tin nhắn đã được thêm vào UI ở trên, không cần làm gì thêm
+      } else {
+        console.error('Error sending message:', error);
+        // Xóa tin nhắn tạm nếu gửi thất bại (lỗi khác permission)
+        setMessages(prev => prev.filter(m => m.id !== newMessage.id));
+        setMessage(messageText);
+      }
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <View style={styles.doctorInfo}>
+            <Image
+              source={getDoctorImage(doctorImage, doctorName)}
+              style={styles.doctorAvatar}
+            />
+            <View style={styles.doctorDetails}>
+              <Text style={styles.doctorName}>{doctorName}</Text>
+            </View>
+          </View>
+        </View>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Đang tải tin nhắn...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView 
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={0}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color="#fff" />
+          <Ionicons name="chevron-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <View style={styles.doctorInfo}>
           <Image
@@ -143,130 +394,125 @@ export default function DoctorChatScreen() {
             <Text style={styles.doctorName}>{doctorName}</Text>
             <View style={styles.statusRow}>
               <View style={styles.onlineDot} />
-              <Text style={styles.statusText}>Đang hoạt động</Text>
+              <Text style={styles.statusText}>Bác sĩ</Text>
             </View>
           </View>
         </View>
         <View style={styles.headerActions}>
           <TouchableOpacity 
-            style={styles.headerBtn}
-            onPress={() => {
-              router.push({
-                pathname: '/voice-call',
-                params: {
-                  doctorName: doctorName,
-                  doctorImage: doctorImage,
-                }
-              });
-            }}
+            style={styles.headerButton}
+            onPress={handlePhoneCall}
           >
-            <Ionicons name="call-outline" size={22} color="#fff" />
+            <Ionicons name="call" size={22} color="#00BCD4" />
           </TouchableOpacity>
           <TouchableOpacity 
-            style={styles.headerBtn}
-            onPress={() => {
-              router.push({
-                pathname: '/video-call',
-                params: {
-                  doctorName: doctorName,
-                  doctorImage: doctorImage,
-                }
-              });
-            }}
+            style={styles.headerButton}
+            onPress={handleVideoCall}
           >
-            <Ionicons name="videocam-outline" size={22} color="#fff" />
+            <Ionicons name="videocam" size={24} color="#00BCD4" />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Messages */}
       <ScrollView 
         ref={scrollViewRef}
         style={styles.messagesContainer}
         contentContainerStyle={styles.messagesContent}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.dateHeader}>
-          <Text style={styles.dateText}>Hôm nay</Text>
-        </View>
-
-        {messages.map((msg) => (
-          <View
-            key={msg.id}
-            style={[
-              styles.messageWrapper,
-              msg.sender === 'user' ? styles.userMessageWrapper : styles.doctorMessageWrapper,
-            ]}
-          >
-            {msg.sender === 'doctor' && (
-              <Image
-                source={getDoctorImage(doctorImage, doctorName)}
-                style={styles.messageAvatar}
-              />
-            )}
-            <View
-              style={[
-                styles.messageBubble,
-                msg.sender === 'user' ? styles.userBubble : styles.doctorBubble,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.messageText,
-                  msg.sender === 'user' ? styles.userMessageText : styles.doctorMessageText,
-                ]}
-              >
-                {msg.text}
-              </Text>
-              <Text
-                style={[
-                  styles.messageTime,
-                  msg.sender === 'user' ? styles.userMessageTime : styles.doctorMessageTime,
-                ]}
-              >
-                {msg.time}
-              </Text>
-            </View>
+        {messages.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Ionicons name="chatbubbles-outline" size={64} color="#cbd5e1" />
+            <Text style={styles.emptyText}>Chưa có tin nhắn</Text>
+            <Text style={styles.emptySubtext}>Gửi tin nhắn đầu tiên cho bác sĩ</Text>
           </View>
-        ))}
-
-        {isTyping && (
-          <View style={styles.typingIndicator}>
-            <Image
-              source={getDoctorImage(doctorImage, doctorName)}
-              style={styles.messageAvatar}
-            />
-            <View style={styles.typingBubble}>
-              <View style={styles.typingDots}>
-                <View style={styles.typingDot} />
-                <View style={styles.typingDot} />
-                <View style={styles.typingDot} />
-              </View>
+        ) : (
+          <>
+            <View style={styles.dateHeader}>
+              <Text style={styles.dateText}>Hôm nay</Text>
             </View>
-          </View>
+
+            {messages.map((msg) => {
+              const animValue = messageAnimations[msg.id];
+              const shouldAnimate = animValue !== undefined;
+              const isPatient = msg.sender === 'patient';
+              
+              return (
+                <Animated.View
+                  key={msg.id}
+                  style={[
+                    styles.messageWrapper,
+                    isPatient ? styles.userMessageWrapper : styles.doctorMessageWrapper,
+                    shouldAnimate && {
+                      opacity: animValue,
+                      transform: [
+                        {
+                          scale: animValue.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0.8, 1],
+                          }),
+                        },
+                        {
+                          translateY: animValue.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [20, 0],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                >
+                  {!isPatient && (
+                    <Image
+                      source={getDoctorImage(doctorImage, doctorName)}
+                      style={styles.messageAvatar}
+                    />
+                  )}
+                  <View style={styles.messageContent}>
+                    {!isPatient && (
+                      <Text style={styles.senderName}>{doctorName}</Text>
+                    )}
+                    {isPatient && (
+                      <Text style={styles.senderNameRight}>{userData?.fullName || 'Bạn'}</Text>
+                    )}
+                    <View
+                      style={[
+                        styles.messageBubble,
+                        isPatient ? styles.userBubble : styles.doctorBubble,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.messageText,
+                          isPatient ? styles.userMessageText : styles.doctorMessageText,
+                        ]}
+                      >
+                        {msg.text}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.messageTime,
+                          isPatient ? styles.userMessageTime : styles.doctorMessageTime,
+                        ]}
+                      >
+                        {msg.time}
+                      </Text>
+                    </View>
+                  </View>
+                  {isPatient && patientAvatar && (
+                    <Image
+                      source={{ uri: patientAvatar }}
+                      style={styles.patientAvatar}
+                    />
+                  )}
+                </Animated.View>
+              );
+            })}
+          </>
         )}
       </ScrollView>
 
-      {/* Quick Replies */}
-      <View style={styles.quickReplies}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <TouchableOpacity style={styles.quickReplyBtn}>
-            <Text style={styles.quickReplyText}>Triệu chứng của tôi</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.quickReplyBtn}>
-            <Text style={styles.quickReplyText}>Đặt lịch khám</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.quickReplyBtn}>
-            <Text style={styles.quickReplyText}>Hỏi về thuốc</Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
-
-      {/* Input */}
       <View style={styles.inputContainer}>
-        <TouchableOpacity style={styles.attachBtn}>
-          <Ionicons name="add-circle-outline" size={28} color="#00BCD4" />
-        </TouchableOpacity>
         <View style={styles.inputWrapper}>
           <TextInput
             style={styles.input}
@@ -276,9 +522,6 @@ export default function DoctorChatScreen() {
             onChangeText={setMessage}
             multiline
           />
-          <TouchableOpacity style={styles.emojiBtn}>
-            <Ionicons name="happy-outline" size={22} color="#64748b" />
-          </TouchableOpacity>
         </View>
         <TouchableOpacity 
           style={[styles.sendBtn, message.trim() && styles.sendBtnActive]}
@@ -297,14 +540,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f0f9ff',
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#64748b',
+  },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingTop: 50,
     paddingBottom: 12,
     paddingHorizontal: 16,
     gap: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
   backBtn: {
     padding: 4,
@@ -314,6 +570,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  headerButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#e0f2f1',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   doctorAvatar: {
     width: 40,
@@ -326,7 +594,7 @@ const styles = StyleSheet.create({
   doctorName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0f172a',
     marginBottom: 2,
   },
   statusRow: {
@@ -342,24 +610,31 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 12,
-    color: '#fff',
-    opacity: 0.9,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  headerBtn: {
-    width: 36,
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
+    color: '#64748b',
   },
   messagesContainer: {
     flex: 1,
   },
   messagesContent: {
     padding: 16,
+    flexGrow: 1,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 80,
+  },
+  emptyText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0f172a',
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 8,
   },
   dateHeader: {
     alignItems: 'center',
@@ -376,31 +651,66 @@ const styles = StyleSheet.create({
   messageWrapper: {
     flexDirection: 'row',
     marginBottom: 12,
-    alignItems: 'flex-end',
+    gap: 8,
   },
   userMessageWrapper: {
     justifyContent: 'flex-end',
+    flexDirection: 'row-reverse',
+    alignSelf: 'flex-end',
   },
   doctorMessageWrapper: {
     justifyContent: 'flex-start',
+    alignSelf: 'flex-start',
+  },
+  messageContent: {
+    maxWidth: '80%',
+    flex: 0,
   },
   messageAvatar: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    marginRight: 8,
   },
-  messageBubble: {
-    maxWidth: '75%',
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+  patientAvatar: {
+    width: 32,
+    height: 32,
     borderRadius: 16,
   },
+  patientMessageAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  senderName: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748b',
+    marginBottom: 4,
+    marginLeft: 4,
+  },
+  senderNameRight: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748b',
+    marginBottom: 4,
+    marginRight: 4,
+    textAlign: 'right',
+  },
+  messageBubble: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 16,
+    maxWidth: '100%',
+    minWidth: 60,
+  },
   userBubble: {
+    alignSelf: 'flex-end',
     backgroundColor: '#00BCD4',
     borderBottomRightRadius: 4,
   },
   doctorBubble: {
+    alignSelf: 'flex-start',
     backgroundColor: '#fff',
     borderBottomLeftRadius: 4,
   },
@@ -408,6 +718,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 4,
+    flexWrap: 'wrap',
   },
   userMessageText: {
     color: '#fff',
@@ -426,47 +737,6 @@ const styles = StyleSheet.create({
   doctorMessageTime: {
     color: '#64748b',
   },
-  typingIndicator: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginBottom: 12,
-  },
-  typingBubble: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 16,
-    borderBottomLeftRadius: 4,
-  },
-  typingDots: {
-    flexDirection: 'row',
-    gap: 4,
-  },
-  typingDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#94a3b8',
-  },
-  quickReplies: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
-  },
-  quickReplyBtn: {
-    backgroundColor: '#E0F7FA',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  quickReplyText: {
-    fontSize: 13,
-    color: '#00BCD4',
-    fontWeight: '500',
-  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -476,9 +746,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#f1f5f9',
     gap: 8,
-  },
-  attachBtn: {
-    padding: 4,
   },
   inputWrapper: {
     flex: 1,
@@ -495,9 +762,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#0f172a',
     maxHeight: 80,
-  },
-  emojiBtn: {
-    padding: 4,
   },
   sendBtn: {
     width: 40,

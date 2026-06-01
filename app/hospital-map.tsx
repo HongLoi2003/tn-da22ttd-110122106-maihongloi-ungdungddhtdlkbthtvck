@@ -32,14 +32,14 @@ export default function HospitalMapScreen() {
   const hospitals: Hospital[] = [
     {
       id: 1,
-      name: 'Bệnh viện Chợ Rẫy',
+      name: 'Bệnh viện Trường Đại học Trà Vinh',
       distance: '1.2 km',
       address: '201B Nguyễn Chí Thanh, Quận 5, TP. HCM',
       rating: 4.6,
       reviews: 1256,
       lat: 10.7547,
       lng: 106.6636,
-      image: require('@/assets/images/benhvien.png'),
+      image: require('@/assets/images/benhviendhtv.png'),
     },
     {
       id: 2,
@@ -50,7 +50,7 @@ export default function HospitalMapScreen() {
       reviews: 842,
       lat: 10.7891,
       lng: 106.7198,
-      image: require('@/assets/images/benhvien.png'),
+      image: require('@/assets/images/benhviendhtv.png'),
     },
     {
       id: 3,
@@ -61,7 +61,7 @@ export default function HospitalMapScreen() {
       reviews: 615,
       lat: 10.7359,
       lng: 106.7217,
-      image: require('@/assets/images/benhvien.png'),
+      image: require('@/assets/images/benhviendhtv.png'),
     },
   ];
 

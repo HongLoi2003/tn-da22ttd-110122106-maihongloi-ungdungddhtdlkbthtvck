@@ -7,12 +7,33 @@ import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacit
 import { useAuth } from './context/AuthContext';
 import { getDocumentsWithQuery } from './services/firebaseService';
 
+// Mapping ảnh bác sĩ
+const doctorImages: any = {
+  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
+  'tranthilan.png': require('@/assets/images/tranthilan.png'),
+  'leminhtam.png': require('@/assets/images/leminhtam.png'),
+  'tranthimai.png': require('@/assets/images/tranthimai.png'),
+  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
+  'phamthuha.png': require('@/assets/images/phamthuha.png'),
+  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
+  'vuthilan.png': require('@/assets/images/vuthilan.png'),
+  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
+  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
+  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
+  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
+  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
+  'lethihang.png': require('@/assets/images/lethihang.png'),
+  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
+  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
+};
+
 export default function ReviewsScreen() {
   const router = useRouter();
   const { user } = useAuth();
   const [myReviews, setMyReviews] = useState<any[]>([]);
   const [pendingReviews, setPendingReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [doctorAvatars, setDoctorAvatars] = useState<{ [key: string]: any }>({});
 
   useFocusEffect(
     useCallback(() => {
@@ -50,6 +71,9 @@ export default function ReviewsScreen() {
         !reviewedAppointmentIds.includes(apt.id)
       );
       setPendingReviews(pending);
+
+      // Load doctor avatars
+      await loadDoctorAvatars([...sortedReviews, ...pending]);
     } catch (error) {
       console.error('Error loading reviews:', error);
       setMyReviews([]);
@@ -57,6 +81,38 @@ export default function ReviewsScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadDoctorAvatars = async (items: any[]) => {
+    try {
+      const { getDocumentById } = await import('./services/firebaseService');
+      const avatarMap: { [key: string]: any } = {};
+      
+      // Get unique doctor IDs
+      const doctorIds = [...new Set(items.map(item => item.doctorId).filter(Boolean))];
+      
+      for (const doctorId of doctorIds) {
+        try {
+          const doctor = await getDocumentById('doctors', doctorId);
+          if (doctor) {
+            const imageField = (doctor as any).hinh_anh || (doctor as any).image;
+            if (imageField && doctorImages[imageField]) {
+              avatarMap[doctorId] = doctorImages[imageField];
+            }
+          }
+        } catch (error) {
+          console.log('Could not load doctor avatar:', doctorId);
+        }
+      }
+      
+      setDoctorAvatars(avatarMap);
+    } catch (error) {
+      console.error('Error loading doctor avatars:', error);
+    }
+  };
+
+  const getDoctorAvatar = (doctorId: string) => {
+    return doctorAvatars[doctorId] || require('@/assets/images/logo.png');
   };
 
   const renderStars = (rating: number) => {
@@ -85,7 +141,7 @@ export default function ReviewsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Đánh giá của tôi</Text>
         <View style={{ width: 24 }} />
@@ -126,7 +182,7 @@ export default function ReviewsScreen() {
             {pendingReviews.map((review) => (
               <TouchableOpacity key={review.id} style={styles.pendingCard}>
                 <Image
-                  source={require('@/assets/images/logo.png')}
+                  source={getDoctorAvatar(review.doctorId)}
                   style={styles.doctorAvatar}
                 />
                 <View style={styles.pendingInfo}>
@@ -152,7 +208,7 @@ export default function ReviewsScreen() {
             <View key={review.id} style={styles.reviewCard}>
               <View style={styles.reviewHeader}>
                 <Image
-                  source={require('@/assets/images/logo.png')}
+                  source={getDoctorAvatar(review.doctorId)}
                   style={styles.doctorAvatar}
                 />
                 <View style={styles.reviewHeaderInfo}>
@@ -184,9 +240,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f9ff',
   },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     paddingTop: 50,
     paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
@@ -198,7 +256,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0f172a',
   },
   content: {
     flex: 1,

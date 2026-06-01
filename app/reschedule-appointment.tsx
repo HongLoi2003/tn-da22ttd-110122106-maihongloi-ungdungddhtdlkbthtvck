@@ -16,13 +16,6 @@ import {
 } from 'react-native';
 import { getDocumentById, getDocumentsWithQuery, updateDocument } from './services/firebaseService';
 
-const doctorImages = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-};
-
 const timeSlots = [
   '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
   '11:00', '11:30', '13:00', '13:30', '14:00', '14:30',
@@ -230,9 +223,7 @@ export default function RescheduleAppointmentScreen() {
     );
   }
 
-  const doctorImage = appointment.image && doctorImages[appointment.image as keyof typeof doctorImages]
-    ? doctorImages[appointment.image as keyof typeof doctorImages]
-    : require('@/assets/images/logo.png');
+  const doctorImage = getDoctorAvatarSmart(appointment.doctor, appointment.image || appointment.hinh_anh);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -320,11 +311,7 @@ export default function RescheduleAppointmentScreen() {
                     onPress={() => setSelectedDoctorId(doctor.id)}
                   >
                     <Image
-                      source={
-                        doctor.image && doctorImages[doctor.image as keyof typeof doctorImages]
-                          ? doctorImages[doctor.image as keyof typeof doctorImages]
-                          : require('@/assets/images/logo.png')
-                      }
+                      source={getDoctorAvatarSmart(doctor.name, doctor.image)}
                       style={styles.doctorCardImage}
                     />
                     <Text style={styles.doctorCardName} numberOfLines={1}>

@@ -2,21 +2,73 @@
   {
     "id": "pop_1",
     "name": "Tim mạch",
-    "doctors": 12
+    "doctors": 12,
+    "image": "tim-mach.png"
   },
   {
     "id": "pop_2",
     "name": "Hô hấp",
-    "doctors": 8
+    "doctors": 8,
+    "image": "ho-hap.png"
   },
   {
     "id": "pop_3",
     "name": "Thần kinh",
-    "doctors": 10
+    "doctors": 10,
+    "image": "than-kinh.png"
   },
   {
     "id": "pop_4",
     "name": "Da liễu",
-    "doctors": 6
+    "doctors": 6,
+    "image": "da-lieu.png"
+  },
+  {
+    "id": "pop_5",
+    "name": "Nhi khoa",
+    "doctors": 15,
+    "image": "nhi-khoa.png"
+  },
+  {
+    "id": "pop_6",
+    "name": "Sản phụ khoa",
+    "doctors": 9,
+    "image": "san-phu-khoa.png"
+  },
+  {
+    "id": "pop_7",
+    "name": "Mắt",
+    "doctors": 7,
+    "image": "mat.png"
+  },
+  {
+    "id": "pop_8",
+    "name": "Răng hàm mặt",
+    "doctors": 11,
+    "image": "rang-ham-mat.png"
+  },
+  {
+    "id": "pop_9",
+    "name": "Tai mũi họng",
+    "doctors": 8,
+    "image": "tai-mui-hong.png"
+  },
+  {
+    "id": "pop_10",
+    "name": "Tiêu hóa",
+    "doctors": 10,
+    "image": "tieu-hoa.png"
+  },
+  {
+    "id": "pop_11",
+    "name": "Cơ xương khớp",
+    "doctors": 13,
+    "image": "co-xuong-khop.png"
+  },
+  {
+    "id": "pop_12",
+    "name": "Nội tiết",
+    "doctors": 6,
+    "image": "noi-tiet.png"
   }
 ]

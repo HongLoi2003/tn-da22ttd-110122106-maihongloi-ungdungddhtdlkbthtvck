@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "9119519990",
+    "project_id": "hearthcare-847b3",
+    "storage_bucket": "hearthcare-847b3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:9119519990:android:6f89d2ae4f6020a9be48d7",
+        "android_client_info": {
+          "package_name": "com.maihongloi23.heatlecare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "9119519990-7p0ipag5n5gpqho8skg3im5omf1sqrju.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.maihongloi23.heatlecare",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "9119519990-h0ghp9fhpjltof05160ea98bchd42i6n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9IgdwTSvIEwC2tImJfd8DABDpGHGERlE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "9119519990-h0ghp9fhpjltof05160ea98bchd42i6n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -8,7 +8,7 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
 import { useAuth } from './context/AuthContext';
 import { deleteDocument, getAllDocuments, updateDocument } from './services/firebaseService';
@@ -18,7 +18,7 @@ interface Notification {
   userId: string;
   title: string;
   body: string;
-  type: 'appointment' | 'medication' | 'test_result' | 'prescription' | 'general';
+  type: 'appointment' | 'medication' | 'test_result' | 'prescription' | 'message' | 'general';
   read: boolean;
   createdAt: string;
   data?: any;
@@ -30,6 +30,7 @@ export default function NotificationsScreen() {
   const [selectedTab, setSelectedTab] = useState<'all' | 'unread'>('all');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const swipeableRefs = useRef<Map<string, Swipeable>>(new Map());
 
   useEffect(() => {
     loadNotifications();
@@ -78,6 +79,7 @@ export default function NotificationsScreen() {
       case 'medication': return 'medical';
       case 'test_result': return 'document-text';
       case 'prescription': return 'receipt';
+      case 'message': return 'chatbubble';
       default: return 'notifications';
     }
   };
@@ -88,6 +90,7 @@ export default function NotificationsScreen() {
       case 'medication': return '#4CAF50';
       case 'test_result': return '#FF9800';
       case 'prescription': return '#9C27B0';
+      case 'message': return '#2196F3';
       default: return '#9E9E9E';
     }
   };
@@ -139,6 +142,25 @@ export default function NotificationsScreen() {
     }
   };
 
+  const renderRightActions = (notificationId: string, progress: Animated.AnimatedInterpolation<number>) => {
+    const translateX = progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [80, 0],
+    });
+
+    return (
+      <Animated.View style={[styles.deleteAction, { transform: [{ translateX }] }]}>
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDeleteNotification(notificationId)}
+        >
+          <Ionicons name="trash-outline" size={24} color="#fff" />
+          <Text style={styles.deleteText}>Xóa</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
   const filteredNotifications =
     selectedTab === 'unread'
       ? notifications.filter(n => !n.read)
@@ -158,90 +180,93 @@ export default function NotificationsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Thông báo</Text>
-        <TouchableOpacity onPress={handleMarkAllAsRead} style={styles.markAllBtn}>
-          <Ionicons name="checkmark-done" size={24} color="#00BCD4" />
-        </TouchableOpacity>
-      </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Thông báo</Text>
+          <TouchableOpacity onPress={handleMarkAllAsRead} style={styles.markAllBtn}>
+            <Ionicons name="checkmark-done" size={24} color="#00BCD4" />
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.tabs}>
-        <TouchableOpacity
-          style={[styles.tab, selectedTab === 'all' && styles.tabActive]}
-          onPress={() => setSelectedTab('all')}
-        >
-          <Text style={[styles.tabText, selectedTab === 'all' && styles.tabTextActive]}>
-            Tất cả ({notifications.length})
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.tab, selectedTab === 'unread' && styles.tabActive]}
-          onPress={() => setSelectedTab('unread')}
-        >
-          <Text style={[styles.tabText, selectedTab === 'unread' && styles.tabTextActive]}>
-            Chưa đọc ({unreadCount})
-          </Text>
-        </TouchableOpacity>
-      </View>
+        <View style={styles.tabs}>
+          <TouchableOpacity
+            style={[styles.tab, selectedTab === 'all' && styles.tabActive]}
+            onPress={() => setSelectedTab('all')}
+          >
+            <Text style={[styles.tabText, selectedTab === 'all' && styles.tabTextActive]}>
+              Tất cả ({notifications.length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, selectedTab === 'unread' && styles.tabActive]}
+            onPress={() => setSelectedTab('unread')}
+          >
+            <Text style={[styles.tabText, selectedTab === 'unread' && styles.tabTextActive]}>
+              Chưa đọc ({unreadCount})
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {filteredNotifications.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Ionicons name="notifications-off-outline" size={64} color="#cbd5e1" />
-            <Text style={styles.emptyText}>Không có thông báo</Text>
-          </View>
-        ) : (
-          filteredNotifications.map(notification => (
-            <TouchableOpacity
-              key={notification.id}
-              style={[
-                styles.notificationCard,
-                !notification.read && styles.notificationCardUnread,
-              ]}
-              onPress={() => handleNotificationPress(notification)}
-            >
-              <View
-                style={[
-                  styles.iconContainer,
-                  { backgroundColor: getNotificationColor(notification.type) + '20' },
-                ]}
-              >
-                <Ionicons
-                  name={getNotificationIcon(notification.type) as any}
-                  size={24}
-                  color={getNotificationColor(notification.type)}
-                />
-              </View>
-
-              <View style={styles.notificationContent}>
-                <View style={styles.notificationHeader}>
-                  <Text style={styles.notificationTitle}>{notification.title}</Text>
-                  {!notification.read && <View style={styles.unreadDot} />}
-                </View>
-                <Text style={styles.notificationBody} numberOfLines={2}>
-                  {notification.body}
-                </Text>
-                <Text style={styles.notificationTime}>{getTimeAgo(notification.createdAt)}</Text>
-              </View>
-
-              <TouchableOpacity
-                style={styles.deleteBtn}
-                onPress={(e) => {
-                  e.stopPropagation();
-                  handleDeleteNotification(notification.id);
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          {filteredNotifications.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="notifications-off-outline" size={64} color="#cbd5e1" />
+              <Text style={styles.emptyText}>Không có thông báo</Text>
+            </View>
+          ) : (
+            filteredNotifications.map(notification => (
+              <Swipeable
+                key={notification.id}
+                ref={(ref) => {
+                  if (ref) {
+                    swipeableRefs.current.set(notification.id, ref);
+                  }
                 }}
+                renderRightActions={(progress) => renderRightActions(notification.id, progress)}
+                overshootRight={false}
+                friction={2}
               >
-                <Ionicons name="close-circle" size={20} color="#94a3b8" />
-              </TouchableOpacity>
-            </TouchableOpacity>
-          ))
-        )}
-      </ScrollView>
-    </SafeAreaView>
+                <TouchableOpacity
+                  style={[
+                    styles.notificationCard,
+                    !notification.read && styles.notificationCardUnread,
+                  ]}
+                  onPress={() => handleNotificationPress(notification)}
+                >
+                  <View
+                    style={[
+                      styles.iconContainer,
+                      { backgroundColor: getNotificationColor(notification.type) + '20' },
+                    ]}
+                  >
+                    <Ionicons
+                      name={getNotificationIcon(notification.type) as any}
+                      size={24}
+                      color={getNotificationColor(notification.type)}
+                    />
+                  </View>
+
+                  <View style={styles.notificationContent}>
+                    <View style={styles.notificationHeader}>
+                      <Text style={styles.notificationTitle}>{notification.title}</Text>
+                      {!notification.read && <View style={styles.unreadDot} />}
+                    </View>
+                    <Text style={styles.notificationBody} numberOfLines={2}>
+                      {notification.body}
+                    </Text>
+                    <Text style={styles.notificationTime}>{getTimeAgo(notification.createdAt)}</Text>
+                  </View>
+                </TouchableOpacity>
+              </Swipeable>
+            ))
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
@@ -317,4 +342,24 @@ const styles = StyleSheet.create({
   deleteBtn: { padding: 4 },
   emptyState: { alignItems: 'center', justifyContent: 'center', paddingVertical: 80 },
   emptyText: { fontSize: 16, color: '#94a3b8', marginTop: 16 },
+  deleteAction: {
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+    marginTop: 12,
+  },
+  deleteButton: {
+    backgroundColor: '#ef4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  deleteText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+  },
 });

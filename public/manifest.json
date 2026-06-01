@@ -1,0 +1,29 @@
+{
+  "name": "Health Care",
+  "short_name": "Health Care",
+  "description": "Ứng dụng chăm sóc sức khỏe - Đặt lịch khám, tư vấn bác sĩ trực tuyến",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#00BCD4",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "medical", "lifestyle"],
+  "lang": "vi",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}

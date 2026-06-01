@@ -7,7 +7,8 @@
     "kinh_nghiem": 10,
     "rating": 4.8,
     "image": "nguyenvanam.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 350000
   },
   {
     "id": "bs002",
@@ -17,7 +18,8 @@
     "kinh_nghiem": 7,
     "rating": 4.8,
     "image": "tranthilan.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 300000
   },
   {
     "id": "bs003",
@@ -27,7 +29,8 @@
     "kinh_nghiem": 5,
     "rating": 4.8,
     "image": "leminhtam.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 400000
   },
   {
     "id": "bs004",
@@ -37,7 +40,8 @@
     "kinh_nghiem": 8,
     "rating": 4.9,
     "image": "tranthimai.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 250000
   },
   {
     "id": "bs005",
@@ -47,7 +51,8 @@
     "kinh_nghiem": 9,
     "rating": 4.9,
     "image": "lehoangnam.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 280000
   },
   {
     "id": "bs006",
@@ -57,7 +62,8 @@
     "kinh_nghiem": 6,
     "rating": 4.9,
     "image": "phamthuha.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 320000
   },
   {
     "id": "bs007",
@@ -67,7 +73,8 @@
     "kinh_nghiem": 12,
     "rating": 4.7,
     "image": "dominhtuan.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 350000
   },
   {
     "id": "bs008",
@@ -77,7 +84,8 @@
     "kinh_nghiem": 4,
     "rating": 4.8,
     "image": "vuthilan.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 300000
   },
   {
     "id": "bs009",
@@ -87,7 +95,8 @@
     "kinh_nghiem": 11,
     "rating": 4.9,
     "image": "hoangvanduc.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 280000
   },
   {
     "id": "bs010",
@@ -97,7 +106,8 @@
     "kinh_nghiem": 3,
     "rating": 4.8,
     "image": "ngothihuong.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 300000
   },
   {
     "id": "bs011",
@@ -107,7 +117,8 @@
     "kinh_nghiem": 8,
     "rating": 4.9,
     "image": "nguyenthihoa.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 300000
   },
   {
     "id": "bs012",
@@ -117,7 +128,8 @@
     "kinh_nghiem": 10,
     "rating": 4.8,
     "image": "tranvankhoa.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 320000
   },
   {
     "id": "bs013",
@@ -127,7 +139,8 @@
     "kinh_nghiem": 9,
     "rating": 4.9,
     "image": "phamminhquan.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 250000
   },
   {
     "id": "bs014",
@@ -137,7 +150,8 @@
     "kinh_nghiem": 12,
     "rating": 4.9,
     "image": "lethihang.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 280000
   },
   {
     "id": "bs015",
@@ -147,7 +161,8 @@
     "kinh_nghiem": 8,
     "rating": 4.8,
     "image": "nguyenvanhai.png",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 350000
   },
   {
     "id": "bs016",
@@ -157,6 +172,7 @@
     "kinh_nghiem": 11,
     "rating": 4.9,
     "image": "dangthithao.jpg",
-    "trang_thai": true
+    "trang_thai": true,
+    "phi_kham": 300000
   }
 ]

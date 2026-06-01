@@ -1,29 +1,11 @@
-import { getAllDocuments } from '@/app/services/firebaseService';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-
-const doctorImages: any = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
-};
+import { getAllDocuments } from './services/firebaseService';
+import { getDoctorAvatarSmart } from './utils/doctorAvatars';
 
 // Map triệu chứng sang chuyên khoa
 const symptomToSpecialty: any = {
@@ -60,39 +42,68 @@ export default function AllDoctorsScreen() {
   const searchParam = params.search as string;
   
   console.log('🔍 All params received:', params);
+  console.log('🔍 Specialty param:', specialtyParam);
   console.log('🔍 Search param:', searchParam);
   
   // Map search text to specialty ID
   const mapSearchToSpecialty = (searchText: string): string | null => {
     const normalized = searchText.toLowerCase().trim();
     
-    if (normalized.includes('tim') || normalized.includes('mạch')) return 'tim_mach';
-    if (normalized.includes('da') || normalized.includes('liễu')) return 'da_lieu';
-    if (normalized.includes('nhi')) return 'nhi_khoa';
-    if (normalized.includes('sản') || normalized.includes('phụ') || normalized.includes('phu')) return 'san_phu_khoa';
+    console.log('🔍 Mapping specialty:', searchText, '-> normalized:', normalized);
+    
+    // Map từ tên chuyên khoa AI trả về (ưu tiên cao nhất - exact match)
+    if (normalized === 'thần kinh') return 'than_kinh';
+    if (normalized === 'cơ xương khớp') return 'co_xuong_khop';
+    if (normalized === 'tim mạch') return 'tim_mach';
+    if (normalized === 'tiêu hóa' || normalized === 'tiêu hoá') return 'tieu_hoa';
+    if (normalized === 'hô hấp') return 'ho_hap';
+    if (normalized === 'da liễu') return 'da_lieu';
+    if (normalized === 'tai mũi họng') return 'tai_mui_hong';
+    if (normalized === 'mắt') return 'mat';
+    if (normalized === 'răng hàm mặt') return 'rang_ham_mat';
+    if (normalized === 'nội tiết') return 'noi_tiet';
+    if (normalized === 'nhi khoa') return 'nhi_khoa';
+    if (normalized === 'sản phụ khoa') return 'san_phu_khoa';
+    if (normalized === 'nội tổng quát' || normalized === 'đa khoa') return 'all';
+    
+    // Map từ search text thông thường (chứa từ khóa)
     if (normalized.includes('thần') || normalized.includes('than') || normalized.includes('kinh')) return 'than_kinh';
-    if (normalized.includes('hô') || normalized.includes('ho') || normalized.includes('hấp') || normalized.includes('hap')) return 'ho_hap';
+    if (normalized.includes('xương') || normalized.includes('xuong') || normalized.includes('khớp') || normalized.includes('khop') || normalized.includes('cơ')) return 'co_xuong_khop';
+    if (normalized.includes('tim') || normalized.includes('mạch') || normalized.includes('mach')) return 'tim_mach';
     if (normalized.includes('tiêu') || normalized.includes('tieu') || normalized.includes('hóa') || normalized.includes('hoa')) return 'tieu_hoa';
-    if (normalized.includes('cơ') || normalized.includes('co') || normalized.includes('xương') || normalized.includes('xuong') || normalized.includes('khớp') || normalized.includes('khop')) return 'co_xuong_khop';
+    if (normalized.includes('hô') || normalized.includes('ho') || normalized.includes('hấp') || normalized.includes('hap')) return 'ho_hap';
+    if (normalized.includes('da') || normalized.includes('liễu') || normalized.includes('lieu')) return 'da_lieu';
     if (normalized.includes('tai') || normalized.includes('mũi') || normalized.includes('mui') || normalized.includes('họng') || normalized.includes('hong')) return 'tai_mui_hong';
     if (normalized.includes('mắt') || normalized.includes('mat') || normalized.includes('nhãn') || normalized.includes('nhan')) return 'mat';
     if (normalized.includes('răng') || normalized.includes('rang') || normalized.includes('hàm') || normalized.includes('ham') || normalized.includes('nha')) return 'rang_ham_mat';
-    if (normalized.includes('nội tiết') || normalized.includes('noi tiet') || normalized.includes('tiết') || normalized.includes('tiet')) return 'noi_tiet';
+    if (normalized.includes('nội tiết') || normalized.includes('noi tiet') || normalized.includes('tiết') || normalized.includes('tiet') || normalized.includes('đái tháo đường') || normalized.includes('tiểu đường')) return 'noi_tiet';
+    if (normalized.includes('nhi') || normalized.includes('trẻ em') || normalized.includes('tre em') || normalized.includes('bé') || normalized.includes('be')) return 'nhi_khoa';
+    if (normalized.includes('sản') || normalized.includes('san') || normalized.includes('phụ') || normalized.includes('phu') || normalized.includes('thai') || normalized.includes('mang thai')) return 'san_phu_khoa';
     
     return null;
   };
   
-  // Determine initial specialty from search param
+  // Determine initial specialty from params
   let initialSpecialty = 'all';
-  if (searchParam) {
+  
+  // Ưu tiên specialty param từ AI chat
+  if (specialtyParam) {
+    const mappedSpecialty = mapSearchToSpecialty(specialtyParam);
+    if (mappedSpecialty) {
+      initialSpecialty = mappedSpecialty;
+      console.log(`✅ Specialty param "${specialtyParam}" mapped to: ${initialSpecialty}`);
+    } else {
+      console.log(`⚠️ Could not map specialty param: ${specialtyParam}`);
+    }
+  }
+  
+  // Fallback to search param
+  if (initialSpecialty === 'all' && searchParam) {
     const mappedSpecialty = mapSearchToSpecialty(searchParam);
     if (mappedSpecialty) {
       initialSpecialty = mappedSpecialty;
-      console.log(`✅ Search "${searchParam}" mapped to specialty: ${initialSpecialty}`);
+      console.log(`✅ Search param "${searchParam}" mapped to: ${initialSpecialty}`);
     }
-  }
-  if (specialtyParam) {
-    initialSpecialty = specialtyParam;
   }
   
   const [searchText, setSearchText] = useState('');
@@ -174,10 +185,10 @@ export default function AllDoctorsScreen() {
             rating: doc.rating || 4.8,
             reviews: 100,
             experience: `${doc.kinh_nghiem || doc.experience || 5} năm`,
-            hospital: 'Bệnh viện Đa khoa',
+            hospital: 'Bệnh viện Trường Đại học Trà Vinh',
             image: doc.image || 'nguyenvanam.png',
             online: doc.trang_thai !== false,
-            price: '300.000đ',
+            price: (doc.phi_kham || doc.gia_kham) ? `${(doc.phi_kham || doc.gia_kham).toLocaleString('vi-VN')}đ` : '200.000đ',
           };
         });
         console.log('Dữ liệu bác sĩ đã map:', mappedDoctors);
@@ -194,42 +205,56 @@ export default function AllDoctorsScreen() {
     fetchDoctors();
   }, []);
 
-  // Auto-select specialty khi có params từ symptom
+  // Auto-select specialty khi có params từ AI chat hoặc symptom
   useEffect(() => {
     if ((symptom || specialtyParam) && allDoctors.length > 0) {
-      // Ưu tiên dùng specialty từ params, nếu không có thì map từ symptom
-      let recommendedSpecialty = specialtyParam || symptomToSpecialty[symptom];
-      
-      if (recommendedSpecialty) {
-        const normalized = recommendedSpecialty.toLowerCase().trim();
-        let specialtyId = 'all';
-        
-        if (normalized.includes('tim') || normalized.includes('mạch')) specialtyId = 'tim_mach';
-        else if (normalized.includes('da') || normalized.includes('liễu')) specialtyId = 'da_lieu';
-        else if (normalized.includes('nhi')) specialtyId = 'nhi_khoa';
-        else if (normalized.includes('sản') || normalized.includes('phụ')) specialtyId = 'san_phu_khoa';
-        else if (normalized.includes('thần') || normalized.includes('kinh')) specialtyId = 'than_kinh';
-        else if (normalized.includes('hô') || normalized.includes('hấp')) specialtyId = 'ho_hap';
-        else if (normalized.includes('tiêu') || normalized.includes('hóa')) specialtyId = 'tieu_hoa';
-        else if (normalized.includes('cơ') || normalized.includes('xương') || normalized.includes('khớp')) specialtyId = 'co_xuong_khop';
-        else if (normalized.includes('tai') || normalized.includes('mũi') || normalized.includes('họng')) specialtyId = 'tai_mui_hong';
-        else if (normalized.includes('mắt') || normalized.includes('nhãn')) specialtyId = 'mat';
-        else if (normalized.includes('răng') || normalized.includes('hàm') || normalized.includes('nha')) specialtyId = 'rang_ham_mat';
-        else if (normalized.includes('nội tiết') || normalized.includes('tiết')) specialtyId = 'noi_tiet';
-        
-        console.log('✅ Auto-filtering to specialty:', specialtyId);
-        setSelectedSpecialty(specialtyId);
-        
-        // Scroll to specialty tab
-        const index = specialties.findIndex(s => s.id === specialtyId);
+      // Ưu tiên dùng specialty từ params (đã được map ở initialSpecialty)
+      if (specialtyParam) {
+        // Đã được map ở initialSpecialty, chỉ cần scroll
+        const index = specialties.findIndex(s => s.id === initialSpecialty);
         if (index > 0 && specialtyListRef.current) {
           setTimeout(() => {
             specialtyListRef.current?.scrollToIndex({ index, animated: true });
           }, 100);
         }
+        return; // Không cần map lại
+      }
+      
+      // Nếu chỉ có symptom (không có specialtyParam), thì map từ symptom
+      if (symptom) {
+        let recommendedSpecialty = symptomToSpecialty[symptom];
+        
+        if (recommendedSpecialty) {
+          const normalized = recommendedSpecialty.toLowerCase().trim();
+          let specialtyId = 'all';
+          
+          if (normalized.includes('tim') || normalized.includes('mạch')) specialtyId = 'tim_mach';
+          else if (normalized.includes('da') || normalized.includes('liễu')) specialtyId = 'da_lieu';
+          else if (normalized.includes('nhi')) specialtyId = 'nhi_khoa';
+          else if (normalized.includes('sản') || normalized.includes('phụ')) specialtyId = 'san_phu_khoa';
+          else if (normalized.includes('thần') || normalized.includes('kinh')) specialtyId = 'than_kinh';
+          else if (normalized.includes('hô') || normalized.includes('hấp')) specialtyId = 'ho_hap';
+          else if (normalized.includes('tiêu') || normalized.includes('hóa')) specialtyId = 'tieu_hoa';
+          else if (normalized.includes('cơ') || normalized.includes('xương') || normalized.includes('khớp')) specialtyId = 'co_xuong_khop';
+          else if (normalized.includes('tai') || normalized.includes('mũi') || normalized.includes('họng')) specialtyId = 'tai_mui_hong';
+          else if (normalized.includes('mắt') || normalized.includes('nhãn')) specialtyId = 'mat';
+          else if (normalized.includes('răng') || normalized.includes('hàm') || normalized.includes('nha')) specialtyId = 'rang_ham_mat';
+          else if (normalized.includes('nội tiết') || normalized.includes('tiết')) specialtyId = 'noi_tiet';
+          
+          console.log('✅ Auto-filtering from symptom to specialty:', specialtyId);
+          setSelectedSpecialty(specialtyId);
+          
+          // Scroll to specialty tab
+          const index = specialties.findIndex(s => s.id === specialtyId);
+          if (index > 0 && specialtyListRef.current) {
+            setTimeout(() => {
+              specialtyListRef.current?.scrollToIndex({ index, animated: true });
+            }, 100);
+          }
+        }
       }
     }
-  }, [allDoctors.length, symptom, specialtyParam]);
+  }, [allDoctors.length, symptom, specialtyParam, initialSpecialty]);
 
   React.useEffect(() => {
     if (params.specialty && params.specialty !== 'all') {
@@ -314,7 +339,7 @@ export default function AllDoctorsScreen() {
     >
       <View style={styles.cardContent}>
         <View style={styles.doctorAvatarContainer}>
-          <Image source={doctorImages[item.image] || doctorImages['nguyenvanam.png']} style={styles.doctorAvatar} />
+          <Image source={getDoctorAvatarSmart(item.name, item.image)} style={styles.doctorAvatar} />
           {item.online && <View style={styles.onlineBadge} />}
         </View>
         <View style={styles.doctorInfo}>
@@ -381,12 +406,21 @@ export default function AllDoctorsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color="#fff" />
+        <TouchableOpacity 
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            } else {
+              router.replace('/(tabs)/');
+            }
+          }} 
+          style={styles.backBtn}
+        >
+          <Ionicons name="chevron-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Bác sĩ gợi ý</Text>
         <TouchableOpacity style={styles.filterBtn}>
-          <Ionicons name="options-outline" size={24} color="#fff" />
+          <Ionicons name="options-outline" size={24} color="#0f172a" />
         </TouchableOpacity>
       </View>
 
@@ -481,13 +515,15 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingTop: 50,
     paddingBottom: 16,
     paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
   backBtn: {
     width: 40,
@@ -498,7 +534,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0f172a',
   },
   filterBtn: {
     width: 40,

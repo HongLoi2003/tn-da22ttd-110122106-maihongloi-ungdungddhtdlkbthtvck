@@ -9,7 +9,7 @@ export default function HospitalNetworkScreen() {
   const hospitals = [
     {
       id: '1',
-      name: 'Bệnh viện Bạch Mai',
+      name: 'Bệnh viện Trường Đại học Trà Vinh',
       level: 'central',
       levelText: 'Tuyến Trung ương',
       address: '78 Giải Phóng, Đống Đa, Hà Nội',
@@ -84,7 +84,7 @@ export default function HospitalNetworkScreen() {
       id: '2',
       patientName: 'Trần Thị B',
       fromHospital: 'Bệnh viện Đa khoa Quận 1',
-      toHospital: 'Bệnh viện Bạch Mai',
+      toHospital: 'Bệnh viện Trường Đại học Trà Vinh',
       reason: 'Cần phẫu thuật tim mạch',
       status: 'approved',
       date: '2024-01-19',
@@ -97,7 +97,7 @@ export default function HospitalNetworkScreen() {
       id: '1',
       title: 'Hội chẩn bệnh nhân tim mạch',
       fromHospital: 'Trạm Y tế Phường 5',
-      withHospital: 'Bệnh viện Bạch Mai',
+      withHospital: 'Bệnh viện Trường Đại học Trà Vinh',
       doctor: 'BS. Nguyễn Văn An',
       specialty: 'Tim mạch',
       date: '2024-01-21',

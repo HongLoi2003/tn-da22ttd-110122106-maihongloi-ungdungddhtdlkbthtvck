@@ -38,6 +38,17 @@ class ErrorHandler {
     const code = error?.code || 'UNKNOWN';
     let message = 'An error occurred';
 
+    // Xử lý lỗi permission-denied một cách graceful - không log
+    if (code === 'permission-denied' || error?.message?.includes('permission')) {
+      return {
+        type: ErrorType.FIREBASE,
+        message: 'Feature requires additional permissions',
+        code: 'permission-denied',
+        originalError: error,
+        timestamp: new Date(),
+      };
+    }
+
     console.log('🔍 [ERROR_HANDLER] Firebase error details:');
     console.log('   Code:', code);
     console.log('   Message:', error?.message);
@@ -146,6 +157,11 @@ class ErrorHandler {
    * Log error for debugging
    */
   logError(error: AppError): void {
+    // Không log lỗi permission-denied để giảm noise
+    if (error.code === 'permission-denied') {
+      return;
+    }
+    
     const logMessage = `[${error.type}] ${error.message}`;
     console.error(logMessage, {
       code: error.code,

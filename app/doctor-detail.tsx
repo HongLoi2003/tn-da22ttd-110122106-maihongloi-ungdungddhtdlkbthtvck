@@ -37,6 +37,7 @@ export default function DoctorDetailScreen() {
   const params = useLocalSearchParams();
   const [doctor, setDoctor] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   console.log('🔍 Doctor detail params:', params);
 
@@ -74,8 +75,8 @@ export default function DoctorDetailScreen() {
           reviews: 128,
           experience: `${foundDoctor.kinh_nghiem || 5} năm`,
           patients: '2,500+',
-          hospital: 'Bệnh viện Đa khoa',
-          education: 'Bác sĩ Đa khoa - Đại học Y Dược TP.HCM',
+          hospital: 'Bệnh viện Trường Đại học Trà Vinh',
+          education: 'Bác sĩ Đa khoa - Đại học Trà Vinh',
           image: imageSource,
           imageName: imageName,
         });
@@ -90,8 +91,8 @@ export default function DoctorDetailScreen() {
           reviews: 128,
           experience: '15 năm',
           patients: '2,500+',
-          hospital: 'Bệnh viện Chợ Rẫy',
-          education: 'Bác sĩ Đa khoa - Đại học Y Dược TP.HCM',
+          hospital: 'Bệnh viện Trường Đại học Trà Vinh',
+          education: 'Bác sĩ Đa khoa - Đại học Trà Vinh',
           image: require('@/assets/images/hoangvanduc.png'),
           imageName: 'hoangvanduc.png',
         });
@@ -107,8 +108,8 @@ export default function DoctorDetailScreen() {
         reviews: 128,
         experience: '15 năm',
         patients: '2,500+',
-        hospital: 'Bệnh viện Chợ Rẫy',
-        education: 'Bác sĩ Đa khoa - Đại học Y Dược TP.HCM',
+        hospital: 'Bệnh viện Trường Đại học Trà Vinh',
+        education: 'Bác sĩ Đa khoa - Đại học Trà Vinh',
         image: require('@/assets/images/hoangvanduc.png'),
         imageName: 'hoangvanduc.png',
       });
@@ -151,8 +152,18 @@ export default function DoctorDetailScreen() {
               <Ionicons name="arrow-back" size={24} color="#000" />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>Thông tin bác sĩ</Text>
-            <TouchableOpacity>
-              <Ionicons name="heart-outline" size={24} color="#000" />
+            <TouchableOpacity 
+              style={[
+                styles.favoriteIconButton,
+                isFavorite && styles.favoriteIconButtonActive
+              ]}
+              onPress={() => setIsFavorite(!isFavorite)}
+            >
+              <Ionicons 
+                name={isFavorite ? "heart" : "heart-outline"} 
+                size={24} 
+                color={isFavorite ? "#fff" : "#000"} 
+              />
             </TouchableOpacity>
           </View>
 
@@ -435,5 +446,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#fff',
+  },
+  favoriteIconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  favoriteIconButtonActive: {
+    backgroundColor: '#E91E63',
   },
 });

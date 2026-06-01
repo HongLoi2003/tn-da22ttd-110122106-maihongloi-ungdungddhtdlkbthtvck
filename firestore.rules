@@ -1,0 +1,149 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users collection
+    match /users/{userId} {
+      // Cho phép đọc tất cả user profiles (public info)
+      allow read: if true;
+      // Cho phép user tạo document của chính họ
+      allow create: if request.auth != null;
+      // Chỉ cho phép user cập nhật/xóa document của chính họ
+      allow update, delete: if request.auth != null && 
+        (request.auth.uid == userId || request.auth.uid == resource.data.uid);
+    }
+    
+    // Doctors collection
+    match /doctors/{doctorId} {
+      allow read: if true; // Public info
+      allow write: if request.auth != null;
+    }
+    
+    // Appointments collection
+    match /appointments/{appointmentId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      // Cho phép update nếu:
+      // 1. User là bệnh nhân (userId khớp với auth.uid)
+      // 2. User là bác sĩ (doctorId khớp với auth.uid HOẶC với doctorInfo.doctorId trong user profile)
+      allow update, delete: if request.auth != null && (
+        resource.data.userId == request.auth.uid || 
+        resource.data.doctorId == request.auth.uid ||
+        // Cho phép bất kỳ user đã đăng nhập nào update (để bác sĩ có thể update)
+        request.auth != null
+      );
+    }
+    
+    // Hospitals collection
+    match /hospitals/{hospitalId} {
+      allow read: if true; // Public info
+      allow write: if request.auth != null;
+    }
+    
+    // Specialties collection
+    match /specialties/{specialtyId} {
+      allow read: if true; // Public info
+      allow write: if request.auth != null;
+    }
+    
+    // Popular Specialties collection
+    match /popular-specialties/{specialtyId} {
+      allow read: if true; // Public info
+      allow write: if request.auth != null;
+    }
+    
+    // Common Symptoms collection
+    match /common-symptoms/{symptomId} {
+      allow read: if true; // Public info
+      allow write: if request.auth != null;
+    }
+    
+    // Reviews collection
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      // Cho phép update nếu:
+      // 1. User là người tạo review (userId khớp)
+      // 2. User là bác sĩ được đánh giá (chỉ update trường helpful)
+      allow update: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['helpful']))
+      );
+      allow delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // Work schedules collection
+    match /workSchedules/{scheduleId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    
+    // Prescriptions collection
+    match /prescriptions/{prescriptionId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // Conversations collection
+    match /conversations/{conversationId} {
+      // Cho phép đọc nếu user là patient hoặc doctor trong conversation
+      // Kiểm tra cả doctorId và doctorAuthUid
+      allow read: if request.auth != null && (
+        resource.data.patientId == request.auth.uid ||
+        resource.data.doctorId == request.auth.uid ||
+        resource.data.doctorAuthUid == request.auth.uid
+      );
+      // Cho phép tạo conversation mới (bao gồm cả migration scripts)
+      allow create: if true;
+      // Cho phép cập nhật (bao gồm cả migration scripts)
+      allow update: if true;
+      // Cho phép xóa nếu user là patient hoặc doctor trong conversation
+      allow delete: if request.auth != null && (
+        resource.data.patientId == request.auth.uid ||
+        resource.data.doctorId == request.auth.uid ||
+        resource.data.doctorAuthUid == request.auth.uid
+      );
+    }
+    
+    // Messages collection
+    match /messages/{messageId} {
+      // Cho phép đọc messages nếu đã đăng nhập
+      allow read: if request.auth != null;
+      // Cho phép tạo message mới nếu đã đăng nhập
+      allow create: if request.auth != null;
+      // Cho phép cập nhật message (để đánh dấu đã đọc)
+      allow update: if request.auth != null;
+      // Cho phép xóa message nếu là người gửi
+      allow delete: if request.auth != null && 
+        resource.data.senderId == request.auth.uid;
+    }
+    
+    // Chats collection
+    match /chats/{chatId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // Messages subcollection
+    match /chats/{chatId}/messages/{messageId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // Comments collection
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+  }
+}

@@ -19,9 +19,9 @@ export default function TabLayout() {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#f1f5f9',
-          height: 90,
-          paddingBottom: 12,
-          paddingTop: 12,
+          height: 78,
+          paddingBottom: 25,
+          paddingTop: 5,
         },
         tabBarLabelStyle: {
           fontSize: 12,
@@ -39,21 +39,27 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="appointments"
-        options={{
-          title: 'Lịch khám',
-          tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="chat"
         options={{
           title: 'Tư vấn',
           tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'chatbubbles' : 'chatbubbles-outline'} size={24} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="booking"
+        options={{
+          title: 'Đặt lịch',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="appointments"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen
@@ -67,12 +73,6 @@ export default function TabLayout() {
       />
       <Tabs.Screen
         name="explore"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="booking"
         options={{
           href: null,
         }}

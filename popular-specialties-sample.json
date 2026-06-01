@@ -1,0 +1,86 @@
+[
+  {
+    "id": "tim-mach",
+    "name": "Tim mạch",
+    "image": "tim-mach.png",
+    "doctors": 45,
+    "description": "Chuyên khoa điều trị các bệnh về tim mạch, huyết áp"
+  },
+  {
+    "id": "nhi-khoa",
+    "name": "Nhi khoa",
+    "image": "nhi-khoa.png",
+    "doctors": 38,
+    "description": "Chuyên khoa chăm sóc sức khỏe trẻ em"
+  },
+  {
+    "id": "san-phu-khoa",
+    "name": "Sản phụ khoa",
+    "image": "san-phu-khoa.png",
+    "doctors": 32,
+    "description": "Chuyên khoa chăm sóc sức khỏe phụ nữ và thai sản"
+  },
+  {
+    "id": "da-lieu",
+    "name": "Da liễu",
+    "image": "da-lieu.png",
+    "doctors": 28,
+    "description": "Chuyên khoa điều trị các bệnh về da"
+  },
+  {
+    "id": "mat",
+    "name": "Mắt",
+    "image": "mat.png",
+    "doctors": 25,
+    "description": "Chuyên khoa điều trị các bệnh về mắt"
+  },
+  {
+    "id": "rang-ham-mat",
+    "name": "Răng hàm mặt",
+    "image": "rang-ham-mat.png",
+    "doctors": 42,
+    "description": "Chuyên khoa điều trị các bệnh về răng miệng"
+  },
+  {
+    "id": "tai-mui-hong",
+    "name": "Tai mũi họng",
+    "image": "tai-mui-hong.png",
+    "doctors": 30,
+    "description": "Chuyên khoa điều trị các bệnh về tai mũi họng"
+  },
+  {
+    "id": "tieu-hoa",
+    "name": "Tiêu hóa",
+    "image": "tieu-hoa.png",
+    "doctors": 35,
+    "description": "Chuyên khoa điều trị các bệnh về tiêu hóa"
+  },
+  {
+    "id": "than-kinh",
+    "name": "Thần kinh",
+    "image": "than-kinh.png",
+    "doctors": 27,
+    "description": "Chuyên khoa điều trị các bệnh về thần kinh"
+  },
+  {
+    "id": "co-xuong-khop",
+    "name": "Cơ xương khớp",
+    "image": "co-xuong-khop.png",
+    "doctors": 33,
+    "description": "Chuyên khoa điều trị các bệnh về cơ xương khớp"
+  },
+  {
+    "id": "ho-hap",
+    "name": "Hô hấp",
+    "image": "ho-hap.png",
+    "doctors": 29,
+    "description": "Chuyên khoa điều trị các bệnh về hô hấp"
+  },
+  {
+    "id": "noi-tiet",
+    "name": "Nội tiết",
+    "image": "noi-tiet.png",
+    "doctors": 24,
+    "description": "Chuyên khoa điều trị các bệnh về nội tiết"
+  }
+]

@@ -1,4 +1,4 @@
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+﻿import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -15,36 +15,9 @@ import {
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { getAllDocuments } from '../services/firebaseService';
+import { getDoctorAvatarSmart } from '../utils/doctorAvatars';
 
-// Map hình ảnh bác sĩ - sử dụng tên file từ doctors.json
-const doctorImages: any = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
-};
 
-// Map hình ảnh bệnh viện
-const hospitalImages: any = {
-  'benhvien.png': require('@/assets/images/benhvien.png'),
-  'benhvienbachmai.png': require('@/assets/images/benhvienbachmai.png'),
-  'benviennhitrunguong.png': require('@/assets/images/benviennhitrunguong.png'),
-  'benhvienphusanhonoi.png': require('@/assets/images/benhvienphusanhonoi.png'),
-  'benhviendalieutrunguong.png': require('@/assets/images/benhviendalieutrunguong.png'),
-  'benhvienquany103.png': require('@/assets/images/benhvienquany103.png'),
-};
 
 interface Doctor {
   id: string;
@@ -65,23 +38,17 @@ interface Article {
   category: string;
 }
 
-interface Hospital {
-  id: string;
-  name: string;
-  address: string;
-  distance: number;
-  rating: number;
-  image: ImageSourcePropType;
-}
-
 export default function HomeScreen() {
+  console.log('🏠 [HOME] HomeScreen component rendering');
   const router = useRouter();
-  const { userData } = useAuth();
+  const { userData, user } = useAuth();
+  console.log('👤 [HOME] User data:', userData?.fullName);
   const [searchText, setSearchText] = useState('');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [hospitals, setHospitals] = useState<Hospital[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
+  const [favoriteDoctors, setFavoriteDoctors] = useState<Set<string>>(new Set());
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const handleSearch = () => {
     if (searchText.trim()) {
@@ -118,51 +85,39 @@ export default function HomeScreen() {
         
         if (doctorsData && doctorsData.length > 0) {
           const mappedDoctors = doctorsData.slice(0, 4).map((doc: any) => {
-            const imageName = doc.image || 'hoangvanduc.png';
-            const imageSource = doctorImages[imageName] || require('@/assets/images/hoangvanduc.png');
-            
-            return {
-              id: doc.id,
-              ten: doc.ten || 'Bác sĩ',
-              chuyen_khoa: doc.chuyen_khoa || 'Đa khoa',
-              rating: doc.rating || 4.8,
-              image: imageSource,
-              kinh_nghiem: doc.kinh_nghiem || 5,
-              imageName: imageName,
-            };
+            try {
+              const imageName = doc.image || doc.hinh_anh || 'hoangvanduc.png';
+              console.log('🔍 Mapping doctor:', doc.ten, '| image field:', doc.image, '| hinh_anh field:', doc.hinh_anh, '| using:', imageName);
+              const imageSource = getDoctorAvatarSmart(doc.ten, imageName);
+              
+              return {
+                id: doc.id,
+                ten: doc.ten || 'Bác sĩ',
+                chuyen_khoa: doc.chuyen_khoa || 'Đa khoa',
+                rating: doc.rating || 4.8,
+                image: imageSource,
+                kinh_nghiem: doc.kinh_nghiem || 5,
+                imageName: imageName,
+              };
+            } catch (error) {
+              console.error('❌ Error mapping doctor:', doc.id, doc.ten, error);
+              // Return a safe default
+              return {
+                id: doc.id || 'unknown',
+                ten: doc.ten || 'Bác sĩ',
+                chuyen_khoa: doc.chuyen_khoa || 'Đa khoa',
+                rating: doc.rating || 4.8,
+                image: require('@/assets/images/logo.png'),
+                kinh_nghiem: doc.kinh_nghiem || 5,
+                imageName: 'logo.png',
+              };
+            }
           });
           setDoctors(mappedDoctors);
           console.log('Mapped doctors:', mappedDoctors);
         } else {
           console.warn('No doctors data from Firebase');
           throw new Error('No doctors data');
-        }
-
-        // Lấy bệnh viện từ Firebase
-        console.log('Fetching hospitals from Firebase...');
-        const hospitalsData = await getAllDocuments('hospitals');
-        console.log('Hospitals data:', hospitalsData);
-        
-        if (hospitalsData && hospitalsData.length > 0) {
-          const mappedHospitals = hospitalsData.slice(0, 3).map((hospital: any) => {
-            console.log(`Hospital: ${hospital.name}, Image: ${hospital.image}`);
-            const imageSource = hospitalImages[hospital.image];
-            console.log(`Image source for ${hospital.image}:`, imageSource ? 'Found' : 'Not found');
-            
-            return {
-              id: hospital.id,
-              name: hospital.name || 'Bệnh viện',
-              address: hospital.address || 'Địa chỉ',
-              distance: hospital.distance || 2.5,
-              rating: hospital.rating || 4.6,
-              image: imageSource || require('@/assets/images/benhvien.png'),
-            };
-          });
-          setHospitals(mappedHospitals);
-          console.log('Mapped hospitals:', mappedHospitals);
-        } else {
-          console.warn('No hospitals data from Firebase');
-          throw new Error('No hospitals data');
         }
 
         // Articles - sử dụng mock data vì không có collection articles
@@ -272,79 +227,50 @@ export default function HomeScreen() {
             category: 'fitness',
           },
         ]);
-
-        setHospitals([
-          {
-            id: 'hosp001',
-            name: 'Bệnh viện Trung ương',
-            address: '1 Trần Hưng Đạo, Hoàn Kiếm',
-            distance: 2.5,
-            rating: 4.8,
-            image: require('@/assets/images/benviennhitrunguong.png'),
-          },
-          {
-            id: 'hosp002',
-            name: 'Bệnh viện Bạch Mai',
-            address: '78 Giải Phóng, Đống Đa',
-            distance: 3.3,
-            rating: 4.7,
-            image: require('@/assets/images/benhvienbachmai.png'),
-          },
-          {
-            id: 'hosp003',
-            name: 'Bệnh viện Nhi Trung ương',
-            address: '18A Tôn Thất Tùng, Đống Đa',
-            distance: 2.1,
-            rating: 4.9,
-            image: require('@/assets/images/benviennhitrunguong.png'),
-          },
-        ]);
       } finally {
         setDataLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+    loadUnreadNotifications();
+  }, [user]);
+
+  const loadUnreadNotifications = async () => {
+    if (!user) {
+      console.log('No user logged in');
+      setUnreadCount(0);
+      return;
+    }
+
+    try {
+      console.log('Loading notifications for user:', user.uid);
+      const allNotifications = await getAllDocuments('notifications');
+      console.log('All notifications:', allNotifications);
+      
+      const userUnreadNotifications = allNotifications.filter(
+        (n: any) => n.userId === user.uid && !n.read
+      );
+      console.log('User unread notifications:', userUnreadNotifications);
+      console.log('Unread count:', userUnreadNotifications.length);
+      
+      setUnreadCount(userUnreadNotifications.length);
+    } catch (error: any) {
+      // Bỏ qua lỗi permission-denied cho notifications
+      if (error?.code === 'permission-denied') {
+        console.log('⚠️ Notifications permission denied, skipping...');
+      } else {
+        console.error('Error loading notifications:', error);
+      }
+      setUnreadCount(0);
+    }
+  };
 
   // Refresh dữ liệu khi quay lại home screen
   useFocusEffect(
     useCallback(() => {
       console.log('Home screen focused - refreshing data');
-      const fetchData = async () => {
-        try {
-          setDataLoading(true);
-          
-          // Lấy bệnh viện từ Firebase
-          const hospitalsData = await getAllDocuments('hospitals');
-          console.log('Hospitals data (refreshed):', hospitalsData);
-          
-          if (hospitalsData && hospitalsData.length > 0) {
-            const mappedHospitals = hospitalsData.slice(0, 3).map((hospital: any) => {
-              console.log(`Hospital: ${hospital.name}, Image: ${hospital.image}`);
-              const imageSource = hospitalImages[hospital.image];
-              console.log(`Image source for ${hospital.image}:`, imageSource ? 'Found' : 'Not found');
-              
-              return {
-                id: hospital.id,
-                name: hospital.name || 'Bệnh viện',
-                address: hospital.address || 'Địa chỉ',
-                distance: hospital.distance || 2.5,
-                rating: hospital.rating || 4.6,
-                image: imageSource || require('@/assets/images/benhvien.png'),
-              };
-            });
-            setHospitals(mappedHospitals);
-            console.log('Mapped hospitals (refreshed):', mappedHospitals);
-          }
-        } catch (error) {
-          console.warn('Error refreshing hospitals:', error);
-        } finally {
-          setDataLoading(false);
-        }
-      };
-      
-      fetchData();
+      loadUnreadNotifications(); // Refresh thông báo
     }, [])
   );
 
@@ -356,36 +282,63 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
-  const DoctorCard = ({ doctor }: { doctor: Doctor }) => (
-    <TouchableOpacity
-      style={styles.doctorCard}
-      onPress={() => router.push({
-        pathname: '/doctor-detail',
-        params: {
-          id: doctor.id,
-          name: doctor.ten,
-          specialty: doctor.chuyen_khoa,
-          image: doctor.imageName,
-          rating: doctor.rating.toString(),
-        }
-      })}
-    >
-      <View style={styles.doctorImageContainer}>
-        <Image source={doctor.image} style={styles.doctorImage} />
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Ionicons name="heart-outline" size={18} color="#E91E63" />
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.doctorTitle}>BS.TS</Text>
-      <Text style={styles.doctorName}>{doctor.ten}</Text>
-      <Text style={styles.doctorSpecialty}>{doctor.chuyen_khoa}</Text>
-      <View style={styles.ratingContainer}>
-        <Ionicons name="star" size={14} color="#FFB800" />
-        <Text style={styles.rating}>{doctor.rating}</Text>
-        <Text style={styles.reviewCount}>({doctor.kinh_nghiem}00+)</Text>
-      </View>
-    </TouchableOpacity>
-  );
+  const toggleFavoriteDoctor = (doctorId: string) => {
+    setFavoriteDoctors(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(doctorId)) {
+        newSet.delete(doctorId);
+      } else {
+        newSet.add(doctorId);
+      }
+      return newSet;
+    });
+  };
+
+  const DoctorCard = ({ doctor }: { doctor: Doctor }) => {
+    const isFavorite = favoriteDoctors.has(doctor.id);
+    
+    return (
+      <TouchableOpacity
+        style={styles.doctorCard}
+        onPress={() => router.push({
+          pathname: '/doctor-detail',
+          params: {
+            id: doctor.id,
+            name: doctor.ten,
+            specialty: doctor.chuyen_khoa,
+            image: doctor.imageName,
+            rating: doctor.rating.toString(),
+          }
+        })}
+      >
+        <View style={styles.doctorImageContainer}>
+          <Image source={doctor.image} style={styles.doctorImage} />
+          <TouchableOpacity 
+            style={[styles.favoriteButton, isFavorite && styles.favoriteButtonActive]}
+            onPress={(e) => {
+              e.stopPropagation();
+              toggleFavoriteDoctor(doctor.id);
+            }}
+          >
+            <Ionicons 
+              name={isFavorite ? "heart" : "heart-outline"} 
+              size={18} 
+              color={isFavorite ? "#fff" : "#E91E63"} 
+            />
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.doctorTitle}>BS.TS</Text>
+        <Text style={styles.doctorName} numberOfLines={1}>{doctor.ten}</Text>
+        <Text style={styles.doctorSpecialty} numberOfLines={1}>{doctor.chuyen_khoa}</Text>
+        <Text style={styles.doctorHospital} numberOfLines={2}>Bệnh viện Trường Đại học Trà Vinh</Text>
+        <View style={styles.ratingContainer}>
+          <Ionicons name="star" size={14} color="#FFB800" />
+          <Text style={styles.rating}>{doctor.rating}</Text>
+          <Text style={styles.reviewCount}>({doctor.kinh_nghiem}00+)</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   const ArticleCard = ({ article }: { article: Article }) => (
     <TouchableOpacity
@@ -407,25 +360,6 @@ export default function HomeScreen() {
     </TouchableOpacity>
   );
 
-  const HospitalCard = ({ hospital }: { hospital: Hospital }) => (
-    <TouchableOpacity
-      style={styles.hospitalCard}
-      onPress={() => router.push(`/hospital-detail?id=${hospital.id}`)}
-    >
-      <Image source={hospital.image} style={styles.hospitalImage} />
-      <View style={styles.hospitalInfo}>
-        <Text style={styles.hospitalName}>{hospital.name}</Text>
-        <View style={styles.hospitalDetails}>
-          <Ionicons name="location" size={14} color="#00BCD4" />
-          <Text style={styles.hospitalDistance}>{hospital.distance} km</Text>
-          <Ionicons name="star" size={14} color="#FFB800" style={{ marginLeft: 8 }} />
-          <Text style={styles.hospitalRating}>{hospital.rating}</Text>
-        </View>
-        <Text style={styles.hospitalAddress}>{hospital.address}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -441,7 +375,9 @@ export default function HomeScreen() {
               style={styles.avatar}
             />
             <View>
-              <Text style={styles.greeting}>Xin chào, {userData?.fullName ? userData.fullName.split(' ').pop() : 'Người dùng'} 👋</Text>
+              <Text style={styles.greeting}>
+                Xin chào, {userData?.fullName || 'Bạn'} 👋
+              </Text>
               <Text style={styles.subGreeting}>
                 <Ionicons name="heart" size={12} color="#00BCD4" /> Chăm sóc sức khỏe chu đáo mỗi ngày
               </Text>
@@ -456,9 +392,11 @@ export default function HomeScreen() {
               onPress={() => router.push('/notifications')}
             >
               <Ionicons name="notifications" size={24} color="#333" />
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>1</Text>
-              </View>
+              {unreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{unreadCount}</Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -474,12 +412,6 @@ export default function HomeScreen() {
             onChangeText={setSearchText}
             onSubmitEditing={handleSearch}
           />
-          <TouchableOpacity 
-            style={styles.filterButton}
-            onPress={() => router.push('/specialties')}
-          >
-            <MaterialCommunityIcons name="tune" size={20} color="#fff" />
-          </TouchableOpacity>
         </View>
 
         {/* Banner */}
@@ -498,7 +430,7 @@ export default function HomeScreen() {
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.bannerButtonSecondary}
-                onPress={() => router.push('/ai-consultation')}
+                onPress={() => router.push('/(tabs)/chat')}
               >
                 <Text style={styles.bannerButtonSecondaryText}>Tư vấn ngay</Text>
               </TouchableOpacity>
@@ -519,44 +451,52 @@ export default function HomeScreen() {
               style={styles.quickMenuGridItem}
               onPress={() => router.push('/booking')}
             >
-              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#E3F2FD' }]}>
-                <MaterialCommunityIcons name="calendar-check" size={40} color="#2196F3" />
+              <View style={styles.quickMenuGridIconBox}>
+                <Image 
+                  source={require('@/assets/images/datlichkham.png')} 
+                  style={styles.quickMenuImage}
+                />
               </View>
               <Text style={styles.quickMenuGridItemLabel}>Đặt lịch khám</Text>
-              <Text style={styles.quickMenuGridItemDesc}>Nhanh chóng</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.quickMenuGridItem}
-              onPress={() => router.push('/ai-consultation')}
+              onPress={() => router.push('/(tabs)/chat')}
             >
-              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#E0F2F1' }]}>
-                <MaterialCommunityIcons name="chat-processing" size={40} color="#00BCD4" />
+              <View style={styles.quickMenuGridIconBox}>
+                <Image 
+                  source={require('@/assets/images/tuvanonline.png')} 
+                  style={styles.quickMenuImage}
+                />
               </View>
               <Text style={styles.quickMenuGridItemLabel}>Tư vấn online</Text>
-              <Text style={styles.quickMenuGridItemDesc}>Bác sĩ 24/7</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.quickMenuGridItem}
               onPress={() => router.push('/(tabs)/appointments')}
             >
-              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#F3E5F5' }]}>
-                <MaterialCommunityIcons name="clock" size={40} color="#9C27B0" />
+              <View style={styles.quickMenuGridIconBox}>
+                <Image 
+                  source={require('@/assets/images/lichkham.png')} 
+                  style={styles.quickMenuImage}
+                />
               </View>
               <Text style={styles.quickMenuGridItemLabel}>Lịch khám</Text>
-              <Text style={styles.quickMenuGridItemDesc}>Quản lý lịch hẹn</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.quickMenuGridItem}
               onPress={() => router.push('/find-hospital')}
             >
-              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FFF3E0' }]}>
-                <MaterialCommunityIcons name="hospital-building" size={40} color="#FF9800" />
+              <View style={styles.quickMenuGridIconBox}>
+                <Image 
+                  source={require('@/assets/images/timbenhvien.png')} 
+                  style={styles.quickMenuImage}
+                />
               </View>
-              <Text style={styles.quickMenuGridItemLabel}>Tìm bệnh viện</Text>
-              <Text style={styles.quickMenuGridItemDesc}>Tìm cơ sở y tế</Text>
+              <Text style={styles.quickMenuGridItemLabel}>Bệnh viện</Text>
             </TouchableOpacity>
           </View>
 
@@ -565,44 +505,52 @@ export default function HomeScreen() {
               style={styles.quickMenuGridItem}
               onPress={() => router.push('/specialties')}
             >
-              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FFEBEE' }]}>
-                <MaterialCommunityIcons name="stethoscope" size={40} color="#F44336" />
+              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FFF5F5' }]}>
+                <Image 
+                  source={require('@/assets/images/chuyenkhoa.png')} 
+                  style={styles.quickMenuImage}
+                />
               </View>
               <Text style={styles.quickMenuGridItemLabel}>Chuyên khoa</Text>
-              <Text style={styles.quickMenuGridItemDesc}>Khám theo chuyên khoa</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.quickMenuGridItem}
               onPress={() => router.push('/pharmacy')}
             >
-              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#E8F5E9' }]}>
-                <MaterialCommunityIcons name="medical-bag" size={40} color="#388E3C" />
+              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#F0FFF4' }]}>
+                <Image 
+                  source={require('@/assets/images/nhathuoc.png')} 
+                  style={styles.quickMenuImage}
+                />
               </View>
               <Text style={styles.quickMenuGridItemLabel}>Nhà thuốc</Text>
-              <Text style={styles.quickMenuGridItemDesc}>Mua thuốc online</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.quickMenuGridItem}
               onPress={() => router.push('/health-insurance')}
             >
-              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FFF8E1' }]}>
-                <MaterialCommunityIcons name="shield-check" size={40} color="#F57F17" />
+              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FFFBEB' }]}>
+                <Image 
+                  source={require('@/assets/images/baohiemyte.png')} 
+                  style={styles.quickMenuImage}
+                />
               </View>
               <Text style={styles.quickMenuGridItemLabel}>Bảo hiểm y tế</Text>
-              <Text style={styles.quickMenuGridItemDesc}>Thông tin bảo hiểm</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.quickMenuGridItem}
               onPress={() => router.push('/support-center')}
             >
-              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FCE4EC' }]}>
-                <MaterialCommunityIcons name="heart-pulse" size={40} color="#E91E63" />
+              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FFF1F2' }]}>
+                <Image 
+                  source={require('@/assets/images/hotrosuckhoe.png')} 
+                  style={styles.quickMenuImage}
+                />
               </View>
               <Text style={styles.quickMenuGridItemLabel}>Hỗ trợ sức khỏe</Text>
-              <Text style={styles.quickMenuGridItemDesc}>Theo dõi sức khỏe</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -610,10 +558,7 @@ export default function HomeScreen() {
         {/* Recommended Doctors */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleContainer}>
-              <Ionicons name="star" size={20} color="#00BCD4" />
-              <Text style={styles.sectionTitle}>Bác sĩ được quan tâm</Text>
-            </View>
+            <Text style={styles.sectionTitle}>Bác sĩ được quan tâm</Text>
             <TouchableOpacity onPress={() => router.push('/all-doctors')}>
               <Text style={styles.seeAll}>Xem tất cả</Text>
             </TouchableOpacity>
@@ -631,10 +576,7 @@ export default function HomeScreen() {
         {/* Health Articles */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleContainer}>
-              <Ionicons name="leaf" size={20} color="#00BCD4" />
-              <Text style={styles.sectionTitle}>Bài viết sức khỏe</Text>
-            </View>
+            <Text style={styles.sectionTitle}>Bài viết sức khỏe</Text>
             <TouchableOpacity onPress={() => router.push('/articles')}>
               <Text style={styles.seeAll}>Xem tất cả</Text>
             </TouchableOpacity>
@@ -647,22 +589,6 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             scrollEventThrottle={16}
           />
-        </View>
-
-        {/* Hospitals */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleContainer}>
-              <Ionicons name="location" size={20} color="#00BCD4" />
-              <Text style={styles.sectionTitle}>Bệnh viện gần bạn</Text>
-            </View>
-            <TouchableOpacity onPress={() => router.push('/find-hospital')}>
-              <Text style={styles.seeAll}>Xem tất cả</Text>
-            </TouchableOpacity>
-          </View>
-          {hospitals.map((hospital) => (
-            <HospitalCard key={hospital.id} hospital={hospital} />
-          ))}
         </View>
 
         <View style={{ height: 20 }} />
@@ -682,7 +608,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    paddingTop: 20,
+    paddingTop: 35,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -756,15 +682,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 16,
     marginVertical: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
     backgroundColor: '#E0F7FA',
-    borderRadius: 16,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'space-between',
     minHeight: 160,
     position: 'relative',
     overflow: 'hidden',
+    shadowColor: '#00BCD4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: '#B2EBF2',
   },
   bannerContent: {
     flex: 1,
@@ -772,21 +705,30 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 1,
   },
-  bannerTitle: {
-    fontSize: 16,
+  bannerLabel: {
+    fontSize: 11,
     fontWeight: '700',
-    color: '#333',
+    color: '#00897B',
     marginBottom: 6,
-    lineHeight: 22,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  bannerTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#00695C',
+    marginBottom: 10,
+    lineHeight: 26,
   },
   bannerTitleHighlight: {
     color: '#00BCD4',
   },
   bannerSubtitle: {
     fontSize: 12,
-    color: '#666',
+    color: '#00897B',
+    lineHeight: 18,
+    fontWeight: '500',
     marginBottom: 12,
-    lineHeight: 16,
   },
   bannerButtonContainer: {
     flexDirection: 'row',
@@ -863,6 +805,32 @@ const styles = StyleSheet.create({
     marginVertical: 12,
     backgroundColor: '#fff',
   },
+  quickMenuButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  quickMenuIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  quickMenuLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  quickMenuDescription: {
+    fontSize: 11,
+    color: '#888',
+    textAlign: 'center',
+    lineHeight: 15,
+  },
   quickMenuGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -875,30 +843,41 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   quickMenuGridIconBox: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
+    width: 75,
+    height: 75,
+    borderRadius: 20,
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.18,
+    shadowColor: '#00BCD4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
     shadowRadius: 8,
-    elevation: 8,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#E0F7FA',
+    overflow: 'hidden',
+    padding: 10,
+  },
+  quickMenuImage: {
+    width: 55,
+    height: 55,
+    resizeMode: 'cover',
   },
   quickMenuGridItemLabel: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: '#0f172a',
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 3,
+    lineHeight: 14,
   },
   quickMenuGridItemDesc: {
-    fontSize: 11,
-    color: '#888',
+    fontSize: 10,
+    color: '#999',
     textAlign: 'center',
-    lineHeight: 15,
+    fontWeight: '600',
   },
   section: {
     paddingHorizontal: 16,
@@ -926,7 +905,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   doctorCard: {
-    width: 140,
+    width: 170,
     marginRight: 12,
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -937,7 +916,7 @@ const styles = StyleSheet.create({
   doctorImageContainer: {
     position: 'relative',
     width: '100%',
-    height: 120,
+    height: 140,
   },
   doctorImage: {
     width: '100%',
@@ -955,6 +934,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  favoriteButtonActive: {
+    backgroundColor: '#E91E63',
+  },
   doctorTitle: {
     fontSize: 10,
     color: '#999',
@@ -963,7 +945,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   doctorName: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: '#333',
     paddingHorizontal: 10,
@@ -974,6 +956,13 @@ const styles = StyleSheet.create({
     color: '#999',
     paddingHorizontal: 10,
     marginTop: 2,
+  },
+  doctorHospital: {
+    fontSize: 10,
+    color: '#00BCD4',
+    paddingHorizontal: 10,
+    marginTop: 2,
+    fontWeight: '500',
   },
   ratingContainer: {
     flexDirection: 'row',

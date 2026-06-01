@@ -1,0 +1,18 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // CHẾ ĐỘ DEVELOPMENT - CHỈ DÙNG CHO TEST
+    // KHÔNG DÙNG CHO PRODUCTION!
+    
+    // Cho phép đọc tất cả
+    match /{document=**} {
+      allow read: if true;
+    }
+    
+    // Cho phép ghi nếu đã đăng nhập
+    match /{document=**} {
+      allow write: if request.auth != null;
+    }
+  }
+}

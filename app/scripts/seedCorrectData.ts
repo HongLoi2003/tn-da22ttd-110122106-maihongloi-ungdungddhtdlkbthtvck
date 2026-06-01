@@ -141,7 +141,7 @@ const seedHospitals = async () => {
       },
       {
         id: 'hosp002',
-        name: 'Bệnh viện Bạch Mai',
+        name: 'Bệnh viện Đại học Trà Vinh',
         address: '78 Giải Phóng, Đống Đa, Hà Nội',
         phone: '024 3869 3731',
         email: 'benhvien@bachmai.gov.vn',
@@ -214,7 +214,7 @@ const seedSampleAppointments = async () => {
         doctorId: 'bs004',
         doctor: 'BS. Trần Thị Mai',
         specialty: 'Hô hấp',
-        hospital: 'Bệnh viện Bạch Mai',
+        hospital: 'Bệnh viện Đại học Trà Vinh',
         date: 'T5',
         fullDate: '21/05/2026',
         time: '14:30',

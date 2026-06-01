@@ -18,6 +18,13 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# Keystore files (IMPORTANT - DO NOT COMMIT!)
+*.keystore
+keystore.properties
+android/keystore.properties
+android/app/release.keystore
+android/app/*.keystore
+
 # Metro
 .metro-health-check*
 
@@ -35,12 +42,14 @@ yarn-error.*
 
 # Firebase
 serviceAccountKey.json
+android/app/google-services.json
+ios/GoogleService-Info.plist
 
 # typescript
 *.tsbuildinfo
 
 app-example
 
-# generated native folders
-/ios
-/android
+# generated native folders (comment out if using prebuild)
+# /ios
+# /android

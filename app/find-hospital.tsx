@@ -1,143 +1,127 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
     ActivityIndicator,
     Image,
+    Linking,
     SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View
 } from 'react-native';
 import { getAllDocuments } from './services/firebaseService';
 
-const hospitalImages = {
-  'benhvien.png': require('@/assets/images/benhvien.png'),
-  'benhvienbachmai.png': require('@/assets/images/benhvienbachmai.png'),
-  'benviennhitrunguong.png': require('@/assets/images/benviennhitrunguong.png'),
-  'benhvienphusanhonoi.png': require('@/assets/images/benhvienphusanhonoi.png'),
-  'benhviendalieutrunguong.png': require('@/assets/images/benhviendalieutrunguong.png'),
-  'benhvienquany103.png': require('@/assets/images/benhvienquany103.png'),
+const doctorImages = {
+  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
+  'tranthilan.png': require('@/assets/images/tranthilan.png'),
+  'leminhtam.png': require('@/assets/images/leminhtam.png'),
+  'tranthimai.png': require('@/assets/images/tranthimai.png'),
+  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
+  'phamthuha.png': require('@/assets/images/phamthuha.png'),
+  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
+  'vuthilan.png': require('@/assets/images/vuthilan.png'),
+  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
+  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
+  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
+  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
+  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
+  'lethihang.png': require('@/assets/images/lethihang.png'),
+  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
+  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
 };
 
-export default function FindHospitalScreen() {
+// Map hình ảnh chuyên khoa
+const specialtyImages: any = {
+  'tim-mach.png': require('@/assets/images/tim-mach.png'),
+  'nhi-khoa.png': require('@/assets/images/nhi-khoa.png'),
+  'san-phu-khoa.png': require('@/assets/images/san-phu-khoa.png'),
+  'da-lieu.png': require('@/assets/images/da-lieu.png'),
+  'mat.png': require('@/assets/images/mat.png'),
+  'rang-ham-mat.png': require('@/assets/images/rang-ham-mat.png'),
+  'tai-mui-hong.png': require('@/assets/images/tai-mui-hong.png'),
+  'tieu-hoa.png': require('@/assets/images/tieu-hoa.png'),
+  'than-kinh.png': require('@/assets/images/than-kinh.png'),
+  'co-xuong-khop.png': require('@/assets/images/co-xuong-khop.png'),
+  'ho-hap.png': require('@/assets/images/ho-hap.png'),
+  'noi-tiet.png': require('@/assets/images/noi-tiet.png'),
+  'khoa.png': require('@/assets/images/khoa.png'),
+};
+
+export default function HospitalInfoScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
-  const searchParam = params.search as string;
-  
-  console.log('🔍 Hospital search param:', searchParam);
-  
-  // Find hospital by name from search param
-  const findHospitalByName = (searchText: string, hospitalsList: any[]): any | null => {
-    if (!searchText || !hospitalsList.length) return null;
-    
-    const searchLower = searchText.toLowerCase().trim();
-    return hospitalsList.find(hospital => 
-      hospital.name.toLowerCase().includes(searchLower)
-    );
-  };
-  
-  const [searchText, setSearchText] = useState('');
-  const [selectedFilter, setSelectedFilter] = useState('all');
-  const [showRequestModal, setShowRequestModal] = useState(false);
-  const [requestText, setRequestText] = useState('');
-  const [hospitals, setHospitals] = useState<any[]>([]);
-  const [filteredHospitals, setFilteredHospitals] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<any[]>([]);
+  const [specialties, setSpecialties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedHospitalId, setSelectedHospitalId] = useState<string | null>(null);
 
   useEffect(() => {
-    loadHospitals();
+    loadData();
   }, []);
 
-  useEffect(() => {
-    // If search param exists and hospitals are loaded, find and navigate to that hospital
-    if (searchParam && hospitals.length > 0) {
-      const foundHospital = findHospitalByName(searchParam, hospitals);
-      if (foundHospital) {
-        console.log('✅ Found hospital:', foundHospital.name);
-        // Navigate directly to hospital detail
-        router.push({
-          pathname: '/hospital-detail',
-          params: { 
-            name: foundHospital.name,
-            id: foundHospital.id 
-          }
-        });
-      } else {
-        console.log('❌ Hospital not found, showing search results');
-        setSearchText(searchParam);
-      }
-    }
-  }, [searchParam, hospitals]);
-
-  useEffect(() => {
-    filterAndSearchHospitals();
-  }, [searchText, selectedFilter, hospitals]);
-
-  const loadHospitals = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
-      const data = await getAllDocuments('hospitals');
-      setHospitals(data);
+      
+      const [allDoctors, popularData] = await Promise.all([
+        getAllDocuments('doctors'),
+        getAllDocuments('popular-specialties'),
+      ]);
+
+      // Đếm số lượng bác sĩ theo chuyên khoa
+      const doctorCountBySpecialty: Record<string, number> = {};
+      allDoctors.forEach((doctor: any) => {
+        const specialty = doctor.chuyen_khoa || doctor.chuyenKhoa;
+        if (specialty) {
+          doctorCountBySpecialty[specialty] = (doctorCountBySpecialty[specialty] || 0) + 1;
+        }
+      });
+
+      // Lọc chỉ lấy chuyên khoa có hình ảnh
+      const specialtiesWithImages = popularData.filter((specialty: any) => {
+        const imageName = specialty.image || 'khoa.png';
+        return imageName !== 'khoa.png' && specialtyImages[imageName];
+      });
+
+      // Cập nhật số lượng bác sĩ thực tế
+      const updatedSpecialties = specialtiesWithImages.map((specialty: any) => {
+        const actualDoctorCount = doctorCountBySpecialty[specialty.name] || 0;
+        return {
+          ...specialty,
+          doctors: actualDoctorCount,
+        };
+      });
+
+      setSpecialties(updatedSpecialties);
+      
+      const mappedDoctors = allDoctors.map((doc: any) => ({
+        id: doc.id,
+        name: doc.ten,
+        specialty: doc.chuyen_khoa,
+        rating: doc.rating,
+        experience: doc.kinh_nghiem,
+        image: doctorImages[doc.image as keyof typeof doctorImages] || doctorImages['nguyenvanam.png'],
+        imageName: doc.image,
+      }));
+      
+      setDoctors(mappedDoctors);
     } catch (error) {
-      console.error('Error loading hospitals:', error);
-      setHospitals([]);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const filterAndSearchHospitals = () => {
-    let filtered = hospitals;
-
-    // Tìm kiếm theo tên, địa chỉ, chuyên khoa
-    if (searchText.trim()) {
-      const searchLower = searchText.toLowerCase();
-      filtered = filtered.filter(hospital => 
-        hospital.name.toLowerCase().includes(searchLower) ||
-        hospital.address.toLowerCase().includes(searchLower) ||
-        (hospital.specialties && hospital.specialties.some((s: string) => s.toLowerCase().includes(searchLower)))
-      );
-    }
-
-    // Lọc theo loại bệnh viện
-    if (selectedFilter !== 'all') {
-      if (selectedFilter === 'pediatric') {
-        filtered = filtered.filter(hospital => 
-          hospital.specialties && hospital.specialties.includes('Nhi khoa')
-        );
-      }
-      // Có thể thêm các filter khác nếu cần
-    }
-
-    setFilteredHospitals(filtered);
+  const handleCallHotline = () => {
+    Linking.openURL('tel:0294123456');
   };
 
-  const getHospitalImage = (hospitalId: string) => {
-    const imageMap: { [key: string]: string } = {
-      'hosp001': 'benviennhitrunguong.png',
-      'hosp002': 'benhvienbachmai.png',
-      'hosp003': 'benviennhitrunguong.png',
-      'hosp004': 'benhvienphusanhonoi.png',
-      'hosp005': 'benhviendalieutrunguong.png',
-      'hosp006': 'benhvienquany103.png',
-    };
-    
-    const imageName = imageMap[hospitalId] || 'benhvien.png';
-    return hospitalImages[imageName as keyof typeof hospitalImages] || hospitalImages['benhvien.png'];
+  const handleOpenMap = () => {
+    const address = 'Bệnh viện Trường Đại học Trà Vinh, 126 Nguyễn Thiện Thành, Khóm 4, Phường 5, Trà Vinh';
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+    Linking.openURL(url);
   };
-
-  const filters = [
-    { id: 'all', name: 'Tất cả', icon: 'grid-outline' },
-    { id: 'public', name: 'Công lập', icon: 'business-outline' },
-    { id: 'private', name: 'Tư nhân', icon: 'shield-checkmark-outline' },
-    { id: 'international', name: 'Quốc tế', icon: 'globe-outline' },
-    { id: 'pediatric', name: 'Nhi khoa', icon: 'happy-outline' },
-  ];
 
   return (
     <SafeAreaView style={styles.container}>
@@ -146,199 +130,163 @@ export default function FindHospitalScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Tìm bệnh viện</Text>
-        <TouchableOpacity 
-          style={styles.mapButton}
-          onPress={() => router.push('/hospital-map')}
-        >
-          <Ionicons name="map-outline" size={20} color="#00BCD4" />
-          <Text style={styles.mapButtonText}>Bản đồ</Text>
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Bệnh viện</Text>
+        <View style={{ width: 24 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#999" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Tìm bệnh viện, chuyên khoa, dịch vụ..."
-            placeholderTextColor="#999"
-            value={searchText}
-            onChangeText={setSearchText}
-          />
-          <TouchableOpacity>
-            <Ionicons name="options-outline" size={20} color="#00BCD4" />
-          </TouchableOpacity>
-        </View>
+        {/* Hospital Image */}
+        <Image 
+          source={require('@/assets/images/benhviendhtv.png')}
+          style={styles.hospitalImage}
+        />
 
-        {/* Filter Chips */}
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterContainer}
-          contentContainerStyle={styles.filterContent}
-        >
-          {filters.map((filter) => (
-            <TouchableOpacity
-              key={filter.id}
-              style={[
-                styles.filterChip,
-                selectedFilter === filter.id && styles.filterChipActive
-              ]}
-              onPress={() => setSelectedFilter(filter.id)}
-            >
-              <Ionicons 
-                name={filter.icon as any} 
-                size={18} 
-                color={selectedFilter === filter.id ? '#fff' : '#00BCD4'} 
-              />
-              <Text style={[
-                styles.filterChipText,
-                selectedFilter === filter.id && styles.filterChipTextActive
-              ]}>
-                {filter.name}
-              </Text>
+        {/* Hospital Info */}
+        <View style={styles.infoSection}>
+          <Text style={styles.hospitalName}>Bệnh viện Trường Đại học Trà Vinh</Text>
+          <Text style={styles.hospitalSubtitle}>Bệnh viện Đa khoa hạng I</Text>
+          
+          <View style={styles.ratingRow}>
+            <Ionicons name="star" size={18} color="#FFB800" />
+            <Text style={styles.ratingText}>4.8 (2,500+ đánh giá)</Text>
+          </View>
+
+          {/* Quick Actions */}
+          <View style={styles.quickActions}>
+            <TouchableOpacity style={styles.actionButton} onPress={handleCallHotline}>
+              <View style={styles.actionIconBox}>
+                <Ionicons name="call" size={24} color="#00BCD4" />
+              </View>
+              <Text style={styles.actionText}>Hotline</Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
 
-        {/* Results Header */}
-        <View style={styles.resultsHeader}>
-          <Text style={styles.resultsText}>Kết quả tìm kiếm ({filteredHospitals.length})</Text>
-          <TouchableOpacity style={styles.sortButton}>
-            <Text style={styles.sortText}>Sắp xếp: Gần nhất</Text>
-            <Ionicons name="chevron-down" size={16} color="#666" />
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.actionButton} onPress={handleOpenMap}>
+              <View style={styles.actionIconBox}>
+                <Ionicons name="location" size={24} color="#00BCD4" />
+              </View>
+              <Text style={styles.actionText}>Bản đồ</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.actionButton}>
+              <View style={styles.actionIconBox}>
+                <Ionicons name="time" size={24} color="#00BCD4" />
+              </View>
+              <Text style={styles.actionText}>Giờ làm việc</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Loading State */}
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#00BCD4" />
+        {/* Contact Info */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Thông tin liên hệ</Text>
+          
+          <View style={styles.contactItem}>
+            <Ionicons name="location-outline" size={20} color="#666" />
+            <Text style={styles.contactText}>
+              126 Nguyễn Thiện Thành, Khóm 4, Phường 5, Trà Vinh
+            </Text>
           </View>
-        ) : filteredHospitals.length === 0 ? (
-          <View style={styles.emptyContainer}>
-            <Ionicons name="business-outline" size={64} color="#cbd5e1" />
-            <Text style={styles.emptyText}>Không tìm thấy bệnh viện nào</Text>
+
+          <View style={styles.contactItem}>
+            <Ionicons name="call-outline" size={20} color="#666" />
+            <Text style={styles.contactText}>0294 123 456</Text>
           </View>
-        ) : (
-          <>
-            {/* Hospital List */}
-            <View style={styles.hospitalList}>
-              {filteredHospitals.map((hospital, index) => (
+
+          <View style={styles.contactItem}>
+            <Ionicons name="time-outline" size={20} color="#666" />
+            <View style={styles.contactTextColumn}>
+              <Text style={styles.contactText}>Thứ 2 - Thứ 6: 7:00 - 17:00</Text>
+              <Text style={styles.contactText}>Thứ 7: 7:00 - 12:00</Text>
+              <Text style={styles.contactText}>Chủ nhật: Nghỉ</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Specialties */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Chuyên khoa</Text>
+          <View style={styles.specialtiesGrid}>
+            {specialties.map((specialty) => {
+              const imageName = specialty.image || 'khoa.png';
+              const imageSource = specialtyImages[imageName] || require('@/assets/images/khoa.png');
+              
+              return (
                 <TouchableOpacity 
-                  key={`${hospital.id}-${index}`} 
-                  style={styles.hospitalCard}
+                  key={specialty.id} 
+                  style={styles.specialtyCard}
+                  onPress={() => router.push('/(tabs)/chat')}
+                >
+                  <View style={styles.specialtyIconContainer}>
+                    <Image source={imageSource} style={styles.specialtyIcon} />
+                  </View>
+                  <Text style={styles.specialtyName}>{specialty.name}</Text>
+                  <Text style={styles.specialtyDoctors}>{specialty.doctors} bác sĩ</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        {/* Doctors */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Đội ngũ bác sĩ</Text>
+            <TouchableOpacity onPress={() => router.push('/all-doctors')}>
+              <Text style={styles.seeAllText}>Xem tất cả</Text>
+            </TouchableOpacity>
+          </View>
+
+          {loading ? (
+            <ActivityIndicator size="large" color="#00BCD4" style={{ marginVertical: 20 }} />
+          ) : (
+            <View style={styles.doctorsList}>
+              {doctors.slice(0, 6).map((doctor) => (
+                <TouchableOpacity 
+                  key={doctor.id} 
+                  style={styles.doctorCard}
                   onPress={() => router.push({
-                    pathname: '/hospital-detail',
-                    params: { 
-                      name: hospital.name,
-                      id: hospital.id 
+                    pathname: '/doctor-detail',
+                    params: {
+                      id: doctor.id,
+                      name: doctor.name,
+                      specialty: doctor.specialty,
+                      image: doctor.imageName,
+                      rating: doctor.rating.toString(),
                     }
                   })}
                 >
-                  <Image 
-                    source={getHospitalImage(hospital.id)}
-                    style={styles.hospitalImage} 
-                  />
-                  <View style={[styles.badge, { backgroundColor: '#00BCD4' }]}>
-                    <Text style={styles.badgeText}>Công lập</Text>
-                  </View>
-                  
-                  <View style={styles.hospitalInfo}>
-                    <Text style={styles.hospitalName}>{hospital.name}</Text>
-                    
-                    <View style={styles.distanceRow}>
-                      <Ionicons name="location-outline" size={14} color="#666" />
-                      <Text style={styles.distanceText}>{hospital.address}</Text>
-                    </View>
-                    
-                    <View style={styles.tagsContainer}>
-                      {hospital.specialties && hospital.specialties.slice(0, 2).map((specialty: string, index: number) => (
-                        <View key={index} style={styles.tag}>
-                          <Text style={styles.tagText}>{specialty}</Text>
-                        </View>
-                      ))}
-                    </View>
-                    
-                    <View style={styles.ratingRow}>
-                      <Ionicons name="star" size={16} color="#FFB800" />
-                      <Text style={styles.ratingText}>
-                        {hospital.rating} ({hospital.reviewCount} đánh giá)
-                      </Text>
+                  <Image source={doctor.image} style={styles.doctorImage} />
+                  <View style={styles.doctorInfo}>
+                    <Text style={styles.doctorName}>{doctor.name}</Text>
+                    <Text style={styles.doctorSpecialty}>{doctor.specialty}</Text>
+                    <View style={styles.doctorRating}>
+                      <Ionicons name="star" size={14} color="#FFB800" />
+                      <Text style={styles.doctorRatingText}>{doctor.rating}</Text>
+                      <Text style={styles.doctorExperience}>• {doctor.experience} năm KN</Text>
                     </View>
                   </View>
-                  
-                  <Ionicons name="chevron-forward" size={20} color="#999" style={styles.chevron} />
+                  <TouchableOpacity 
+                    style={styles.bookButton}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      router.push({
+                        pathname: '/(tabs)/booking',
+                        params: {
+                          doctorId: doctor.id,
+                          doctorName: doctor.name,
+                          doctorSpecialty: doctor.specialty,
+                        }
+                      });
+                    }}
+                  >
+                    <Text style={styles.bookButtonText}>Đặt lịch</Text>
+                  </TouchableOpacity>
                 </TouchableOpacity>
               ))}
             </View>
-          </>
-        )}
-
-        {/* Not Found Section */}
-        <View style={styles.notFoundCard}>
-          <View style={styles.notFoundIcon}>
-            <Ionicons name="business-outline" size={40} color="#00BCD4" />
-          </View>
-          <Text style={styles.notFoundTitle}>Không tìm thấy bệnh viện bạn cần?</Text>
-          <Text style={styles.notFoundText}>
-            Gửi yêu cầu để chúng tôi hỗ trợ tìm kiếm bệnh viện phù hợp nhất cho bạn
-          </Text>
-          <TouchableOpacity 
-            style={styles.requestButton}
-            onPress={() => setShowRequestModal(true)}
-          >
-            <Text style={styles.requestButtonText}>Gửi yêu cầu</Text>
-            <Ionicons name="arrow-forward" size={18} color="#00BCD4" />
-          </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
-
-      {/* Request Modal */}
-      {showRequestModal && (
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Gửi yêu cầu tìm bệnh viện</Text>
-              <TouchableOpacity onPress={() => setShowRequestModal(false)}>
-                <Ionicons name="close" size={24} color="#000" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.requestForm}>
-              <Text style={styles.requestLabel}>Mô tả yêu cầu của bạn</Text>
-              <TextInput
-                style={styles.requestInput}
-                placeholder="Ví dụ: Tôi cần tìm bệnh viện chuyên khoa tim mạch gần khu vực Quận 1..."
-                placeholderTextColor="#999"
-                multiline
-                numberOfLines={6}
-                value={requestText}
-                onChangeText={setRequestText}
-                textAlignVertical="top"
-              />
-              <Text style={styles.requestHint}>
-                Chúng tôi sẽ liên hệ với bạn trong vòng 24h để hỗ trợ tìm kiếm bệnh viện phù hợp
-              </Text>
-              <TouchableOpacity 
-                style={styles.submitButton}
-                onPress={() => {
-                  if (requestText.trim()) {
-                    alert('Đã gửi yêu cầu thành công! Chúng tôi sẽ liên hệ với bạn sớm.');
-                    setRequestText('');
-                    setShowRequestModal(false);
-                  } else {
-                    alert('Vui lòng nhập mô tả yêu cầu');
-                  }
-                }}
-              >
-                <Text style={styles.submitButtonText}>Gửi yêu cầu</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      )}
     </SafeAreaView>
   );
 }
@@ -362,291 +310,196 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#000',
   },
-  mapButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  mapButtonText: {
-    fontSize: 14,
-    color: '#00BCD4',
-    fontWeight: '600',
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    marginTop: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 12,
-    gap: 12,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: '#000',
-  },
-  filterContainer: {
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  filterContent: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  filterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: '#E0F7FA',
-    borderRadius: 20,
-    gap: 6,
-  },
-  filterChipActive: {
-    backgroundColor: '#00BCD4',
-  },
-  filterChipText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#00BCD4',
-  },
-  filterChipTextActive: {
-    color: '#fff',
-  },
-  resultsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  resultsText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#000',
-  },
-  sortButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  sortText: {
-    fontSize: 13,
-    color: '#666',
-  },
-  hospitalList: {
-    paddingHorizontal: 16,
-  },
-  loadingContainer: {
-    paddingVertical: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyContainer: {
-    paddingVertical: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 14,
-    color: '#cbd5e1',
-    marginTop: 16,
-  },
-  hospitalCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: 'hidden',
-    position: 'relative',
-  },
   hospitalImage: {
     width: '100%',
-    height: 140,
+    height: 200,
     resizeMode: 'cover',
   },
-  badge: {
-    position: 'absolute',
-    top: 12,
-    left: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#fff',
-  },
-  hospitalInfo: {
-    padding: 16,
-  },
-  hospitalName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
+  infoSection: {
+    backgroundColor: '#fff',
+    padding: 20,
     marginBottom: 8,
   },
-  distanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 6,
+  hospitalName: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 4,
   },
-  distanceText: {
-    fontSize: 13,
-    color: '#666',
-  },
-  hospitalAddress: {
-    fontSize: 13,
+  hospitalSubtitle: {
+    fontSize: 14,
     color: '#666',
     marginBottom: 12,
-  },
-  tagsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
-  tag: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  tagText: {
-    fontSize: 11,
-    color: '#666',
   },
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    marginBottom: 20,
   },
   ratingText: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#666',
   },
-  chevron: {
-    position: 'absolute',
-    right: 16,
-    top: '50%',
+  quickActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
   },
-  notFoundCard: {
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 24,
-    padding: 24,
-    borderRadius: 12,
+  actionButton: {
     alignItems: 'center',
   },
-  notFoundIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  actionIconBox: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: '#E0F7FA',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  notFoundTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#000',
     marginBottom: 8,
-    textAlign: 'center',
   },
-  notFoundText: {
-    fontSize: 13,
-    color: '#666',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 16,
+  actionText: {
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '500',
   },
-  requestButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: '#00BCD4',
-    borderRadius: 24,
-  },
-  requestButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#00BCD4',
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
+  section: {
     backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    maxHeight: '70%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    marginBottom: 8,
   },
-  modalTitle: {
+  sectionTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: '#000',
-  },
-  modalList: {
-    padding: 16,
-  },
-  requestForm: {
-    padding: 16,
-  },
-  requestLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 12,
-  },
-  requestInput: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 14,
-    color: '#000',
-    minHeight: 120,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    marginBottom: 12,
-  },
-  requestHint: {
-    fontSize: 12,
-    color: '#666',
-    lineHeight: 18,
     marginBottom: 16,
   },
-  submitButton: {
-    backgroundColor: '#00BCD4',
-    padding: 16,
-    borderRadius: 12,
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 16,
   },
-  submitButtonText: {
-    fontSize: 15,
+  seeAllText: {
+    fontSize: 14,
+    color: '#00BCD4',
+    fontWeight: '600',
+  },
+  contactItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 16,
+  },
+  contactText: {
+    flex: 1,
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+  contactTextColumn: {
+    flex: 1,
+  },
+  specialtiesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  specialtyCard: {
+    width: '23%',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  specialtyIconContainer: {
+    width: 75,
+    height: 75,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    shadowColor: '#00BCD4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#E0F7FA',
+  },
+  specialtyIcon: {
+    width: 55,
+    height: 55,
+    borderRadius: 12,
+  },
+  specialtyName: {
+    fontSize: 11,
     fontWeight: '700',
+    color: '#0f172a',
+    textAlign: 'center',
+    marginBottom: 3,
+    lineHeight: 14,
+  },
+  specialtyDoctors: {
+    fontSize: 10,
+    color: '#00BCD4',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+  doctorsList: {
+    gap: 12,
+  },
+  doctorCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 12,
+  },
+  doctorImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 12,
+  },
+  doctorInfo: {
+    flex: 1,
+  },
+  doctorName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#000',
+    marginBottom: 4,
+  },
+  doctorSpecialty: {
+    fontSize: 13,
+    color: '#666',
+    marginBottom: 4,
+  },
+  doctorRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  doctorRatingText: {
+    fontSize: 12,
+    color: '#000',
+    fontWeight: '600',
+  },
+  doctorExperience: {
+    fontSize: 12,
+    color: '#666',
+  },
+  bookButton: {
+    backgroundColor: '#00BCD4',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  bookButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
     color: '#fff',
   },
 });

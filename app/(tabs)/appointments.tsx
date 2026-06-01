@@ -26,6 +26,42 @@ const doctorImages = {
   'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
 };
 
+const doctorNameToImage: { [key: string]: string } = {
+  'Nguyễn Văn An': 'nguyenvanam.png',
+  'Trần Thị Lan': 'tranthilan.png',
+  'Lê Minh Tâm': 'leminhtam.png',
+  'Trần Thị Mai': 'tranthimai.png',
+  'Lê Hoàng Nam': 'lehoangnam.png',
+  'Phạm Thu Hà': 'phamthuha.png',
+  'Đỗ Minh Tuấn': 'dominhtuan.png',
+  'Vũ Thị Lan': 'vuthilan.png',
+  'Hoàng Văn Đức': 'hoangvanduc.png',
+  'Ngô Thị Hương': 'ngothihuong.png',
+  'Nguyễn Thị Hoa': 'nguyenthihoa.png',
+  'Trần Văn Khoa': 'tranvankhoa.png',
+  'Phạm Minh Quân': 'phamminhquan.png',
+  'Lê Thị Hằng': 'lethihang.png',
+  'Nguyễn Văn Hải': 'nguyenvanhai.png',
+  'Đặng Thị Thảo': 'dangthithao.jpg',
+  // Thêm các biến thể tên có thể có
+  'BS. Nguyễn Thị Hoa': 'nguyenthihoa.png',
+  'BS. Nguyễn Văn An': 'nguyenvanam.png',
+  'BS. Trần Thị Lan': 'tranthilan.png',
+  'BS. Lê Minh Tâm': 'leminhtam.png',
+  'BS. Trần Thị Mai': 'tranthimai.png',
+  'BS. Lê Hoàng Nam': 'lehoangnam.png',
+  'BS. Phạm Thu Hà': 'phamthuha.png',
+  'BS. Đỗ Minh Tuấn': 'dominhtuan.png',
+  'BS. Vũ Thị Lan': 'vuthilan.png',
+  'BS. Hoàng Văn Đức': 'hoangvanduc.png',
+  'BS. Ngô Thị Hương': 'ngothihuong.png',
+  'BS. Trần Văn Khoa': 'tranvankhoa.png',
+  'BS. Phạm Minh Quân': 'phamminhquan.png',
+  'BS. Lê Thị Hằng': 'lethihang.png',
+  'BS. Nguyễn Văn Hải': 'nguyenvanhai.png',
+  'BS. Đặng Thị Thảo': 'dangthithao.jpg',
+};
+
 export default function AppointmentsScreen() {
   const router = useRouter();
   const { user } = useAuth();
@@ -137,6 +173,7 @@ export default function AppointmentsScreen() {
     if (status === 'confirmed') return '#06D6A0';
     if (status === 'pending') return '#FFB800';
     if (status === 'rescheduled') return '#8B5CF6';
+    if (status === 'completed') return '#10b981';
     return '#94a3b8';
   };
 
@@ -144,7 +181,9 @@ export default function AppointmentsScreen() {
     if (status === 'confirmed') return 'Đã xác nhận';
     if (status === 'pending') return 'Chờ xác nhận';
     if (status === 'rescheduled') return 'Đã đổi lịch';
-    return 'Đã hủy';
+    if (status === 'completed') return 'Hoàn thành';
+    if (status === 'cancelled') return 'Đã hủy';
+    return 'Không xác định';
   };
 
   const renderAppointmentCard = ({ item }: any) => {
@@ -152,10 +191,50 @@ export default function AppointmentsScreen() {
     const aptDate = new Date(item.appointmentDate || item.createdAt);
     const isUpcoming = aptDate >= now && item.status !== 'cancelled' && item.status !== 'completed';
     
-    // Fallback cho image nếu không có
-    const doctorImage = item.image && doctorImages[item.image as keyof typeof doctorImages] 
-      ? doctorImages[item.image as keyof typeof doctorImages]
-      : require('@/assets/images/logo.png');
+    // Debug log
+    console.log('🖼️ [APPOINTMENTS] Rendering card for:', item.doctor);
+    console.log('🖼️ [APPOINTMENTS] item.image:', item.image);
+    console.log('🖼️ [APPOINTMENTS] item.hinh_anh:', item.hinh_anh);
+    
+    // Lấy avatar bác sĩ với fallback
+    const getAvatar = () => {
+      const imageFileName = item.image || item.hinh_anh;
+      
+      console.log('🖼️ [APPOINTMENTS] imageFileName:', imageFileName);
+      
+      // Priority 1: Từ file name
+      if (imageFileName && doctorImages[imageFileName as keyof typeof doctorImages]) {
+        console.log('✅ [APPOINTMENTS] Found image by filename:', imageFileName);
+        return doctorImages[imageFileName as keyof typeof doctorImages];
+      }
+      
+      // Priority 2: Từ tên bác sĩ
+      if (item.doctor) {
+        const mappedImage = doctorNameToImage[item.doctor];
+        console.log('🔍 [APPOINTMENTS] Mapped image for', item.doctor, ':', mappedImage);
+        if (mappedImage && doctorImages[mappedImage as keyof typeof doctorImages]) {
+          console.log('✅ [APPOINTMENTS] Found image by doctor name:', mappedImage);
+          return doctorImages[mappedImage as keyof typeof doctorImages];
+        }
+      }
+      
+      // Priority 3: Default
+      console.log('⚠️ [APPOINTMENTS] Using default logo');
+      return require('@/assets/images/logo.png');
+    };
+    
+    const doctorImage = getAvatar();
+    
+    // Đảm bảo các field không undefined
+    const doctorName = item.doctor || 'Bác sĩ';
+    const specialty = item.specialty || 'Chuyên khoa';
+    const hospital = item.hospital || 'Bệnh viện';
+    const date = item.date || '';
+    const fullDate = item.fullDate || '';
+    const time = item.time || '';
+    const duration = item.duration || '30 phút';
+    const room = item.room || 'Phòng khám';
+    const floor = item.floor || 'Tầng 1';
     
     return (
       <View style={styles.appointmentCard}>
@@ -166,11 +245,11 @@ export default function AppointmentsScreen() {
               style={styles.doctorAvatar}
             />
             <View style={styles.doctorDetails}>
-              <Text style={styles.doctorName}>{item.doctor}</Text>
-              <Text style={styles.specialty}>{item.specialty}</Text>
+              <Text style={styles.doctorName} numberOfLines={1}>{doctorName}</Text>
+              <Text style={styles.specialty} numberOfLines={1}>{specialty}</Text>
               <View style={styles.locationRow}>
-                <Ionicons name="location-outline" size={14} color="#64748b" />
-                <Text style={styles.hospital}>{item.hospital}</Text>
+                <Ionicons name="location-outline" size={12} color="#64748b" />
+                <Text style={styles.hospital} numberOfLines={1}>{hospital}</Text>
               </View>
             </View>
           </View>
@@ -182,54 +261,74 @@ export default function AppointmentsScreen() {
         </View>
 
         {isUpcoming && (
-          <View style={styles.appointmentDetails}>
-            <View style={styles.detailItem}>
-              <View style={styles.detailIcon}>
-                <Ionicons name="calendar-outline" size={20} color="#00BCD4" />
+          <>
+            <View style={styles.appointmentDetails}>
+              <View style={styles.detailItem}>
+                <View style={styles.detailIcon}>
+                  <Ionicons name="calendar-outline" size={18} color="#00BCD4" />
+                </View>
+                <View style={styles.detailContent}>
+                  <Text style={styles.detailLabel}>{date}</Text>
+                  <Text style={styles.detailValue} numberOfLines={1}>{fullDate}</Text>
+                </View>
               </View>
-              <View>
-                <Text style={styles.detailLabel}>{item.date}</Text>
-                <Text style={styles.detailValue}>{item.fullDate}</Text>
+
+              <View style={styles.detailItem}>
+                <View style={styles.detailIcon}>
+                  <Ionicons name="time-outline" size={18} color="#00BCD4" />
+                </View>
+                <View style={styles.detailContent}>
+                  <Text style={styles.detailLabel}>{time}</Text>
+                  <Text style={styles.detailValue} numberOfLines={1}>({duration})</Text>
+                </View>
+              </View>
+
+              <View style={styles.detailItem}>
+                <View style={styles.detailIcon}>
+                  <Ionicons name="business-outline" size={18} color="#00BCD4" />
+                </View>
+                <View style={styles.detailContent}>
+                  <Text style={styles.detailLabel} numberOfLines={1}>{room}</Text>
+                  <Text style={styles.detailValue} numberOfLines={1}>{floor}</Text>
+                </View>
               </View>
             </View>
 
-            <View style={styles.detailItem}>
-              <View style={styles.detailIcon}>
-                <Ionicons name="time-outline" size={20} color="#00BCD4" />
+            {/* Fee Display */}
+            {item.fee && (
+              <View style={styles.feeContainer}>
+                <Text style={styles.feeLabel}>Phí khám:</Text>
+                <Text style={styles.feeValue}>{item.fee.toLocaleString('vi-VN')} đ</Text>
               </View>
-              <View>
-                <Text style={styles.detailLabel}>{item.time}</Text>
-                <Text style={styles.detailValue}>({item.duration})</Text>
-              </View>
-            </View>
-
-            <View style={styles.detailItem}>
-              <View style={styles.detailIcon}>
-                <Ionicons name="business-outline" size={20} color="#00BCD4" />
-              </View>
-              <View>
-                <Text style={styles.detailLabel}>{item.room}</Text>
-                <Text style={styles.detailValue}>{item.floor}</Text>
-              </View>
-            </View>
-          </View>
+            )}
+          </>
         )}
 
         {!isUpcoming && (
-          <View style={styles.simpleDetails}>
-            <View style={styles.simpleDetailRow}>
-              <Ionicons name="calendar-outline" size={14} color="#64748b" />
-              <Text style={styles.simpleDetailText}>
-                {item.date}, {item.fullDate}
-              </Text>
-              <Text style={styles.simpleDetailText}>•</Text>
-              <Text style={styles.simpleDetailText}>{item.time}</Text>
+          <>
+            <View style={styles.simpleDetails}>
+              <View style={styles.simpleDetailRow}>
+                <Ionicons name="calendar-outline" size={14} color="#64748b" />
+                <Text style={styles.simpleDetailText} numberOfLines={1}>
+                  {date}, {fullDate}
+                </Text>
+                <Text style={styles.simpleDetailText}>•</Text>
+                <Text style={styles.simpleDetailText}>{time}</Text>
+              </View>
+              <View style={styles.simpleDetailRow}>
+                <Ionicons name="location-outline" size={14} color="#64748b" />
+                <Text style={styles.simpleDetailText} numberOfLines={1}>{hospital}</Text>
+              </View>
+              {item.fee && (
+                <View style={styles.simpleDetailRow}>
+                  <Ionicons name="card-outline" size={14} color="#64748b" />
+                  <Text style={styles.simpleDetailText}>
+                    Phí khám: {item.fee.toLocaleString('vi-VN')} đ
+                  </Text>
+                </View>
+              )}
             </View>
-            <View style={styles.simpleDetailRow}>
-              <Ionicons name="location-outline" size={14} color="#64748b" />
-              <Text style={styles.simpleDetailText}>{item.hospital}</Text>
-            </View>
-          </View>
+          </>
         )}
 
         <View style={styles.cardActions}>
@@ -239,7 +338,7 @@ export default function AppointmentsScreen() {
                 style={styles.outlineButton}
                 onPress={() => router.push(`/appointment-detail?id=${item.id}`)}
               >
-                <Text style={styles.outlineButtonText}>Xem chi tiết</Text>
+                <Text style={styles.outlineButtonText}>Chi tiết</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.primaryButton}>
                 <Text style={styles.primaryButtonText}>Đến khám</Text>
@@ -259,27 +358,19 @@ export default function AppointmentsScreen() {
     );
   };
 
-  const getIconBg = (icon: string) => {
-    if (icon === '❤️') return '#FFE5E5';
-    if (icon === '👂') return '#E5F3FF';
-    if (icon === '🧠') return '#F0E5FF';
-    if (icon === '🧴') return '#E5FFF0';
-    return '#F1F5F9';
-  };
-
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color="#fff" />
+          <Ionicons name="chevron-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Lịch khám</Text>
         <TouchableOpacity 
           style={styles.calendarBtn}
           onPress={() => setShowCalendar(!showCalendar)}
         >
-          <Ionicons name="calendar-outline" size={24} color="#fff" />
+          <Ionicons name="calendar-outline" size={24} color="#0f172a" />
         </TouchableOpacity>
       </View>
 
@@ -398,21 +489,6 @@ export default function AppointmentsScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
-
-      {/* Help Card */}
-      <TouchableOpacity 
-        style={styles.helpCard}
-      >
-        <View style={styles.helpIcon}>
-          <Ionicons name="calendar-outline" size={24} color="#00BCD4" />
-          <Ionicons name="time-outline" size={16} color="#00BCD4" style={styles.helpIconOverlay} />
-        </View>
-        <View style={styles.helpContent}>
-          <Text style={styles.helpTitle}>Bạn cần thay đổi lịch khám?</Text>
-          <Text style={styles.helpDesc}>Hãy hủy lịch trước ít nhất 2 giờ để được hỗ trợ tốt nhất.</Text>
-        </View>
-        <Ionicons name="chevron-forward" size={20} color="#64748b" />
-      </TouchableOpacity>
     </View>
   );
 }
@@ -423,13 +499,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f9ff',
   },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingTop: 50,
     paddingBottom: 16,
     paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
   },
   backBtn: {
     width: 40,
@@ -440,7 +518,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0f172a',
   },
   calendarBtn: {
     width: 40,
@@ -519,6 +597,8 @@ const styles = StyleSheet.create({
   },
   doctorDetails: {
     flex: 1,
+    justifyContent: 'center',
+    minWidth: 0,
   },
   doctorName: {
     fontSize: 15,
@@ -535,6 +615,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    flex: 1,
+    minWidth: 0,
   },
   hospital: {
     fontSize: 12,
@@ -562,6 +644,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flex: 1,
+    minWidth: 0,
   },
   detailIcon: {
     width: 36,
@@ -571,6 +655,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  detailContent: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   detailLabel: {
     fontSize: 13,
     fontWeight: '600',
@@ -579,6 +667,25 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 11,
     color: '#64748b',
+  },
+  feeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    paddingBottom: 4,
+    borderTopWidth: 1,
+    borderTopColor: '#f1f5f9',
+  },
+  feeLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#64748b',
+  },
+  feeValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#00BCD4',
   },
   simpleDetails: {
     gap: 8,
@@ -631,50 +738,6 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  helpCard: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  helpIcon: {
-    width: 48,
-    height: 48,
-    backgroundColor: '#E0F7FA',
-    borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  helpIconOverlay: {
-    position: 'absolute',
-    bottom: 4,
-    right: 4,
-  },
-  helpContent: {
-    flex: 1,
-  },
-  helpTitle: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#0f172a',
-    marginBottom: 2,
-  },
-  helpDesc: {
-    fontSize: 11,
-    color: '#64748b',
   },
   loadingContainer: {
     flex: 1,

@@ -1,10 +1,39 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from './context/AuthContext';
+import { getAllDocuments } from './services/firebaseService';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadUnreadNotifications();
+    }, [user])
+  );
+
+  const loadUnreadNotifications = async () => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+
+    try {
+      const allNotifications = await getAllDocuments('notifications');
+      const userUnreadNotifications = allNotifications.filter(
+        (n: any) => n.userId === user.uid && !n.read
+      );
+      setUnreadCount(userUnreadNotifications.length);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+      setUnreadCount(0);
+    }
+  };
 
   const quickActions = [
     { id: '1', icon: 'calendar', label: 'Hồ sơ y tế', color: '#00BCD4' },
@@ -24,10 +53,11 @@ export default function ProfileScreen() {
   ];
 
   const otherOptions = [
-    { id: '1', icon: 'lock-closed-outline', label: 'Đổi mật khẩu', color: '#00BCD4' },
-    { id: '2', icon: 'help-circle-outline', label: 'Trung tâm hỗ trợ', color: '#00BCD4' },
-    { id: '3', icon: 'information-circle-outline', label: 'Điều khoản & Chính sách', color: '#00BCD4' },
-    { id: '4', icon: 'log-out-outline', label: 'Đăng xuất', color: '#EF4444', isLogout: true },
+    { id: '1', icon: 'lock-closed-outline', label: 'Đổi mật khẩu', color: '#00BCD4', route: '/change-password' },
+    { id: '2', icon: 'help-circle-outline', label: 'Trung tâm hỗ trợ', color: '#00BCD4', route: '/support-center' },
+    { id: '3', icon: 'information-circle-outline', label: 'Điều khoản & Chính sách', color: '#00BCD4', route: '/terms-policy' },
+    { id: '4', icon: 'bug-outline', label: '🔧 Debug & Import Data', color: '#10b981', route: '/debug' },
+    { id: '5', icon: 'log-out-outline', label: 'Đăng xuất', color: '#EF4444', isLogout: true },
   ];
 
   return (
@@ -42,10 +72,15 @@ export default function ProfileScreen() {
           <TouchableOpacity style={styles.iconBtn}>
             <Ionicons name="settings-outline" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconBtn}>
-            <View style={styles.notificationBadge}>
-              <Text style={styles.badgeText}>3</Text>
-            </View>
+          <TouchableOpacity 
+            style={styles.iconBtn}
+            onPress={() => router.push('/notifications')}
+          >
+            {unreadCount > 0 && (
+              <View style={styles.notificationBadge}>
+                <Text style={styles.badgeText}>{unreadCount}</Text>
+              </View>
+            )}
             <Ionicons name="notifications-outline" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -140,7 +175,15 @@ export default function ProfileScreen() {
           <Text style={styles.sectionTitle}>Khác</Text>
           <View style={styles.optionsList}>
             {otherOptions.map((option) => (
-              <TouchableOpacity key={option.id} style={styles.optionItem}>
+              <TouchableOpacity 
+                key={option.id} 
+                style={styles.optionItem}
+                onPress={() => {
+                  if (option.route) {
+                    router.push(option.route as any);
+                  }
+                }}
+              >
                 <View style={styles.optionLeft}>
                   <View style={[styles.optionIcon, { backgroundColor: option.color + '20' }]}>
                     <Ionicons name={option.icon as any} size={20} color={option.color} />

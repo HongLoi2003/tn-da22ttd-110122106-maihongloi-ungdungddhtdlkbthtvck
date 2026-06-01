@@ -1,28 +1,34 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import React from 'react';
 import { Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function SupportCenterScreen() {
   const router = useRouter();
+  const [expandedFaq, setExpandedFaq] = React.useState<string | null>(null);
+
+  const toggleFaq = (id: string) => {
+    setExpandedFaq(expandedFaq === id ? null : id);
+  };
 
   const contactMethods = [
     { 
       id: '1', 
       icon: 'call', 
       title: 'Hotline', 
-      subtitle: '1900-xxxx',
+      subtitle: '0908971115',
       description: 'Hỗ trợ 24/7',
       color: '#00BCD4',
-      action: () => Linking.openURL('tel:1900xxxx')
+      action: () => Linking.openURL('tel: 0908971115')
     },
     { 
       id: '2', 
       icon: 'mail', 
       title: 'Email', 
-      subtitle: 'support@healthcare.vn',
+      subtitle: 'info@capcuu-115.com',
       description: 'Phản hồi trong 24h',
       color: '#06D6A0',
-      action: () => Linking.openURL('mailto:support@healthcare.vn')
+      action: () => Linking.openURL('mailto:info@capcuu-115.com')
     },
     { 
       id: '3', 
@@ -37,7 +43,7 @@ export default function SupportCenterScreen() {
       id: '4', 
       icon: 'logo-facebook', 
       title: 'Facebook', 
-      subtitle: 'fb.com/healthcare',
+      subtitle: 'fb.com/travinhgeneralhospital',
       description: 'Nhắn tin qua Messenger',
       color: '#1877F2',
       action: () => Linking.openURL('https://facebook.com')
@@ -45,10 +51,36 @@ export default function SupportCenterScreen() {
   ];
 
   const faqs = [
-    { id: '1', question: 'Làm thế nào để đặt lịch khám?', answer: 'Bạn có thể đặt lịch khám qua ứng dụng...' },
-    { id: '2', question: 'Tôi có thể hủy lịch khám không?', answer: 'Có, bạn có thể hủy lịch trước 24h...' },
-    { id: '3', question: 'Phí khám bệnh là bao nhiêu?', answer: 'Phí khám phụ thuộc vào chuyên khoa...' },
-    { id: '4', question: 'Làm sao để xem kết quả xét nghiệm?', answer: 'Kết quả sẽ được cập nhật trong hồ sơ...' },
+    { 
+      id: '1', 
+      question: 'Làm thế nào để đặt lịch khám?', 
+      answer: 'Bạn có thể đặt lịch khám qua ứng dụng bằng cách: 1) Chọn chuyên khoa hoặc bác sĩ, 2) Chọn ngày và giờ khám phù hợp, 3) Điền thông tin bệnh nhân, 4) Xác nhận và thanh toán (nếu cần). Lịch khám sẽ được xác nhận qua thông báo và email.' 
+    },
+    { 
+      id: '2', 
+      question: 'Tôi có thể hủy lịch khám không?', 
+      answer: 'Có, bạn có thể hủy lịch khám trước 24 giờ so với giờ hẹn. Vào mục "Lịch khám" > Chọn lịch cần hủy > Nhấn "Hủy lịch". Nếu đã thanh toán, số tiền sẽ được hoàn lại trong 3-5 ngày làm việc.' 
+    },
+    { 
+      id: '3', 
+      question: 'Phí khám bệnh là bao nhiêu?', 
+      answer: 'Phí khám phụ thuộc vào chuyên khoa và bác sĩ. Phí khám thông thường từ 150.000đ - 500.000đ. Bạn có thể xem chi tiết phí khám khi chọn bác sĩ. Chúng tôi chấp nhận thanh toán qua thẻ, ví điện tử và tiền mặt tại bệnh viện.' 
+    },
+    { 
+      id: '4', 
+      question: 'Làm sao để xem kết quả xét nghiệm?', 
+      answer: 'Kết quả xét nghiệm sẽ được cập nhật trong hồ sơ sức khỏe của bạn trong vòng 24-48 giờ. Vào mục "Hồ sơ" > "Kết quả xét nghiệm" để xem chi tiết. Bạn cũng sẽ nhận được thông báo khi kết quả đã sẵn sàng.' 
+    },
+    { 
+      id: '5', 
+      question: 'Tôi có thể đặt lịch cho người thân không?', 
+      answer: 'Có, bạn có thể thêm hồ sơ người thân trong mục "Hồ sơ" và đặt lịch khám cho họ. Mỗi tài khoản có thể quản lý tối đa 5 hồ sơ bệnh nhân.' 
+    },
+    { 
+      id: '6', 
+      question: 'Bệnh viện có hỗ trợ bảo hiểm y tế không?', 
+      answer: 'Có, Bệnh viện Trường Đại học Trà Vinh chấp nhận bảo hiểm y tế. Vui lòng mang theo thẻ BHYT khi đến khám. Bạn có thể cập nhật thông tin BHYT trong hồ sơ để thuận tiện hơn.' 
+    },
   ];
 
   return (
@@ -56,7 +88,7 @@ export default function SupportCenterScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Trung tâm hỗ trợ</Text>
         <View style={{ width: 24 }} />
@@ -88,15 +120,30 @@ export default function SupportCenterScreen() {
         {/* FAQs */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Câu hỏi thường gặp</Text>
-          {faqs.map((faq) => (
-            <TouchableOpacity key={faq.id} style={styles.faqCard}>
-              <View style={styles.faqHeader}>
-                <Ionicons name="help-circle-outline" size={20} color="#00BCD4" />
-                <Text style={styles.faqQuestion}>{faq.question}</Text>
-              </View>
-              <Text style={styles.faqAnswer}>{faq.answer}</Text>
-            </TouchableOpacity>
-          ))}
+          {faqs.map((faq) => {
+            const isExpanded = expandedFaq === faq.id;
+            return (
+              <TouchableOpacity 
+                key={faq.id} 
+                style={styles.faqCard}
+                onPress={() => toggleFaq(faq.id)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.faqHeader}>
+                  <Ionicons name="help-circle-outline" size={20} color="#00BCD4" />
+                  <Text style={styles.faqQuestion}>{faq.question}</Text>
+                  <Ionicons 
+                    name={isExpanded ? "chevron-up" : "chevron-down"} 
+                    size={20} 
+                    color="#64748b" 
+                  />
+                </View>
+                {isExpanded && (
+                  <Text style={styles.faqAnswer}>{faq.answer}</Text>
+                )}
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Emergency */}
@@ -128,13 +175,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0f9ff',
   },
   header: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#fff',
     paddingTop: 50,
     paddingBottom: 16,
     paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
   },
   backButton: {
     padding: 4,
@@ -142,7 +191,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0f172a',
   },
   content: {
     flex: 1,
@@ -210,7 +259,6 @@ const styles = StyleSheet.create({
   faqHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
     gap: 8,
   },
   faqQuestion: {
@@ -224,6 +272,7 @@ const styles = StyleSheet.create({
     color: '#64748b',
     lineHeight: 20,
     paddingLeft: 28,
+    marginTop: 8,
   },
   emergencyCard: {
     flexDirection: 'row',
