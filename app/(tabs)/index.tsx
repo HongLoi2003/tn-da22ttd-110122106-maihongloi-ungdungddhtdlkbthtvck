@@ -2,16 +2,16 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-    FlatList,
-    Image,
-    ImageSourcePropType,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  FlatList,
+  Image,
+  ImageSourcePropType,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { getAllDocuments } from '../services/firebaseService';
@@ -39,10 +39,10 @@ interface Article {
 }
 
 export default function HomeScreen() {
-  console.log('🏠 [HOME] HomeScreen component rendering');
+  console.log('?? [HOME] HomeScreen component rendering');
   const router = useRouter();
   const { userData, user } = useAuth();
-  console.log('👤 [HOME] User data:', userData?.fullName);
+  console.log('?? [HOME] User data:', userData?.fullName);
   const [searchText, setSearchText] = useState('');
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
@@ -87,7 +87,7 @@ export default function HomeScreen() {
           const mappedDoctors = doctorsData.slice(0, 4).map((doc: any) => {
             try {
               const imageName = doc.image || doc.hinh_anh || 'hoangvanduc.png';
-              console.log('🔍 Mapping doctor:', doc.ten, '| image field:', doc.image, '| hinh_anh field:', doc.hinh_anh, '| using:', imageName);
+              console.log('?? Mapping doctor:', doc.ten, '| image field:', doc.image, '| hinh_anh field:', doc.hinh_anh, '| using:', imageName);
               const imageSource = getDoctorAvatarSmart(doc.ten, imageName);
               
               return {
@@ -100,14 +100,14 @@ export default function HomeScreen() {
                 imageName: imageName,
               };
             } catch (error) {
-              console.error('❌ Error mapping doctor:', doc.id, doc.ten, error);
+              console.error('? Error mapping doctor:', doc.id, doc.ten, error);
               // Return a safe default
               return {
                 id: doc.id || 'unknown',
                 ten: doc.ten || 'Bác sĩ',
                 chuyen_khoa: doc.chuyen_khoa || 'Đa khoa',
                 rating: doc.rating || 4.8,
-                image: require('@/assets/images/logo.png'),
+                image: require('../../assets/images/logo.png'),
                 kinh_nghiem: doc.kinh_nghiem || 5,
                 imageName: 'logo.png',
               };
@@ -126,32 +126,32 @@ export default function HomeScreen() {
             id: '1',
             title: 'Uống đủ nước mỗi ngày',
             excerpt: 'Nước là nguồn sống, chiếm 60-70% trọng lượng cơ thể',
-            image: require('@/assets/images/chedouonguoc.png'),
-            date: '20/03/2024',
+            image: { uri: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=800&q=80' },
+            date: '20/06/2026',
             category: 'nutrition',
           },
           {
             id: '2',
             title: 'Cách ngủ ngon hơn',
             excerpt: 'Giấc ngủ chất lượng là nền tảng của sức khỏe',
-            image: require('@/assets/images/stress.png'),
-            date: '17/03/2024',
+            image: { uri: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800&q=80' },
+            date: '17/06/2026',
             category: 'sleep',
           },
           {
             id: '3',
             title: 'Dấu hiệu bệnh tim',
             excerpt: 'Bệnh tim là nguyên nhân gây tử vong hàng đầu',
-            image: require('@/assets/images/dauhieubenhtim.png'),
-            date: '16/03/2024',
+            image: { uri: 'https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?w=800&q=80' },
+            date: '16/06/2026',
             category: 'cardiology',
           },
           {
             id: '4',
             title: 'Tập thể dục đều đặn',
             excerpt: 'Vận động thể chất đều đặn là chìa khóa cho sức khỏe toàn diện',
-            image: require('@/assets/images/yoga.png'),
-            date: '15/03/2024',
+            image: { uri: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80' },
+            date: '15/06/2026',
             category: 'fitness',
           },
         ]);
@@ -164,7 +164,7 @@ export default function HomeScreen() {
             ten: 'BS. Nguyễn Văn An',
             chuyen_khoa: 'Tim mạch',
             rating: 4.9,
-            image: require('@/assets/images/hoangvanduc.png'),
+            image: 'hoangvanduc.png',
             kinh_nghiem: 10,
           },
           {
@@ -172,7 +172,7 @@ export default function HomeScreen() {
             ten: 'BS. Trần Thị Lan',
             chuyen_khoa: 'Sản phụ khoa',
             rating: 4.8,
-            image: require('@/assets/images/hesuyen.png'),
+            image: 'tranthilan.png',
             kinh_nghiem: 7,
           },
           {
@@ -180,7 +180,7 @@ export default function HomeScreen() {
             ten: 'BS. Lê Minh Tâm',
             chuyen_khoa: 'Nhi khoa',
             rating: 4.9,
-            image: require('@/assets/images/dominhtuan.png'),
+            image: 'dominhtuan.png',
             kinh_nghiem: 5,
           },
           {
@@ -188,7 +188,7 @@ export default function HomeScreen() {
             ten: 'BS. Phạm Thu Hà',
             chuyen_khoa: 'Cấp cứu',
             rating: 4.7,
-            image: require('@/assets/images/dangthithao.jpg'),
+            image: 'dangthithao.jpg',
             kinh_nghiem: 8,
           },
         ]);
@@ -198,32 +198,32 @@ export default function HomeScreen() {
             id: '1',
             title: 'Uống đủ nước mỗi ngày',
             excerpt: 'Nước là nguồn sống, chiếm 60-70% trọng lượng cơ thể',
-            image: require('@/assets/images/chedouonguoc.png'),
-            date: '20/03/2024',
+            image: { uri: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=800&q=80' },
+            date: '20/06/2026',
             category: 'nutrition',
           },
           {
             id: '2',
             title: 'Cách ngủ ngon hơn',
             excerpt: 'Giấc ngủ chất lượng là nền tảng của sức khỏe',
-            image: require('@/assets/images/stress.png'),
-            date: '17/03/2024',
+            image: { uri: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800&q=80' },
+            date: '17/06/2026',
             category: 'sleep',
           },
           {
             id: '3',
             title: 'Dấu hiệu bệnh tim',
             excerpt: 'Bệnh tim là nguyên nhân gây tử vong hàng đầu',
-            image: require('@/assets/images/dauhieubenhtim.png'),
-            date: '16/03/2024',
+            image: { uri: 'https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?w=800&q=80' },
+            date: '16/06/2026',
             category: 'cardiology',
           },
           {
             id: '4',
             title: 'Tập thể dục đều đặn',
             excerpt: 'Vận động thể chất đều đặn là chìa khóa cho sức khỏe toàn diện',
-            image: require('@/assets/images/yoga.png'),
-            date: '15/03/2024',
+            image: { uri: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80' },
+            date: '15/06/2026',
             category: 'fitness',
           },
         ]);
@@ -256,9 +256,9 @@ export default function HomeScreen() {
       
       setUnreadCount(userUnreadNotifications.length);
     } catch (error: any) {
-      // Bỏ qua lỗi permission-denied cho notifications
+      // B? qua l?i permission-denied cho notifications
       if (error?.code === 'permission-denied') {
-        console.log('⚠️ Notifications permission denied, skipping...');
+        console.log('?? Notifications permission denied, skipping...');
       } else {
         console.error('Error loading notifications:', error);
       }
@@ -327,10 +327,9 @@ export default function HomeScreen() {
             />
           </TouchableOpacity>
         </View>
-        <Text style={styles.doctorTitle}>BS.TS</Text>
         <Text style={styles.doctorName} numberOfLines={1}>{doctor.ten}</Text>
         <Text style={styles.doctorSpecialty} numberOfLines={1}>{doctor.chuyen_khoa}</Text>
-        <Text style={styles.doctorHospital} numberOfLines={2}>Bệnh viện Trường Đại học Trà Vinh</Text>
+        <Text style={styles.doctorHospital} numberOfLines={2}>Bệnh viện Trường Đại Học Trà Vinh</Text>
         <View style={styles.ratingContainer}>
           <Ionicons name="star" size={14} color="#FFB800" />
           <Text style={styles.rating}>{doctor.rating}</Text>
@@ -343,7 +342,7 @@ export default function HomeScreen() {
   const ArticleCard = ({ article }: { article: Article }) => (
     <TouchableOpacity
       style={styles.articleCard}
-      onPress={() => router.push(`/article-detail?id=${article.id}`)}
+      onPress={() => router.push('/articles')}
     >
       <View style={styles.articleImageContainer}>
         <Image source={article.image} style={styles.articleImage} />
@@ -370,7 +369,7 @@ export default function HomeScreen() {
               source={
                 userData?.avatar 
                   ? { uri: userData.avatar }
-                  : require('@/assets/images/icon.png')
+                  : require('../../assets/images/icon.png')
               }
               style={styles.avatar}
             />
@@ -417,10 +416,8 @@ export default function HomeScreen() {
         {/* Banner */}
         <View style={styles.banner}>
           <View style={styles.bannerContent}>
-            <Text style={styles.bannerTitle}>Chăm sóc sức khỏe <Text style={styles.bannerTitleHighlight}>mỗi ngày</Text></Text>
-            <Text style={styles.bannerSubtitle}>
-              Đặt lịch khám và tư vấn chuyên khoa
-            </Text>
+            <Text style={styles.bannerTitle}>Đặt lịch khám và tư vấn chuyên khoa <Text style={styles.bannerTitleHighlight}>mỗi ngày</Text></Text>
+            
             <View style={styles.bannerButtonContainer}>
               <TouchableOpacity 
                 style={styles.bannerButton}
@@ -438,7 +435,7 @@ export default function HomeScreen() {
           </View>
           <View style={styles.bannerImageContainer}>
             <Image
-              source={require('@/assets/images/bacsi.png')}
+              source={require('../../assets/images/bacsi.png')}
               style={styles.bannerImage}
             />
           </View>
@@ -453,7 +450,7 @@ export default function HomeScreen() {
             >
               <View style={styles.quickMenuGridIconBox}>
                 <Image 
-                  source={require('@/assets/images/datlichkham.png')} 
+                  source={require('../../assets/images/datlichkham.png')} 
                   style={styles.quickMenuImage}
                 />
               </View>
@@ -461,30 +458,32 @@ export default function HomeScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity 
+                          style={styles.quickMenuGridItem}
+                          onPress={() => router.push('/(tabs)/appointments')}
+                        >
+                          <View style={styles.quickMenuGridIconBox}>
+                            <Image 
+                              source={require('../../assets/images/lichkham.png')} 
+                              style={styles.quickMenuImage}
+                            />
+                          </View>
+                          <Text style={styles.quickMenuGridItemLabel}>Lịch khám</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
               style={styles.quickMenuGridItem}
               onPress={() => router.push('/(tabs)/chat')}
             >
               <View style={styles.quickMenuGridIconBox}>
                 <Image 
-                  source={require('@/assets/images/tuvanonline.png')} 
+                  source={require('../../assets/images/tuvanonline.png')} 
                   style={styles.quickMenuImage}
                 />
               </View>
               <Text style={styles.quickMenuGridItemLabel}>Tư vấn online</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={styles.quickMenuGridItem}
-              onPress={() => router.push('/(tabs)/appointments')}
-            >
-              <View style={styles.quickMenuGridIconBox}>
-                <Image 
-                  source={require('@/assets/images/lichkham.png')} 
-                  style={styles.quickMenuImage}
-                />
-              </View>
-              <Text style={styles.quickMenuGridItemLabel}>Lịch khám</Text>
-            </TouchableOpacity>
+            
 
             <TouchableOpacity 
               style={styles.quickMenuGridItem}
@@ -492,7 +491,7 @@ export default function HomeScreen() {
             >
               <View style={styles.quickMenuGridIconBox}>
                 <Image 
-                  source={require('@/assets/images/timbenhvien.png')} 
+                  source={require('../../assets/images/timbenhvien.png')} 
                   style={styles.quickMenuImage}
                 />
               </View>
@@ -507,7 +506,7 @@ export default function HomeScreen() {
             >
               <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FFF5F5' }]}>
                 <Image 
-                  source={require('@/assets/images/chuyenkhoa.png')} 
+                  source={require('../../assets/images/chuyenkhoa.png')} 
                   style={styles.quickMenuImage}
                 />
               </View>
@@ -520,7 +519,7 @@ export default function HomeScreen() {
             >
               <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#F0FFF4' }]}>
                 <Image 
-                  source={require('@/assets/images/nhathuoc.png')} 
+                  source={require('../../assets/images/nhathuoc.png')} 
                   style={styles.quickMenuImage}
                 />
               </View>
@@ -533,11 +532,11 @@ export default function HomeScreen() {
             >
               <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FFFBEB' }]}>
                 <Image 
-                  source={require('@/assets/images/baohiemyte.png')} 
+                  source={require('../../assets/images/baohiemyte.png')} 
                   style={styles.quickMenuImage}
                 />
               </View>
-              <Text style={styles.quickMenuGridItemLabel}>Bảo hiểm y tế</Text>
+              <Text style={styles.quickMenuGridItemLabel}>Bảo hiểm y tế </Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -546,7 +545,7 @@ export default function HomeScreen() {
             >
               <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FFF1F2' }]}>
                 <Image 
-                  source={require('@/assets/images/hotrosuckhoe.png')} 
+                  source={require('../../assets/images/hotrosuckhoe.png')} 
                   style={styles.quickMenuImage}
                 />
               </View>
@@ -680,9 +679,9 @@ const styles = StyleSheet.create({
   },
   banner: {
     flexDirection: 'row',
-    marginHorizontal: 16,
+    marginHorizontal: 20,
     marginVertical: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
     paddingVertical: 20,
     backgroundColor: '#E0F7FA',
     borderRadius: 20,
@@ -905,7 +904,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   doctorCard: {
-    width: 170,
+    width: 185,
     marginRight: 12,
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -916,7 +915,7 @@ const styles = StyleSheet.create({
   doctorImageContainer: {
     position: 'relative',
     width: '100%',
-    height: 140,
+    height: 160,
   },
   doctorImage: {
     width: '100%',

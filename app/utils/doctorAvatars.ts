@@ -1,22 +1,22 @@
-// Mapping tên bác sĩ với file ảnh
+// Mapping tên bác sĩ với URL ảnh
 export const doctorImages: { [key: string]: any } = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
-  'logo.png': require('@/assets/images/logo.png'),
+  'nguyenvanam.png': { uri: 'https://i.pravatar.cc/200?img=12' },
+  'tranthilan.png': { uri: 'https://i.pravatar.cc/200?img=5' },
+  'leminhtam.png': { uri: 'https://i.pravatar.cc/200?img=33' },
+  'tranthimai.png': { uri: 'https://i.pravatar.cc/200?img=47' },
+  'lehoangnam.png': { uri: 'https://i.pravatar.cc/200?img=13' },
+  'phamthuha.png': { uri: 'https://i.pravatar.cc/200?img=48' },
+  'dominhtuan.png': { uri: 'https://i.pravatar.cc/200?img=15' },
+  'vuthilan.png': { uri: 'https://i.pravatar.cc/200?img=9' },
+  'hoangvanduc.png': { uri: 'https://i.pravatar.cc/200?img=68' },
+  'ngothihuong.png': { uri: 'https://i.pravatar.cc/200?img=23' },
+  'nguyenthihoa.png': { uri: 'https://i.pravatar.cc/200?img=44' },
+  'tranvankhoa.png': { uri: 'https://i.pravatar.cc/200?img=51' },
+  'phamminhquan.png': { uri: 'https://i.pravatar.cc/200?img=59' },
+  'lethihang.png': { uri: 'https://i.pravatar.cc/200?img=45' },
+  'nguyenvanhai.png': { uri: 'https://i.pravatar.cc/200?img=60' },
+  'dangthithao.jpg': { uri: 'https://i.pravatar.cc/200?img=32' },
+  'logo.png': { uri: 'https://i.pravatar.cc/200?img=1' },
 };
 
 // Mapping tên bác sĩ (fullName) với file ảnh
@@ -57,7 +57,7 @@ export const doctorNameToImage: { [key: string]: string } = {
 };
 
 // Default avatar
-const defaultAvatar = require('@/assets/images/logo.png');
+const defaultAvatar = { uri: 'https://i.pravatar.cc/200?img=1' };
 
 /**
  * Lấy avatar của bác sĩ - hàm tổng hợp với nhiều fallback

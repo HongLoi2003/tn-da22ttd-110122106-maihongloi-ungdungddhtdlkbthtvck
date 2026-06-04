@@ -7,23 +7,23 @@ import { Platform } from 'react-native';
 
 // Map tất cả ảnh bác sĩ
 const doctorImages: { [key: string]: any } = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
-  'hesuyen.png': require('@/assets/images/hesuyen.png'),
+  'nguyenvanam.png': { uri: 'https://i.pravatar.cc/200?img=12' },
+  'tranthilan.png': { uri: 'https://i.pravatar.cc/200?img=5' },
+  'leminhtam.png': { uri: 'https://i.pravatar.cc/200?img=33' },
+  'tranthimai.png': { uri: 'https://i.pravatar.cc/200?img=47' },
+  'lehoangnam.png': { uri: 'https://i.pravatar.cc/200?img=13' },
+  'phamthuha.png': { uri: 'https://i.pravatar.cc/200?img=48' },
+  'dominhtuan.png': { uri: 'https://i.pravatar.cc/200?img=15' },
+  'vuthilan.png': { uri: 'https://i.pravatar.cc/200?img=9' },
+  'hoangvanduc.png': { uri: 'https://i.pravatar.cc/200?img=68' },
+  'ngothihuong.png': { uri: 'https://i.pravatar.cc/200?img=23' },
+  'nguyenthihoa.png': { uri: 'https://i.pravatar.cc/200?img=44' },
+  'tranvankhoa.png': { uri: 'https://i.pravatar.cc/200?img=51' },
+  'phamminhquan.png': { uri: 'https://i.pravatar.cc/200?img=59' },
+  'lethihang.png': { uri: 'https://i.pravatar.cc/200?img=45' },
+  'nguyenvanhai.png': { uri: 'https://i.pravatar.cc/200?img=60' },
+  'dangthithao.jpg': { uri: 'https://i.pravatar.cc/200?img=32' },
+  'logo.png': { uri: 'https://i.pravatar.cc/200?img=1' },
 };
 
 // Map ảnh bệnh viện (chỉ có 2 file thực sự tồn tại)
@@ -46,23 +46,6 @@ const specialtyImages: { [key: string]: any } = {
   'tai-mui-hong.png': require('@/assets/images/tai-mui-hong.png'),
   'than-kinh.png': require('@/assets/images/than-kinh.png'),
   'tieu-hoa.png': require('@/assets/images/tieu-hoa.png'),
-};
-
-// Map ảnh bài viết
-const articleImages: { [key: string]: any } = {
-  'chedouonguoc.png': require('@/assets/images/chedouonguoc.png'),
-  'stress.png': require('@/assets/images/stress.png'),
-  'dauhieubenhtim.png': require('@/assets/images/dauhieubenhtim.png'),
-  'yoga.png': require('@/assets/images/yoga.png'),
-  'chamsocdamun.png': require('@/assets/images/chamsocdamun.png'),
-  'chamsocrang.png': require('@/assets/images/chamsocrang.png'),
-  'chamsoctresosinh.png': require('@/assets/images/chamsoctresosinh.png'),
-  'canthiotreem.png': require('@/assets/images/canthiotreem.png'),
-  'daukhopgoi.png': require('@/assets/images/daukhopgoi.png'),
-  'ngudugiac.png': require('@/assets/images/ngudugiac.png'),
-  'thaikykhoemanh.png': require('@/assets/images/thaikykhoemanh.png'),
-  'viemloetdaday.png': require('@/assets/images/viemloetdaday.png'),
-  'viemxoangmantinh.png': require('@/assets/images/viemxoangmantinh.png'),
 };
 
 // Map ảnh chung
@@ -94,7 +77,7 @@ const commonImages: { [key: string]: any } = {
  * @param type - Loại ảnh: 'doctor' | 'hospital' | 'specialty' | 'article' | 'common'
  * @returns Image source object hoặc URI string
  */
-export function getImageSource(imageName: string, type: 'doctor' | 'hospital' | 'specialty' | 'article' | 'common' = 'common') {
+export function getImageSource(imageName: string, type: 'doctor' | 'hospital' | 'specialty' | 'common' = 'common') {
   let imageMap: { [key: string]: any } = {};
   
   switch (type) {
@@ -106,9 +89,6 @@ export function getImageSource(imageName: string, type: 'doctor' | 'hospital' | 
       break;
     case 'specialty':
       imageMap = specialtyImages;
-      break;
-    case 'article':
-      imageMap = articleImages;
       break;
     case 'common':
       imageMap = commonImages;
@@ -167,5 +147,5 @@ export function getImageSourceObject(imageUrl: string | null | undefined, fallba
 }
 
 // Export các map để dùng trực tiếp nếu cần
-export { articleImages, commonImages, doctorImages, hospitalImages, specialtyImages };
+export { commonImages, doctorImages, hospitalImages, specialtyImages };
 
