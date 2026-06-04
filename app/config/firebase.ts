@@ -36,12 +36,12 @@ const validateFirebaseConfig = (config: FirebaseConfigType): boolean => {
 
 // Firebase configuration from environment variables
 const firebaseConfig: FirebaseConfigType = {
-  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY || '',
-  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN || '',
-  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID || '',
-  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
-  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
-  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID || '',
+  apiKey: "AIzaSyDehJOLX38acOCdq1CFbVqigBgxebaBD2k",
+  authDomain: "hearthcare-847b3.firebaseapp.com",
+  projectId: "hearthcare-847b3",
+  storageBucket: "hearthcare-847b3.firebasestorage.app",
+  messagingSenderId: "9119519990",
+  appId: "1:9119519990:web:0f8f0508861c87e2be48d7",
 };
 
 // Check if Firebase config is valid
@@ -95,6 +95,21 @@ if (isConfigValid) {
   }
 } else {
   console.warn('⚠️ Firebase configuration is invalid. Firebase features will not work.');
+}
+
+// Helper để ensure db không bao giờ undefined
+export function getFirestoreDb(): Firestore {
+  if (!db) {
+    throw new Error('Firebase Firestore is not initialized. Check your .env.local file.');
+  }
+  return db;
+}
+
+export function getFirebaseAuth(): Auth {
+  if (!auth) {
+    throw new Error('Firebase Auth is not initialized. Check your .env.local file.');
+  }
+  return auth;
 }
 
 export { app, auth, db, isConfigValid, storage };
