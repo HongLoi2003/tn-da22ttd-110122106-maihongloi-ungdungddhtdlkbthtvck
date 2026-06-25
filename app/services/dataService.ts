@@ -4,8 +4,8 @@
  * Replaces hardcoded mock data with dynamic data from Firebase
  */
 
-import { db } from '@/app/config/firebase';
-import errorHandler from '@/app/utils/errorHandler';
+import { getFirestoreDb,} from '@/config/firebase';
+import errorHandler from '@/utils/errorHandler';
 import {
     collection,
     getDocs,
@@ -94,11 +94,11 @@ class DataService {
         if (cached) return cached;
       }
 
-      let q = query(collection(db, 'doctors'), limit(limit_count));
+      let q = query(collection(getFirestoreDb(), 'doctors'), limit(limit_count));
 
       if (specialty) {
         q = query(
-          collection(db, 'doctors'),
+          collection(getFirestoreDb(), 'doctors'),
           where('chuyen_khoa', '==', specialty),
           limit(limit_count)
         );
@@ -134,7 +134,7 @@ class DataService {
         if (cached) return cached;
       }
 
-      const q = query(collection(db, 'hospitals'), limit(limit_count));
+      const q = query(collection(getFirestoreDb(), 'hospitals'), limit(limit_count));
       const snapshot = await getDocs(q);
       const hospitals = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -162,7 +162,7 @@ class DataService {
         if (cached) return cached;
       }
 
-      const q = query(collection(db, 'specialties'));
+      const q = query(collection(getFirestoreDb(), 'specialties'));
       const snapshot = await getDocs(q);
       const specialties = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -191,7 +191,7 @@ class DataService {
       }
 
       const q = query(
-        collection(db, 'articles'),
+        collection(getFirestoreDb(), 'articles'),
         orderBy('createdAt', 'desc'),
         limit(limit_count)
       );

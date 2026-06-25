@@ -44,7 +44,7 @@ export default function NotificationDetailScreen() {
         setNotification(data as NotificationDetail);
         
         // Đánh dấu đã đọc nếu chưa đọc
-        if (!data.read) {
+        if (!(data as any).read) {
           await updateDocument('notifications', notificationId, { read: true });
         }
       }

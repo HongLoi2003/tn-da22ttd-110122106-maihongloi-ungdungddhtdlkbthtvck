@@ -106,27 +106,6 @@
     "replies": []
   },
   {
-    "id": "cmt008",
-    "articleId": "3",
-    "userId": "user010",
-    "userName": "Lê Thị K",
-    "userAvatar": "tranthimai.png",
-    "content": "Bác sĩ có thể tư vấn thêm về thực đơn cụ thể không ạ?",
-    "createdAt": "2024-03-15T10:00:00Z",
-    "likes": 7,
-    "replies": [
-      {
-        "id": "reply004",
-        "userId": "doctor001",
-        "userName": "BS. Nguyễn Văn An",
-        "userAvatar": "nguyenvanam.png",
-        "content": "Chào bạn! Bạn có thể tham khảo thêm bài viết về thực đơn dinh dưỡng trên trang của chúng tôi nhé.",
-        "createdAt": "2024-03-15T14:00:00Z",
-        "likes": 12
-      }
-    ]
-  },
-  {
     "id": "cmt009",
     "articleId": "4",
     "userId": "user011",

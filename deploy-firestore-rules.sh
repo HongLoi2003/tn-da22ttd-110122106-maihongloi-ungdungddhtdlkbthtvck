@@ -1,26 +1,36 @@
 #!/bin/bash
 
+# Deploy Firestore Rules to Firebase
 echo "🚀 Deploying Firestore Rules..."
-echo ""
 
 # Check if Firebase CLI is installed
-if ! command -v firebase &> /dev/null
-then
-    echo "❌ Firebase CLI chưa được cài đặt!"
-    echo "📦 Cài đặt bằng lệnh: npm install -g firebase-tools"
+if ! command -v firebase &> /dev/null; then
+    echo "❌ Firebase CLI is not installed!"
+    echo "Install it with: npm install -g firebase-tools"
     exit 1
 fi
 
-# Deploy Firestore rules
-echo "📤 Đang deploy Firestore rules..."
+# Check if logged in
+echo "📝 Checking Firebase login status..."
+firebase login:list
+
+# Deploy rules
+echo ""
+echo "🔥 Deploying Firestore rules..."
 firebase deploy --only firestore:rules
 
 if [ $? -eq 0 ]; then
     echo ""
-    echo "✅ Deploy Firestore rules thành công!"
-    echo "🎉 Bây giờ bạn có thể đọc collection 'popular-specialties'"
+    echo "✅ Firestore rules deployed successfully!"
+    echo ""
+    echo "📋 Rules now allow:"
+    echo "  ✓ Users can create AI conversations"
+    echo "  ✓ Users can read their own conversations"
+    echo "  ✓ Users can update their own conversations"
+    echo "  ✓ Users can delete their own conversations"
+    echo "  ✓ Users can create/delete AI messages"
 else
     echo ""
-    echo "❌ Deploy thất bại!"
-    echo "💡 Hãy chắc chắn bạn đã đăng nhập Firebase: firebase login"
+    echo "❌ Failed to deploy Firestore rules!"
+    echo "Please check the error message above."
 fi

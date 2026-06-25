@@ -19,6 +19,12 @@ interface Tool {
 }
 
 const tools: Tool[] = [
+  // Chat Debug Tools
+  { name: 'Chat Debug Center', description: '🎯 Trung tâm debug hệ thống chat', icon: 'chatbubbles', path: '/chat-debug-center', category: 'Chat Debug' },
+  { name: 'Quick Check 16 Doctors', description: 'Kiểm tra nhanh chat 16 bác sĩ', icon: 'search', path: '/quick-check-all-doctors-chat', category: 'Chat Debug' },
+  { name: 'Check All Doctors Chat', description: 'Kiểm tra chi tiết chat tất cả bác sĩ', icon: 'analytics', path: '/check-all-doctors-chat-status', category: 'Chat Debug' },
+  { name: 'Debug Chat Issue', description: 'Debug vấn đề chat cụ thể', icon: 'bug', path: '/debug-chat-issue', category: 'Chat Debug' },
+  
   // Debug Tools
   { name: 'Debug Auth State', description: 'Kiểm tra trạng thái authentication', icon: 'shield-checkmark', path: '/_dev/debug/debug-auth-state', category: 'Debug' },
   { name: 'Debug Firebase Login', description: 'Debug Firebase login', icon: 'log-in', path: '/_dev/debug/debug-firebase-login', category: 'Debug' },
@@ -29,6 +35,12 @@ const tools: Tool[] = [
   { name: 'Check Firestore Rules', description: 'Kiểm tra Firestore security rules', icon: 'shield', path: '/_dev/check/check-firestore-rules', category: 'Check' },
   { name: 'Check User Roles', description: 'Kiểm tra và sửa user roles', icon: 'people', path: '/_dev/check/check-user-role', category: 'Check' },
   { name: 'Check Doctor Auth UID', description: 'Kiểm tra authUid của bác sĩ', icon: 'medical', path: '/_dev/check/check-all-doctors-auth-uid', category: 'Check' },
+  { name: 'Check Doctor IDs', description: 'Kiểm tra doctorInfo.doctorId của tất cả bác sĩ', icon: 'checkmark-circle', path: '/check-all-doctors-have-doctorid', category: 'Check' },
+  
+  // Cleanup Tools
+  { name: 'Check Duplicate Doctors', description: '🔍 Kiểm tra tài khoản bác sĩ duplicate', icon: 'copy', path: '/check-duplicate-doctors', category: 'Cleanup' },
+  { name: 'Delete Duplicate Test Accounts', description: '🗑️ Xóa 2 tài khoản test duplicate', icon: 'trash', path: '/delete-duplicate-test-accounts', category: 'Cleanup' },
+  { name: 'Recreate BS001', description: '🏥 Tạo lại tài khoản BS. Nguyễn Văn An', icon: 'person-add', path: '/recreate-bs001-account', category: 'Cleanup' },
   
   // Test Tools
   { name: 'Test Firebase Connection', description: 'Test kết nối Firebase', icon: 'cloud', path: '/_dev/test/test-firebase-connection', category: 'Test' },

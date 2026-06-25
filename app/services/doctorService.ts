@@ -155,16 +155,16 @@ class DoctorServiceClass {
           const { getDocumentById } = await import('./firebaseService');
           const doctorInfo = await getDocumentById('doctors', doctorId);
           
-          if (doctorInfo && doctorInfo.ten) {
-            console.log('🔍 [DoctorService] Doctor name from doctors collection:', doctorInfo.ten);
+          if (doctorInfo && (doctorInfo as any).ten) {
+            console.log('🔍 [DoctorService] Doctor name from doctors collection:', (doctorInfo as any).ten);
             
             // Filter by doctor name (with and without "BS." prefix)
             appointments = allAppointments.filter((apt: any) => {
               const doctorMatch = 
-                apt.doctor === doctorInfo.ten || 
-                apt.doctor === `BS. ${doctorInfo.ten}` ||
-                apt.doctor === `Bs. ${doctorInfo.ten}` ||
-                apt.doctor?.toLowerCase() === doctorInfo.ten?.toLowerCase();
+                apt.doctor === (doctorInfo as any).ten || 
+                apt.doctor === `BS. ${(doctorInfo as any).ten}` ||
+                apt.doctor === `Bs. ${(doctorInfo as any).ten}` ||
+                apt.doctor?.toLowerCase() === (doctorInfo as any).ten?.toLowerCase();
               
               if (doctorMatch) {
                 console.log('✅ [DoctorService] Found match by name:', apt.doctor);
@@ -197,12 +197,12 @@ class DoctorServiceClass {
       if (appointments.length > 0) {
         console.log('📋 [DoctorService] Sample appointment:', {
           id: appointments[0].id,
-          doctorId: appointments[0].doctorId,
-          doctor: appointments[0].doctor,
-          patientName: appointments[0].patientName,
-          date: appointments[0].fullDate,
-          time: appointments[0].time,
-          status: appointments[0].status
+          doctorId: (appointments[0] as any).doctorId,
+          doctor: (appointments[0] as any).doctor,
+          patientName: (appointments[0] as any).patientName,
+          date: (appointments[0] as any).fullDate,
+          time: (appointments[0] as any).time,
+          status: (appointments[0] as any).status
         });
       } else {
         console.log('⚠️  [DoctorService] No appointments found for doctorId:', doctorId);

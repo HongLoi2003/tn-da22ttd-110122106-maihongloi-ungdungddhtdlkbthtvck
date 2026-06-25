@@ -1,15 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
-    ActivityIndicator,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Animated,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
+import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import { useAuth } from './context/AuthContext';
 import { deleteDocument, getAllDocuments, updateDocument } from './services/firebaseService';
 
@@ -108,11 +110,65 @@ export default function NotificationsScreen() {
       console.error('Error updating notification:', error);
     }
 
-    // Chuyển đến trang chi tiết thông báo
-    router.push({
-      pathname: '/notification-detail',
-      params: { id: notification.id },
-    });
+    // Xử lý navigation theo loại thông báo
+    switch (notification.type) {
+      case 'message':
+        // Chuyển thẳng đến màn hình chat với bác sĩ
+        if (notification.data?.conversationId) {
+          // Ưu tiên dùng conversationId nếu có - sẽ load toàn bộ tin nhắn cũ
+          router.push({
+            pathname: '/doctor-chat',
+            params: { 
+              conversationId: notification.data.conversationId,
+              doctorId: notification.data.doctorId || '',
+              doctorName: notification.data.doctorName || 'Bác sĩ',
+            },
+          });
+        } else if (notification.data?.doctorId && notification.data?.doctorName) {
+          // Fallback: dùng doctorId và doctorName - sẽ tìm conversation
+          router.push({
+            pathname: '/doctor-chat',
+            params: { 
+              doctorId: notification.data.doctorId,
+              doctorName: notification.data.doctorName,
+            },
+          });
+        } else {
+          // Fallback cuối: chuyển đến tab chat
+          router.push('/(tabs)/chat');
+        }
+        break;
+      
+      case 'appointment':
+        // Chuyển đến chi tiết lịch hẹn
+        if (notification.data?.appointmentId) {
+          router.push({
+            pathname: '/appointment-detail',
+            params: { id: notification.data.appointmentId },
+          });
+        } else {
+          router.push('/(tabs)/appointments');
+        }
+        break;
+      
+      case 'prescription':
+        // Chuyển đến trang đơn thuốc
+        router.push('/all-prescriptions');
+        break;
+      
+      case 'test_result':
+        // Chuyển đến trang kết quả xét nghiệm
+        router.push('/all-test-results');
+        break;
+      
+      default:
+        // Các loại khác: hiển thị thông báo đơn giản
+        router.push({
+          pathname: '/notification-detail',
+          params: { id: notification.id },
+        });
+        break;
+    }
   };
 
   const handleMarkAllAsRead = async () => {
@@ -142,14 +198,14 @@ export default function NotificationsScreen() {
     }
   };
 
-  const renderRightActions = (notificationId: string, progress: Animated.AnimatedInterpolation<number>) => {
+  const renderRightActions = (notificationId: string, progress: any) => {
     const translateX = progress.interpolate({
       inputRange: [0, 1],
       outputRange: [80, 0],
     });
 
     return (
-      <Animated.View style={[styles.deleteAction, { transform: [{ translateX }] }]}>
+      <Animated.View style={[styles.deleteAction, { transform: [{ translateX: translateX }] }]}>
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={() => handleDeleteNotification(notificationId)}

@@ -2,22 +2,31 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { getAllDocuments } from './services/firebaseService';
+import { getImageSource } from './utils/imageHelper';
 
 const hospitalImages: any = {
-  'benhvien.png': require('@/assets/images/benhviendhtv.png'),
-  'benhviendhtv.png': require('@/assets/images/benhviendhtv.png'),
+  'benhvien.png': require('../assets/images/benhviendhtv.png'),
+  'benhviendhtv.png': require('../assets/images/benhviendhtv.png'),
 };
+
+// Helper function
+function getDoctorAvatarSmart(doctorName: string, imageUrl?: string) {
+  if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+    return { uri: imageUrl };
+  }
+  return getImageSource('logo.png', 'common');
+}
 
 export default function HospitalDetailScreen() {
   const router = useRouter();
@@ -135,7 +144,7 @@ export default function HospitalDetailScreen() {
 
   const hospital = hospitalData ? {
     ...hospitalData,
-    image: hospitalImages[hospitalData.image] || require('@/assets/images/benhviendhtv.png'),
+    image: hospitalImages[hospitalData.image] || require('../assets/images/benhviendhtv.png'),
     distance: hospitalData.distance || '0 km',
     reviews: hospitalData.reviewCount || 0,
     openTime: hospitalData.workingHours || '24/7',
@@ -146,7 +155,7 @@ export default function HospitalDetailScreen() {
     phone: '0000000000',
     email: 'email@hospital.vn',
     website: 'www.hospital.vn',
-    image: require('@/assets/images/benhviendhtv.png'),
+    image: require('../assets/images/benhviendhtv.png'),
     rating: 4.6,
     reviews: 0,
     openTime: '24/7',
@@ -155,7 +164,7 @@ export default function HospitalDetailScreen() {
   };
 
   const specialties = (hospital.specialties && Array.isArray(hospital.specialties)) 
-    ? hospital.specialties 
+    ? [...new Set(hospital.specialties)] // Loại bỏ duplicate bằng Set
     : [
         'Tim mạch',
         'Tiêu hóa',
@@ -166,7 +175,7 @@ export default function HospitalDetailScreen() {
       ];
 
   const services = (hospital.services && Array.isArray(hospital.services))
-    ? hospital.services
+    ? [...new Set(hospital.services)] // Loại bỏ duplicate bằng Set
     : [
         'Khám bệnh tổng quát',
         'Cấp cứu 24/7',
@@ -183,7 +192,7 @@ export default function HospitalDetailScreen() {
       rating: 5,
       date: '15/01/2025',
       comment: 'Bệnh viện rất tốt, bác sĩ tận tình, cơ sở vật chất hiện đại. Rất hài lòng với dịch vụ.',
-      avatar: require('@/assets/images/logo.png'),
+      avatar: require('../assets/images/logo.png'),
     },
     {
       id: 2,
@@ -191,7 +200,7 @@ export default function HospitalDetailScreen() {
       rating: 4,
       date: '12/01/2025',
       comment: 'Nhân viên thân thiện, thời gian chờ hợp lý. Tuy nhiên giá khám hơi cao.',
-      avatar: require('@/assets/images/logo.png'),
+      avatar: require('../assets/images/logo.png'),
     },
     {
       id: 3,
@@ -199,7 +208,7 @@ export default function HospitalDetailScreen() {
       rating: 5,
       date: '10/01/2025',
       comment: 'Đội ngũ y bác sĩ chuyên nghiệp, trang thiết bị y tế đầy đủ. Rất đáng tin cậy.',
-      avatar: require('@/assets/images/logo.png'),
+      avatar: require('../assets/images/logo.png'),
     },
   ];
 

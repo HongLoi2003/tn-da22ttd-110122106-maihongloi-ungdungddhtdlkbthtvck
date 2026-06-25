@@ -14,37 +14,7 @@ import {
 } from 'react-native';
 import CustomToast from './components/CustomToast';
 import { getDocumentById, updateDocument } from './services/firebaseService';
-
-// Mapping ảnh bác sĩ
-const doctorImages: any = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
-};
-
-// Hàm lấy avatar bác sĩ
-const getDoctorAvatarSmart = (doctorName?: string, imageName?: string) => {
-  // Nếu có imageName và tồn tại trong mapping
-  if (imageName && doctorImages[imageName]) {
-    return doctorImages[imageName];
-  }
-  
-  // Fallback: trả về ảnh mặc định
-  return doctorImages['nguyenvanam.png'];
-};
+import { getDoctorAvatarSmart } from './utils/doctorAvatars';
 
 export default function AppointmentDetailScreen() {
   const router = useRouter();
@@ -198,7 +168,7 @@ export default function AppointmentDetailScreen() {
               if (router.canGoBack()) {
                 router.back();
               } else {
-                router.replace('/(tabs)/');
+                router.replace('/(tabs)/appointments');
               }
             }} 
             style={styles.backBtn}

@@ -3,16 +3,16 @@ import { useRouter } from 'expo-router';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import { auth } from './config/firebase';
+import { getFirebaseAuth } from './config/firebase';
 import { createDocument } from './services/firebaseService';
 
 export default function CreateDoctorAccount() {
@@ -70,7 +70,7 @@ export default function CreateDoctorAccount() {
 
       // Create Firebase Auth account
       const userCredential = await createUserWithEmailAndPassword(
-        auth,
+        getFirebaseAuth(),
         doctorEmail,
         doctorPassword
       );
@@ -105,11 +105,11 @@ export default function CreateDoctorAccount() {
       
       let errorMessage = 'Không thể tạo tài khoản bác sĩ';
       
-      if (error.code === 'auth/email-already-in-use') {
+      if (error.code === 'getFirebaseAuth()/email-already-in-use') {
         errorMessage = 'Tài khoản bác sĩ đã tồn tại.\n\nBạn có thể đăng nhập với:\nEmail: nguyenvanan@gmail.com\nMật khẩu: 123456';
-      } else if (error.code === 'auth/weak-password') {
+      } else if (error.code === 'getFirebaseAuth()/weak-password') {
         errorMessage = 'Mật khẩu quá yếu (cần ít nhất 6 ký tự)';
-      } else if (error.code === 'auth/invalid-email') {
+      } else if (error.code === 'getFirebaseAuth()/invalid-email') {
         errorMessage = 'Email không hợp lệ';
       }
 

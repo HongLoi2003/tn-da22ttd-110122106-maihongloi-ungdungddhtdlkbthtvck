@@ -39,7 +39,11 @@
         "mat ngu",
         "kho ngu",
         "thức đêm",
-        "mất giấc"
+        "mất giấc",
+        "mất ngủ lo âu",
+        "khó ngủ căng thẳng",
+        "mất ngủ stress",
+        "trằn trọc đêm"
       ],
       "weight": 8
     },
@@ -66,7 +70,10 @@
         "run chân",
         "run rẩy",
         "rung",
-        "run liên tục"
+        "run liên tục",
+        "run tay do lo lắng",
+        "tay run thần kinh",
+        "run khi hồi hộp"
       ],
       "weight": 9
     },
@@ -80,7 +87,10 @@
         "tê tay",
         "tê chân",
         "tê liệt",
-        "tê mỏi"
+        "tê mỏi",
+        "tê chân do tiểu đường",
+        "tê tay đái tháo đường",
+        "tê bàn tay bàn chân"
       ],
       "weight": 9
     },
@@ -423,7 +433,10 @@
         "dau lung",
         "lung dau",
         "lưng đau",
-        "đau thắt lưng"
+        "đau thắt lưng",
+        "đau lưng thận",
+        "đau lưng do thận",
+        "lưng đau thận"
       ],
       "weight": 10
     },
@@ -438,7 +451,10 @@
         "đau gáy",
         "nhức cổ vai",
         "cứng cổ",
-        "mỏi vai gáy"
+        "mỏi vai gáy",
+        "đau khớp sưng",
+        "sưng khớp đau",
+        "đau khớp nóng"
       ],
       "weight": 9
     },
@@ -452,7 +468,10 @@
         "nhức gối",
         "gối đau",
         "dau goi",
-        "đau đầu gối"
+        "đau đầu gối",
+        "đau vai cứng",
+        "vai đau cứng",
+        "viêm bao hoạt dịch vai"
       ],
       "weight": 10
     },
@@ -465,7 +484,10 @@
         "nhức vai",
         "vai đau",
         "dau vai",
-        "đau khớp vai"
+        "đau khớp vai",
+        "đau gối sưng",
+        "gối sưng đau",
+        "đau gối khi đi"
       ],
       "weight": 9
     },
@@ -478,7 +500,10 @@
         "đau lưng",
         "nhức cột sống",
         "cột sống đau",
-        "đau sống lưng"
+        "đau sống lưng",
+        "đau ngón tay sưng",
+        "ngón tay sưng cứng",
+        "khớp tay đau"
       ],
       "weight": 9
     },
@@ -816,7 +841,10 @@
         "ngực đau",
         "dau nguc",
         "nhức ngực",
-        "đau vùng ngực"
+        "đau vùng ngực",
+        "đau ngực khó thở",
+        "thở khó đau ngực",
+        "đau ngực tức ngực"
       ],
       "weight": 10
     },
@@ -829,7 +857,10 @@
         "ngực tức",
         "nghẹt ngực",
         "ngực nghẹt",
-        "căng tức ngực"
+        "căng tức ngực",
+        "hồi hộp lo âu",
+        "tim đập nhanh lo lắng",
+        "hồi hộp căng thẳng"
       ],
       "weight": 10
     },
@@ -843,7 +874,10 @@
         "kho tho",
         "thở gấp",
         "hụt hơi",
-        "thở nhanh"
+        "thở nhanh",
+        "ngực nặng khó thở",
+        "đau ngực lan ra tay",
+        "tức ngực đau tay trái"
       ],
       "weight": 10
     },
@@ -857,7 +891,10 @@
         "tim nhanh",
         "đánh trống ngực",
         "tim đập mạnh",
-        "nhịp tim nhanh"
+        "nhịp tim nhanh",
+        "tim đập nhanh bất thường",
+        "tim đập không đều",
+        "rối loạn nhịp tim"
       ],
       "weight": 9
     },
@@ -883,7 +920,10 @@
         "tim đập nhanh",
         "tim hồi hộp",
         "hồi hộp tim",
-        "tim nhanh"
+        "tim nhanh",
+        "mệt mỏi khó thở",
+        "mệt dễ dàng",
+        "mệt khi gắng sức"
       ],
       "weight": 8
     },
@@ -898,7 +938,10 @@
         "choang",
         "chong mat",
         "hoa mat",
-        "váng đầu"
+        "váng đầu",
+        "chóng mặt đau đầu",
+        "đau đầu chóng mặt",
+        "hoa mắt đau đầu"
       ],
       "weight": 8
     },
@@ -1209,7 +1252,10 @@
         "bụng đau",
         "dau bung",
         "đau dạ dày",
-        "đau bao tử"
+        "đau bao tử",
+        "đau bụng kinh",
+        "đau bụng hành kinh",
+        "đau bụng chu kỳ"
       ],
       "weight": 10
     },
@@ -1223,7 +1269,10 @@
         "đầy bụng",
         "day hoi",
         "bụng đầy",
-        "bụng phình"
+        "bụng phình",
+        "buồn nôn chóng mặt",
+        "nôn chóng mặt",
+        "buồn nôn đau đầu"
       ],
       "weight": 9
     },
@@ -1236,7 +1285,10 @@
         "kho tieu",
         "khó tiêu hóa",
         "ăn không tiêu",
-        "tiêu hóa kém"
+        "tiêu hóa kém",
+        "nôn có máu",
+        "nôn ra máu",
+        "xuất huyết tiêu hóa"
       ],
       "weight": 9
     },
@@ -1250,7 +1302,10 @@
         "ói",
         "muốn nôn",
         "buon non",
-        "cảm giác nôn"
+        "cảm giác nôn",
+        "trào ngược dạ dày",
+        "ợ chua",
+        "nóng rát thực quản"
       ],
       "weight": 9
     },
@@ -1264,7 +1319,10 @@
         "ói",
         "nôn mửa",
         "ói mửa",
-        "nôn ra"
+        "nôn ra",
+        "tiêu chảy cấp",
+        "đi ngoài phân lỏng",
+        "tiêu chảy nhiều lần"
       ],
       "weight": 9
     },
@@ -1278,7 +1336,10 @@
         "đi ngoài",
         "tieu chay",
         "tiêu lỏng",
-        "đi ngoài nhiều"
+        "đi ngoài nhiều",
+        "táo bón mãn tính",
+        "khó đi ngoài",
+        "táo bón kéo dài"
       ],
       "weight": 10
     },
@@ -1607,7 +1668,10 @@
         "ho có đờm",
         "ho đờm",
         "ho lâu ngày",
-        "ho nhiều"
+        "ho nhiều",
+        "ho có đờm máu",
+        "ho ra máu",
+        "ho khan kéo dài"
       ],
       "weight": 10
     },
@@ -1620,7 +1684,10 @@
         "ho khô",
         "ho không đờm",
         "ho khạc",
-        "ho liên tục"
+        "ho liên tục",
+        "khó thở đau ngực",
+        "thở khó đau tim",
+        "khó thở hồi hộp"
       ],
       "weight": 9
     },
@@ -1633,7 +1700,9 @@
         "ho đờm",
         "ho bị đờm",
         "ho ra đờm",
-        "ho có đàm"
+        "ho có đàm",
+        "sổ mũi nghẹt mũi",
+        "nghẹt sổ mũi"
       ],
       "weight": 9
     },
@@ -1648,7 +1717,10 @@
         "thở gấp",
         "hụt hơi",
         "thở nhanh",
-        "khó hít thở"
+        "khó hít thở",
+        "hen suyễn",
+        "khó thở khò khè",
+        "thở rít"
       ],
       "weight": 10
     },
@@ -1662,7 +1734,10 @@
         "dau hong",
         "viêm họng",
         "sưng họng",
-        "nhức họng"
+        "nhức họng",
+        "đau ngực hít thở",
+        "đau khi hít sâu",
+        "đau ngực thở sâu"
       ],
       "weight": 9
     },
@@ -1675,7 +1750,10 @@
         "họng viêm",
         "viem hong",
         "họng sưng",
-        "họng đỏ"
+        "họng đỏ",
+        "khạc ra máu",
+        "đờm có máu",
+        "ho có máu"
       ],
       "weight": 9
     },
@@ -2005,7 +2083,10 @@
         "man do",
         "phát ban",
         "nổi đỏ",
-        "da đỏ"
+        "da đỏ",
+        "ngứa da khô",
+        "da khô ngứa",
+        "ngứa da toàn thân"
       ],
       "weight": 10
     },
@@ -2019,7 +2100,10 @@
         "ngứa ngáy",
         "ngua",
         "da ngứa",
-        "ngứa khắp người"
+        "ngứa khắp người",
+        "nổi mẩn ngứa",
+        "phát ban ngứa",
+        "dị ứng nổi mẩn"
       ],
       "weight": 10
     },
@@ -2034,7 +2118,10 @@
         "noi mun",
         "mụn cá",
         "mụn bọc",
-        "mụn đầu đen"
+        "mụn đầu đen",
+        "da bong vảy",
+        "vảy trắng trên da",
+        "viêm da vẩy nến"
       ],
       "weight": 9
     },
@@ -2048,7 +2135,10 @@
         "di ung",
         "da dị ứng",
         "kích ứng da",
-        "phản ứng da"
+        "phản ứng da",
+        "mụn nhiều",
+        "mụn viêm",
+        "mụn bọc"
       ],
       "weight": 10
     },
@@ -2061,7 +2151,10 @@
         "nổi ban",
         "ban đỏ",
         "da nổi ban",
-        "xuất hiện ban"
+        "xuất hiện ban",
+        "chàm",
+        "da khô ngứa",
+        "viêm da dị ứng"
       ],
       "weight": 9
     },
@@ -2406,7 +2499,10 @@
         "dau hong",
         "viêm họng",
         "sưng họng",
-        "nhức họng"
+        "nhức họng",
+        "đau tai chảy mủ",
+        "tai đau sưng",
+        "đau tai nghe kém"
       ],
       "weight": 10
     },
@@ -2420,7 +2516,9 @@
         "viem hong",
         "họng sưng",
         "họng đỏ",
-        "họng bị viêm"
+        "họng bị viêm",
+        "nghẹt mũi đau đầu",
+        "nghẹt mũi khó thở"
       ],
       "weight": 10
     },
@@ -2434,7 +2532,10 @@
         "ho có đờm",
         "ho đờm",
         "ho lâu ngày",
-        "ho nhiều"
+        "ho nhiều",
+        "khàn giọng",
+        "mất tiếng",
+        "tiếng khàn kéo dài"
       ],
       "weight": 9
     },
@@ -2448,7 +2549,10 @@
         "khàn giọng",
         "giọng khàn",
         "nói khàn",
-        "giọng bị khàn"
+        "giọng bị khàn",
+        "đau khi nuốt",
+        "khó nuốt",
+        "đau họng khi nuốt"
       ],
       "weight": 9
     },
@@ -2462,7 +2566,10 @@
         "không nói được",
         "câm tiếng",
         "tiếng bị mất",
-        "không ra tiếng"
+        "không ra tiếng",
+        "đau xoang",
+        "nghẹt mũi đau đầu",
+        "xoang viêm"
       ],
       "weight": 9
     },
@@ -2808,7 +2915,10 @@
         "mắt đau",
         "dau mat",
         "nhức mắt",
-        "mắt nhức"
+        "mắt nhức",
+        "đau mắt đỏ",
+        "đau mắt nhức đầu",
+        "đau mắt mỏi"
       ],
       "weight": 10
     },
@@ -2821,7 +2931,9 @@
         "đỏ mắt",
         "do mat",
         "mắt đỏ ngầu",
-        "mắt bị đỏ"
+        "mắt bị đỏ",
+        "mắt đỏ ngứa",
+        "đỏ mắt viêm"
       ],
       "weight": 9
     },
@@ -2835,7 +2947,10 @@
         "mo mat",
         "nhìn mờ",
         "nhìn không rõ",
-        "thị lực mờ"
+        "thị lực mờ",
+        "mờ mắt chóng mặt",
+        "chóng mặt mờ mắt",
+        "hoa mắt chóng mặt"
       ],
       "weight": 10
     },
@@ -2848,7 +2963,10 @@
         "mắt khô",
         "kho mat",
         "mắt khô khan",
-        "mắt bị khô"
+        "mắt bị khô",
+        "mắt khô rát",
+        "khô mắt mỏi",
+        "hội chứng khô mắt"
       ],
       "weight": 9
     },
@@ -2939,7 +3057,12 @@
         "mắt mỏi",
         "mệt mắt",
         "mắt mệt mỏi",
-        "mắt bị mỏi"
+        "mắt bị mỏi",
+        "đau đầu mỏi mắt",
+        "mỏi mắt đau đầu",
+        "đau đầu do mỏi mắt",
+        "nhức đầu mỏi mắt",
+        "đau đầu khi nhìn màn hình"
       ],
       "weight": 8
     },
@@ -2977,7 +3100,10 @@
         "đau khi nhìn",
         "nhìn đau",
         "mắt đau khi nhìn",
-        "đau khi mở mắt"
+        "đau khi mở mắt",
+        "đau đầu khi nhìn",
+        "nhức đầu khi nhìn",
+        "đau mắt đau đầu"
       ],
       "weight": 8
     },
@@ -3200,7 +3326,9 @@
         "sot",
         "trẻ sốt",
         "bé sốt",
-        "con sốt"
+        "con sốt",
+        "sốt cao trẻ em",
+        "em bé sốt"
       ],
       "weight": 10
     },
@@ -3215,7 +3343,9 @@
         "ho đờm",
         "trẻ ho",
         "bé ho",
-        "ho nhiều"
+        "ho nhiều",
+        "em bé ho",
+        "ho trẻ nhỏ"
       ],
       "weight": 9
     },
@@ -3228,7 +3358,9 @@
         "chảy nước mũi",
         "so mui",
         "mũi chảy",
-        "trẻ sổ mũi"
+        "trẻ sổ mũi",
+        "em bé sổ mũi",
+        "sổ mũi nước"
       ],
       "weight": 8
     },
@@ -3283,7 +3415,10 @@
         "bieng an",
         "kém ăn",
         "chán ăn",
-        "không chịu ăn"
+        "không chịu ăn",
+        "trẻ biếng ăn",
+        "em không chịu ăn",
+        "trẻ kém ăn"
       ],
       "weight": 9
     },
@@ -3297,7 +3432,10 @@
         "quay khoc",
         "bé khóc",
         "trẻ khóc",
-        "khóc quấy"
+        "khóc quấy",
+        "trẻ quấy nhiều",
+        "em khóc đêm",
+        "trẻ khó ngủ"
       ],
       "weight": 8
     },
@@ -3606,7 +3744,10 @@
         "tiểu đường",
         "tieu nhieu",
         "đái nhiều",
-        "tiểu liên tục"
+        "tiểu liên tục",
+        "uống nước nhiều",
+        "khát liên tục",
+        "khát nước thường xuyên"
       ],
       "weight": 10
     },
@@ -3619,7 +3760,10 @@
         "khát nước",
         "uống nước nhiều",
         "khát liên tục",
-        "luôn khát"
+        "luôn khát",
+        "tiểu đêm nhiều",
+        "đi tiểu đêm",
+        "tiểu nhiều lần"
       ],
       "weight": 10
     },
@@ -3632,7 +3776,10 @@
         "giảm cân nhanh",
         "sut can",
         "gầy nhanh",
-        "giảm cân không rõ nguyên nhân"
+        "giảm cân không rõ nguyên nhân",
+        "mệt mỏi mãn tính",
+        "luôn mệt",
+        "mệt không lý do"
       ],
       "weight": 9
     },
@@ -3646,7 +3793,9 @@
         "tăng cân",
         "béo phì",
         "thừa cân",
-        "tăng cân không kiểm soát"
+        "tăng cân không kiểm soát",
+        "béo lên nhanh",
+        "tăng cân không rõ lý do"
       ],
       "weight": 9
     },
@@ -3661,7 +3810,10 @@
         "mỏi",
         "met moi",
         "uể oải",
-        "kiệt sức"
+        "kiệt sức",
+        "tóc rụng nhiều",
+        "rụng tóc bất thường",
+        "hói đầu"
       ],
       "weight": 9
     },
@@ -3675,7 +3827,10 @@
         "đái tháo đường",
         "tieu duong",
         "đường máu cao",
-        "glucose cao"
+        "glucose cao",
+        "run tay tuyến giáp",
+        "tay run không kiểm soát",
+        "run khi đưa tay"
       ],
       "weight": 10
     },
@@ -4004,7 +4159,10 @@
         "nhức răng",
         "dau rang",
         "răng đau",
-        "răng nhức"
+        "răng nhức",
+        "đau răng nhức đầu",
+        "răng đau lan lên đầu",
+        "đau răng đau tai"
       ],
       "weight": 10
     },
@@ -4018,7 +4176,9 @@
         "sau rang",
         "răng bị sâu",
         "răng bị mục",
-        "răng thủng"
+        "răng thủng",
+        "sưng lợi chảy máu",
+        "lợi sưng đỏ"
       ],
       "weight": 10
     },
@@ -4031,7 +4191,9 @@
         "chảy máu nướu",
         "chay mau rang",
         "nướu chảy máu",
-        "lợi chảy máu"
+        "lợi chảy máu",
+        "chảy máu lợi",
+        "viêm nướu chảy máu"
       ],
       "weight": 9
     },
@@ -4044,7 +4206,10 @@
         "nướu sưng",
         "lợi sưng",
         "sưng lợi",
-        "nướu bị sưng"
+        "nướu bị sưng",
+        "miệng hôi",
+        "hơi thở hôi",
+        "mùi miệng khó chịu"
       ],
       "weight": 9
     },
@@ -4057,7 +4222,10 @@
         "hơi thở hôi",
         "hoi mieng",
         "miệng hôi",
-        "thở hôi"
+        "thở hôi",
+        "răng đau nhức",
+        "đau răng dữ dội",
+        "răng đau buốt"
       ],
       "weight": 8
     },
@@ -4396,7 +4564,10 @@
         "đau vùng chậu",
         "dau bung duoi",
         "đau bụng kinh",
-        "đau hạ vị"
+        "đau hạ vị",
+        "đau bụng hành kinh",
+        "đau bụng chu kỳ",
+        "đau bụng kinh dữ dội"
       ],
       "weight": 10
     },
@@ -4409,7 +4580,10 @@
         "kinh nguyệt",
         "roi loan kinh",
         "mất kinh",
-        "kinh không đều"
+        "kinh không đều",
+        "rong huyết",
+        "chảy máu bất thường",
+        "kinh nguyệt bất thường"
       ],
       "weight": 9
     },
@@ -4422,7 +4596,10 @@
         "chậm kinh",
         "kinh trễ",
         "kinh muộn",
-        "kinh không đến"
+        "kinh không đến",
+        "khí hư bất thường",
+        "nhiều dịch âm đạo",
+        "khí hư có mùi"
       ],
       "weight": 9
     },
@@ -4435,7 +4612,10 @@
         "đau kinh",
         "đau bụng khi hành kinh",
         "đau khi có kinh",
-        "đau bụng đến tháng"
+        "đau bụng đến tháng",
+        "đau khi giao hợp",
+        "đau âm đạo",
+        "khó chịu khi quan hệ"
       ],
       "weight": 9
     },
@@ -4448,7 +4628,10 @@
         "kinh nhiều",
         "ra máu nhiều",
         "kinh kéo dài",
-        "kinh ra nhiều"
+        "kinh ra nhiều",
+        "trễ kinh",
+        "kinh nguyệt trễ",
+        "chậm hành kinh"
       ],
       "weight": 8
     },
@@ -4885,9 +5068,11 @@
         87,
         88,
         89,
-        90
+        90,
+        1,
+        2
       ],
-      "confidence": 90
+      "confidence": 75
     },
     {
       "specialtyId": 4,
@@ -5033,9 +5218,11 @@
         207,
         208,
         209,
-        210
+        210,
+        1,
+        2
       ],
-      "confidence": 90
+      "confidence": 70
     },
     {
       "specialtyId": 8,
@@ -5070,9 +5257,10 @@
         237,
         238,
         239,
-        240
+        240,
+        1
       ],
-      "confidence": 90
+      "confidence": 60
     },
     {
       "specialtyId": 9,
@@ -5144,9 +5332,11 @@
         297,
         298,
         299,
-        300
+        300,
+        1,
+        2
       ],
-      "confidence": 90
+      "confidence": 65
     },
     {
       "specialtyId": 11,

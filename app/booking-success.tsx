@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     Image,
     SafeAreaView,
@@ -10,24 +10,28 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
+import { useAuth } from './context/AuthContext';
+import { sendAppointmentConfirmation } from './services/emailService';
+import { createDocument } from './services/firebaseService';
+import notificationService from './services/notificationService';
 
 const doctorImages = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
+  'nguyenvanam.png': { uri: 'https://images.pexels.com/photos/26336880/pexels-photo-26336880.jpeg' },
+  'leminhtam.png': { uri: 'https://images.pexels.com/photos/5722163/pexels-photo-5722163.jpeg' },
+  'lehoangnam.png': { uri: 'https://images.pexels.com/photos/14438788/pexels-photo-14438788.jpeg' },
+  'dominhtuan.png': { uri: 'https://images.pexels.com/photos/14628069/pexels-photo-14628069.jpeg' },
+  'hoangvanduc.png': { uri: 'https://images.pexels.com/photos/27666713/pexels-photo-27666713.jpeg' },
+  'tranvankhoa.png': { uri: 'https://images.pexels.com/photos/15962798/pexels-photo-15962798.jpeg' },
+  'phamminhquan.png': { uri: 'https://images.pexels.com/photos/29995617/pexels-photo-29995617.jpeg' },
+  'nguyenvanhai.png': { uri: 'https://images.pexels.com/photos/19601385/pexels-photo-19601385.jpeg' },
+  'tranthilan.png': { uri: 'https://images.pexels.com/photos/15641079/pexels-photo-15641079.jpeg' },
+  'tranthimai.png': { uri: 'https://images.pexels.com/photos/27666717/pexels-photo-27666717.jpeg' },
+  'phamthuha.png': { uri: 'https://images.pexels.com/photos/15962796/pexels-photo-15962796.jpeg' },
+  'vuthilan.png': { uri: 'https://images.pexels.com/photos/27392531/pexels-photo-27392531.jpeg' },
+  'ngothihuong.png': { uri: 'https://images.pexels.com/photos/14628046/pexels-photo-14628046.jpeg' },
+  'nguyenthihoa.png': { uri: 'https://images.pexels.com/photos/14628045/pexels-photo-14628045.jpeg' },
+  'lethihang.png': { uri: 'https://images.pexels.com/photos/4173248/pexels-photo-4173248.jpeg' },
+  'dangthithao.jpg': { uri: 'https://images.pexels.com/photos/29995629/pexels-photo-29995629.jpeg' },
 };
 
 export default function BookingSuccessScreen() {
@@ -59,6 +63,11 @@ export default function BookingSuccessScreen() {
   const sendBookingNotifications = async () => {
     if (!user?.uid) return;
 
+    console.log('🚀 [BOOKING] sendBookingNotifications called');
+    console.log('📧 [BOOKING] patientEmail value:', patientEmail);
+    console.log('📧 [BOOKING] patientEmail type:', typeof patientEmail);
+    console.log('📧 [BOOKING] patientEmail truthy?', !!patientEmail);
+
     try {
       const appointmentDateTime = `${selectedDate} lúc ${selectedTime}`;
       
@@ -83,34 +92,79 @@ export default function BookingSuccessScreen() {
         },
       });
 
-      // 3. Schedule reminder notifications
-      // Parse date and time to create Date object
-      const [day, month, year] = selectedDate.split('/');
-      const [hours, minutes] = selectedTime.split(':');
-      const appointmentDate = new Date(
-        parseInt(year),
-        parseInt(month) - 1,
-        parseInt(day),
-        parseInt(hours),
-        parseInt(minutes)
-      );
+      // 3. Send email confirmation
+      if (patientEmail) {
+        try {
+          console.log('📧 Sending appointment email to:', patientEmail);
+          const emailSent = await sendAppointmentConfirmation(patientEmail, {
+            doctorName: selectedDoctor,
+            date: selectedDate,
+            time: selectedTime,
+            specialty: selectedSpecialty,
+            hospital: selectedHospital,
+            patientName: patientName,
+            appointmentCode: appointmentCode,
+            checkInCode: checkInCode,
+          });
 
-      // Schedule reminder 1 day before
-      await notificationService.scheduleAppointmentReminder(
-        appointmentDate,
-        selectedDoctor,
-        selectedTime
-      );
+          if (emailSent) {
+            console.log('✅ Appointment confirmation email sent successfully');
+          } else {
+            console.warn('⚠️ Failed to send appointment email');
+          }
+        } catch (emailError) {
+          console.error('❌ Error sending appointment email:', emailError);
+        }
+      }
 
-      // Schedule reminder 1 hour before
-      await notificationService.scheduleAppointmentReminderOneHour(
-        appointmentDate,
-        selectedDoctor
-      );
+      // 3. Schedule reminder notifications (only if appointment is in the future)
+      try {
+        // Parse date and time to create Date object
+        const [day, month, year] = selectedDate.split('/');
+        const [hours, minutes] = selectedTime.split(':');
+        const appointmentDate = new Date(
+          parseInt(year),
+          parseInt(month) - 1,
+          parseInt(day),
+          parseInt(hours),
+          parseInt(minutes)
+        );
+
+        // Only schedule if appointment is in the future
+        if (appointmentDate > new Date()) {
+          // Schedule reminder 1 day before
+          const reminderDate1Day = new Date(appointmentDate);
+          reminderDate1Day.setDate(reminderDate1Day.getDate() - 1);
+          reminderDate1Day.setHours(9, 0, 0, 0);
+
+          if (reminderDate1Day > new Date()) {
+            await notificationService.scheduleAppointmentReminder(
+              appointmentDate,
+              selectedDoctor,
+              selectedTime
+            );
+          }
+
+          // Schedule reminder 1 hour before
+          const reminderDate1Hour = new Date(appointmentDate);
+          reminderDate1Hour.setHours(reminderDate1Hour.getHours() - 1);
+
+          if (reminderDate1Hour > new Date()) {
+            await notificationService.scheduleAppointmentReminderOneHour(
+              appointmentDate,
+              selectedDoctor
+            );
+          }
+        }
+      } catch (scheduleError) {
+        // Don't throw error if scheduling fails, just log it
+        console.warn('Could not schedule reminders:', scheduleError);
+      }
 
       console.log('✅ All booking notifications sent successfully');
     } catch (error) {
       console.error('Error sending booking notifications:', error);
+      // Don't throw error to prevent UI from showing error to user
     }
   };
 
@@ -132,7 +186,7 @@ export default function BookingSuccessScreen() {
         <View style={styles.section}>
           <View style={styles.codeCard}>
             <View style={styles.codeHeader}>
-              <Ionicons name="document-text" size={24} color="#00BCD4" />
+              <Ionicons name="document-text" size={20} color="#00BCD4" />
               <Text style={styles.codeTitle}>Mã đặt lịch</Text>
             </View>
             <Text style={styles.codeValue}>{appointmentCode}</Text>
@@ -141,8 +195,8 @@ export default function BookingSuccessScreen() {
 
           <View style={styles.codeCard}>
             <View style={styles.codeHeader}>
-              <Ionicons name="qr-code" size={24} color="#00BCD4" />
-              <Text style={styles.codeTitle}>Mã check-in tại bệnh viện</Text>
+              <Ionicons name="qr-code" size={20} color="#00BCD4" />
+              <Text style={styles.codeTitle}>Mã check-in</Text>
             </View>
             <Text style={styles.codeValue}>{checkInCode}</Text>
             <Text style={styles.codeNote}>Xuất trình mã này khi đến bệnh viện</Text>
@@ -378,34 +432,34 @@ const styles = StyleSheet.create({
   },
   codeCard: {
     backgroundColor: '#E0F7FA',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 10,
     borderWidth: 2,
-    borderColor: '#00BCD4',
+    borderColor: '#80DEEA',
     borderStyle: 'dashed',
   },
   codeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    gap: 8,
+    marginBottom: 10,
+    gap: 6,
   },
   codeTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
     color: '#00838F',
   },
   codeValue: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
     color: '#00BCD4',
     textAlign: 'center',
-    marginBottom: 8,
-    letterSpacing: 1,
+    marginBottom: 6,
+    letterSpacing: 0.8,
   },
   codeNote: {
-    fontSize: 12,
+    fontSize: 11,
     color: '#00838F',
     textAlign: 'center',
   },

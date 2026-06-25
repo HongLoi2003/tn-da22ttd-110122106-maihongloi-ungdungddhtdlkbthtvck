@@ -2,52 +2,52 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Image,
-    Linking,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Image,
+  Linking,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { getAllDocuments } from './services/firebaseService';
 
 const doctorImages = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
+  'nguyenvanam.png': { uri: 'https://images.pexels.com/photos/26336880/pexels-photo-26336880.jpeg' },
+  'leminhtam.png': { uri: 'https://images.pexels.com/photos/5722163/pexels-photo-5722163.jpeg' },
+  'lehoangnam.png': { uri: 'https://images.pexels.com/photos/14438788/pexels-photo-14438788.jpeg' },
+  'dominhtuan.png': { uri: 'https://images.pexels.com/photos/14628069/pexels-photo-14628069.jpeg' },
+  'hoangvanduc.png': { uri: 'https://images.pexels.com/photos/27666713/pexels-photo-27666713.jpeg' },
+  'tranvankhoa.png': { uri: 'https://images.pexels.com/photos/15962798/pexels-photo-15962798.jpeg' },
+  'phamminhquan.png': { uri: 'https://images.pexels.com/photos/29995617/pexels-photo-29995617.jpeg' },
+  'nguyenvanhai.png': { uri: 'https://images.pexels.com/photos/19601385/pexels-photo-19601385.jpeg' },
+  'tranthilan.png': { uri: 'https://images.pexels.com/photos/15641079/pexels-photo-15641079.jpeg' },
+  'tranthimai.png': { uri: 'https://images.pexels.com/photos/27666717/pexels-photo-27666717.jpeg' },
+  'phamthuha.png': { uri: 'https://images.pexels.com/photos/15962796/pexels-photo-15962796.jpeg' },
+  'vuthilan.png': { uri: 'https://images.pexels.com/photos/27392531/pexels-photo-27392531.jpeg' },
+  'ngothihuong.png': { uri: 'https://images.pexels.com/photos/14628046/pexels-photo-14628046.jpeg' },
+  'nguyenthihoa.png': { uri: 'https://images.pexels.com/photos/14628045/pexels-photo-14628045.jpeg' },
+  'lethihang.png': { uri: 'https://images.pexels.com/photos/4173248/pexels-photo-4173248.jpeg' },
+  'dangthithao.jpg': { uri: 'https://images.pexels.com/photos/29995629/pexels-photo-29995629.jpeg' },
 };
 
 // Map hình ảnh chuyên khoa
 const specialtyImages: any = {
-  'tim-mach.png': require('@/assets/images/tim-mach.png'),
-  'nhi-khoa.png': require('@/assets/images/nhi-khoa.png'),
-  'san-phu-khoa.png': require('@/assets/images/san-phu-khoa.png'),
-  'da-lieu.png': require('@/assets/images/da-lieu.png'),
-  'mat.png': require('@/assets/images/mat.png'),
-  'rang-ham-mat.png': require('@/assets/images/rang-ham-mat.png'),
-  'tai-mui-hong.png': require('@/assets/images/tai-mui-hong.png'),
-  'tieu-hoa.png': require('@/assets/images/tieu-hoa.png'),
-  'than-kinh.png': require('@/assets/images/than-kinh.png'),
-  'co-xuong-khop.png': require('@/assets/images/co-xuong-khop.png'),
-  'ho-hap.png': require('@/assets/images/ho-hap.png'),
-  'noi-tiet.png': require('@/assets/images/noi-tiet.png'),
-  'khoa.png': require('@/assets/images/khoa.png'),
+  'tim-mach.png': require('../assets/images/tim-mach.png'),
+  'nhi-khoa.png': require('../assets/images/nhi-khoa.png'),
+  'san-phu-khoa.png': require('../assets/images/san-phu-khoa.png'),
+  'da-lieu.png': require('../assets/images/da-lieu.png'),
+  'mat.png': require('../assets/images/mat.png'),
+  'rang-ham-mat.png': require('../assets/images/rang-ham-mat.png'),
+  'tai-mui-hong.png': require('../assets/images/tai-mui-hong.png'),
+  'tieu-hoa.png': require('../assets/images/tieu-hoa.png'),
+  'than-kinh.png': require('../assets/images/than-kinh.png'),
+  'co-xuong-khop.png': require('../assets/images/co-xuong-khop.png'),
+  'ho-hap.png': require('../assets/images/ho-hap.png'),
+  'noi-tiet.png': require('../assets/images/noi-tiet.png'),
+  'khoa.png': require('../assets/images/khoa.png'),
 };
 
 export default function HospitalInfoScreen() {
@@ -84,8 +84,17 @@ export default function HospitalInfoScreen() {
         return imageName !== 'khoa.png' && specialtyImages[imageName];
       });
 
+      // Loại bỏ chuyên khoa trùng lặp (dựa trên tên)
+      const uniqueSpecialties = specialtiesWithImages.reduce((acc: any[], current: any) => {
+        const exists = acc.find(item => item.name === current.name);
+        if (!exists) {
+          acc.push(current);
+        }
+        return acc;
+      }, []);
+
       // Cập nhật số lượng bác sĩ thực tế
-      const updatedSpecialties = specialtiesWithImages.map((specialty: any) => {
+      const updatedSpecialties = uniqueSpecialties.map((specialty: any) => {
         const actualDoctorCount = doctorCountBySpecialty[specialty.name] || 0;
         return {
           ...specialty,
@@ -103,6 +112,7 @@ export default function HospitalInfoScreen() {
         experience: doc.kinh_nghiem,
         image: doctorImages[doc.image as keyof typeof doctorImages] || doctorImages['nguyenvanam.png'],
         imageName: doc.image,
+        price: (doc.phi_kham || doc.gia_kham) ? `${(doc.phi_kham || doc.gia_kham).toLocaleString('vi-VN')}đ` : '200.000đ',
       }));
       
       setDoctors(mappedDoctors);
@@ -137,43 +147,19 @@ export default function HospitalInfoScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Hospital Image */}
         <Image 
-          source={require('@/assets/images/benhviendhtv.png')}
+          source={require('../assets/images/benhviendhtv.png')}
           style={styles.hospitalImage}
         />
 
         {/* Hospital Info */}
         <View style={styles.infoSection}>
           <Text style={styles.hospitalName}>Bệnh viện Trường Đại học Trà Vinh</Text>
-          <Text style={styles.hospitalSubtitle}>Bệnh viện Đa khoa hạng I</Text>
           
           <View style={styles.ratingRow}>
             <Ionicons name="star" size={18} color="#FFB800" />
-            <Text style={styles.ratingText}>4.8 (2,500+ đánh giá)</Text>
+            <Text style={styles.hospitalRatingText}>4.8 (2,500+ đánh giá)</Text>
           </View>
 
-          {/* Quick Actions */}
-          <View style={styles.quickActions}>
-            <TouchableOpacity style={styles.actionButton} onPress={handleCallHotline}>
-              <View style={styles.actionIconBox}>
-                <Ionicons name="call" size={24} color="#00BCD4" />
-              </View>
-              <Text style={styles.actionText}>Hotline</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionButton} onPress={handleOpenMap}>
-              <View style={styles.actionIconBox}>
-                <Ionicons name="location" size={24} color="#00BCD4" />
-              </View>
-              <Text style={styles.actionText}>Bản đồ</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionButton}>
-              <View style={styles.actionIconBox}>
-                <Ionicons name="time" size={24} color="#00BCD4" />
-              </View>
-              <Text style={styles.actionText}>Giờ làm việc</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         {/* Contact Info */}
@@ -183,8 +169,7 @@ export default function HospitalInfoScreen() {
           <View style={styles.contactItem}>
             <Ionicons name="location-outline" size={20} color="#666" />
             <Text style={styles.contactText}>
-              126 Nguyễn Thiện Thành, Khóm 4, Phường 5, Trà Vinh
-            </Text>
+              126 Nguyễn Thiện Thành, Khóm 4, Phường 5, Trà Vinh </Text>
           </View>
 
           <View style={styles.contactItem}>
@@ -208,7 +193,7 @@ export default function HospitalInfoScreen() {
           <View style={styles.specialtiesGrid}>
             {specialties.map((specialty) => {
               const imageName = specialty.image || 'khoa.png';
-              const imageSource = specialtyImages[imageName] || require('@/assets/images/khoa.png');
+              const imageSource = specialtyImages[imageName] || { uri: "https://via.placeholder.com/150" };
               
               return (
                 <TouchableOpacity 
@@ -255,32 +240,55 @@ export default function HospitalInfoScreen() {
                     }
                   })}
                 >
-                  <Image source={doctor.image} style={styles.doctorImage} />
-                  <View style={styles.doctorInfo}>
-                    <Text style={styles.doctorName}>{doctor.name}</Text>
-                    <Text style={styles.doctorSpecialty}>{doctor.specialty}</Text>
-                    <View style={styles.doctorRating}>
-                      <Ionicons name="star" size={14} color="#FFB800" />
-                      <Text style={styles.doctorRatingText}>{doctor.rating}</Text>
-                      <Text style={styles.doctorExperience}>• {doctor.experience} năm KN</Text>
+                  <View style={styles.cardContent}>
+                    <View style={styles.doctorAvatarContainer}>
+                      <Image source={doctor.image} style={styles.doctorAvatar} />
+                      <View style={styles.onlineBadge} />
+                    </View>
+                    <View style={styles.doctorInfo}>
+                      <View style={styles.doctorHeader}>
+                        <Text style={styles.doctorName}>{doctor.name}</Text>
+                        <View style={styles.ratingBadge}>
+                          <Ionicons name="star" size={12} color="#FFB800" />
+                          <Text style={styles.ratingText}>{doctor.rating}</Text>
+                        </View>
+                      </View>
+                      <Text style={styles.doctorSpecialty}>{doctor.specialty}</Text>
+                      <View style={styles.doctorMeta}>
+                        <View style={styles.metaItem}>
+                          <Ionicons name="briefcase-outline" size={14} color="#64748b" />
+                          <Text style={styles.metaText}>{doctor.experience} năm</Text>
+                        </View>
+                        <View style={styles.metaItem}>
+                          <Ionicons name="location-outline" size={14} color="#64748b" />
+                          <Text style={styles.metaText}>BV Đại học Trà Vinh</Text>
+                        </View>
+                      </View>
+                      <View style={styles.cardFooter}>
+                        <View style={styles.priceContainer}>
+                          <Text style={styles.priceLabel}>Phí khám:</Text>
+                          <Text style={styles.priceValue}>{doctor.price}</Text>
+                        </View>
+                        <TouchableOpacity 
+                          style={styles.bookButton}
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            router.push({
+                              pathname: '/(tabs)/booking',
+                              params: {
+                                doctorId: doctor.id,
+                                doctorName: doctor.name,
+                                doctorSpecialty: doctor.specialty,
+                              }
+                            });
+                          }}
+                        >
+                          <Ionicons name="calendar-outline" size={16} color="#fff" />
+                          <Text style={styles.bookButtonText}>Đặt lịch</Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
-                  <TouchableOpacity 
-                    style={styles.bookButton}
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      router.push({
-                        pathname: '/(tabs)/booking',
-                        params: {
-                          doctorId: doctor.id,
-                          doctorName: doctor.name,
-                          doctorSpecialty: doctor.specialty,
-                        }
-                      });
-                    }}
-                  >
-                    <Text style={styles.bookButtonText}>Đặt lịch</Text>
-                  </TouchableOpacity>
                 </TouchableOpacity>
               ))}
             </View>
@@ -337,7 +345,7 @@ const styles = StyleSheet.create({
     gap: 6,
     marginBottom: 20,
   },
-  ratingText: {
+  hospitalRatingText: {
     fontSize: 14,
     color: '#666',
   },
@@ -451,51 +459,112 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   doctorCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  doctorImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+  cardContent: {
+    flexDirection: 'row',
+    padding: 16,
+  },
+  doctorAvatarContainer: {
+    position: 'relative',
     marginRight: 12,
+  },
+  doctorAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+  },
+  onlineBadge: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#06D6A0',
+    borderWidth: 2,
+    borderColor: '#fff',
   },
   doctorInfo: {
     flex: 1,
   },
+  doctorHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
   doctorName: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#000',
-    marginBottom: 4,
+    color: '#0f172a',
+    flex: 1,
+  },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FFF9E6',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  ratingText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#0f172a',
   },
   doctorSpecialty: {
     fontSize: 13,
-    color: '#666',
-    marginBottom: 4,
+    color: '#64748b',
+    marginBottom: 8,
   },
-  doctorRating: {
+  doctorMeta: {
+    gap: 4,
+    marginBottom: 12,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  metaText: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-  doctorRatingText: {
+  priceLabel: {
     fontSize: 12,
-    color: '#000',
-    fontWeight: '600',
+    color: '#64748b',
   },
-  doctorExperience: {
-    fontSize: 12,
-    color: '#666',
+  priceValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#00BCD4',
   },
   bookButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: '#00BCD4',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 20,
   },
   bookButtonText: {
     fontSize: 13,

@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { db } from './config/firebase';
+import { getFirestoreDb } from './config/firebase';
 
 interface DoctorComparison {
   id: string;
@@ -36,7 +36,7 @@ export default function CompareBs004VsBrokenDoctors() {
     console.log(`\n🔍 Analyzing ${doctorId}...`);
     
     // 1. Lấy doctor document
-    const doctorDoc = await getDocs(query(collection(db, 'doctors'), where('id', '==', doctorId)));
+    const doctorDoc = await getDocs(query(collection(getFirestoreDb(), 'doctors'), where('id', '==', doctorId)));
     const doctorData = doctorDoc.docs[0]?.data();
     const doctorName = doctorData?.ten || 'Unknown';
     const authUid = doctorData?.authUid || null;
@@ -47,7 +47,7 @@ export default function CompareBs004VsBrokenDoctors() {
     // 2. Tìm user account
     let userAccountUid = null;
     const userQuery = query(
-      collection(db, 'users'),
+      collection(getFirestoreDb(), 'users'),
       where('role', '==', 'doctor'),
       where('doctorInfo.doctorId', '==', doctorId)
     );
@@ -61,7 +61,7 @@ export default function CompareBs004VsBrokenDoctors() {
     
     // 3. Đếm conversations theo doctorId
     const convByDoctorIdQuery = query(
-      collection(db, 'conversations'),
+      collection(getFirestoreDb(), 'conversations'),
       where('doctorId', '==', doctorId)
     );
     const convByDoctorId = await getDocs(convByDoctorIdQuery);
@@ -71,7 +71,7 @@ export default function CompareBs004VsBrokenDoctors() {
     let convByAuthUid = { size: 0 };
     if (authUid) {
       const convByAuthUidQuery = query(
-        collection(db, 'conversations'),
+        collection(getFirestoreDb(), 'conversations'),
         where('doctorAuthUid', '==', authUid)
       );
       convByAuthUid = await getDocs(convByAuthUidQuery);
@@ -80,7 +80,7 @@ export default function CompareBs004VsBrokenDoctors() {
     
     // 5. Đếm messages
     const messagesQuery = query(
-      collection(db, 'messages'),
+      collection(getFirestoreDb(), 'messages'),
       where('doctorId', '==', doctorId)
     );
     const messages = await getDocs(messagesQuery);

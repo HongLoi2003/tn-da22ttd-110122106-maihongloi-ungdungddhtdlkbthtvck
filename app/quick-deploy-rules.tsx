@@ -12,7 +12,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { db } from './config/firebase';
+import { getFirestoreDb,} from './config/firebase';
 
 export default function QuickDeployRulesScreen() {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function QuickDeployRulesScreen() {
     setTestResult('Đang kiểm tra...');
     
     try {
-      const q = query(collection(db, 'popular-specialties'), limit(1));
+      const q = query(collection(getFirestoreDb(), 'popular-specialties'), limit(1));
       const snapshot = await getDocs(q);
       
       if (snapshot.size > 0) {
@@ -208,7 +208,7 @@ export default function QuickDeployRulesScreen() {
 
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => router.push('/seed-popular-specialties')}
+            onPress={() => router.push('/seed-data')}
           >
             <Ionicons name="cloud-upload" size={20} color="#4CAF50" />
             <Text style={styles.actionButtonText}>Seed dữ liệu chuyên khoa</Text>

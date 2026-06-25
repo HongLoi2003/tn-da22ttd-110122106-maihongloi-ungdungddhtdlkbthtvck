@@ -4,11 +4,9 @@
   },
   "build": {
     "development": {
-      "developmentClient": true,
-      "distribution": "internal"
+      "developmentClient": true
     },
     "preview": {
-      "distribution": "internal",
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
@@ -23,11 +21,42 @@
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease",
         "env": {
-          "EXPO_NO_BYTECODE": "1"
-        }
+          "EXPO_NO_BYTECODE": "1",
+          "NODE_ENV": "production"
+        },
+        "image": "latest",
+        "resourceClass": "large"
       },
       "ios": {
         "buildConfiguration": "Release"
+      }
+    },
+    "universal": {
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease",
+        "env": {
+          "EXPO_NO_BYTECODE": "1",
+          "NODE_ENV": "production"
+        },
+        "config": "release"
+      }
+    },
+    "ios-production": {
+      "ios": {
+        "buildConfiguration": "Release",
+        "env": {
+          "EXPO_NO_BYTECODE": "1",
+          "NODE_ENV": "production"
+        },
+        "simulator": false,
+        "image": "latest"
+      }
+    },
+    "ios-simulator": {
+      "ios": {
+        "buildConfiguration": "Debug",
+        "simulator": true
       }
     }
   },

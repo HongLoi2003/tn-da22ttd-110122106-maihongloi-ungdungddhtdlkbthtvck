@@ -3,7 +3,17 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { where } from 'firebase/firestore';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { useAuth } from './context/AuthContext';
 import { deleteDocument, getDocumentsWithQuery, updateDocument } from './services/firebaseService';
 
@@ -12,7 +22,15 @@ export default function PaymentMethodsScreen() {
   const { user } = useAuth();
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [walletBalance, setWalletBalance] = useState<number>(0);
+  const [walletId, setWalletId] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  
+  // Modal state
+  const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [topUpAmount, setTopUpAmount] = useState('');
+  const [selectedTopUpMethod, setSelectedTopUpMethod] = useState('momo');
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -21,7 +39,7 @@ export default function PaymentMethodsScreen() {
   );
 
   const loadData = async () => {
-    await Promise.all([loadPaymentMethods(), loadTransactions()]);
+    await Promise.all([loadPaymentMethods(), loadTransactions(), loadWalletBalance()]);
   };
 
   const loadPaymentMethods = async () => {
@@ -62,6 +80,112 @@ export default function PaymentMethodsScreen() {
     } catch (error) {
       console.error('Error loading transactions:', error);
       setTransactions([]);
+    }
+  };
+
+  const loadWalletBalance = async () => {
+    try {
+      if (!user) {
+        setWalletBalance(0);
+        return;
+      }
+      
+      // Lấy số dư ví từ collection wallets
+      const wallets = await getDocumentsWithQuery('wallets', [
+        where('userId', '==', user.uid)
+      ]);
+      
+      if (wallets.length > 0) {
+        setWalletBalance((wallets[0] as any).balance || 0);
+        setWalletId(wallets[0].id);
+      } else {
+        // Tạo ví mới nếu chưa có
+        const { createDocument } = await import('./services/firebaseService');
+        const newWallet = await createDocument('wallets', {
+          userId: user.uid,
+          balance: 0,
+          createdAt: new Date().toISOString(),
+        });
+        setWalletBalance(0);
+        setWalletId(newWallet.id);
+      }
+    } catch (error) {
+      console.error('Error loading wallet balance:', error);
+      setWalletBalance(0);
+    }
+  };
+
+  const handleTopUp = () => {
+    setTopUpAmount('');
+    setSelectedTopUpMethod('momo');
+    setShowTopUpModal(true);
+  };
+
+  const quickAmounts = [50000, 100000, 200000, 500000, 1000000, 2000000];
+
+  const handleQuickAmount = (amount: number) => {
+    setTopUpAmount(amount.toString());
+  };
+
+  const handleConfirmTopUp = async () => {
+    const amount = parseInt(topUpAmount);
+    
+    if (!amount || amount < 10000) {
+      Alert.alert('Lỗi', 'Số tiền nạp tối thiểu là 10.000đ');
+      return;
+    }
+
+    if (amount > 50000000) {
+      Alert.alert('Lỗi', 'Số tiền nạp tối đa là 50.000.000đ');
+      return;
+    }
+
+    if (!walletId) {
+      Alert.alert('Lỗi', 'Không tìm thấy ví. Vui lòng thử lại!');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+
+      // Cập nhật số dư ví
+      const newBalance = walletBalance + amount;
+      await updateDocument('wallets', walletId, {
+        balance: newBalance,
+        updatedAt: new Date().toISOString(),
+      });
+
+      // Tạo transaction record
+      const { createDocument } = await import('./services/firebaseService');
+      await createDocument('transactions', {
+        userId: user?.uid,
+        amount: `+${amount.toLocaleString('vi-VN')}đ`,
+        description: 'Nạp tiền vào ví',
+        method: selectedTopUpMethod === 'momo' ? 'Ví MoMo' : 
+                selectedTopUpMethod === 'banking' ? 'Chuyển khoản' : 'Thẻ tín dụng',
+        date: new Date().toLocaleDateString('vi-VN'),
+        createdAt: new Date().toISOString(),
+        type: 'top_up',
+        status: 'completed',
+      });
+
+      setIsProcessing(false);
+      setShowTopUpModal(false);
+      
+      Alert.alert(
+        'Nạp tiền thành công!',
+        `Bạn đã nạp ${amount.toLocaleString('vi-VN')}đ vào ví`,
+        [
+          {
+            text: 'OK',
+            onPress: () => loadData(),
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error topping up:', error);
+      setIsProcessing(false);
+      Alert.alert('Lỗi', 'Không thể nạp tiền. Vui lòng thử lại!');
     }
   };
 
@@ -121,7 +245,10 @@ export default function PaymentMethodsScreen() {
           <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Thanh toán</Text>
-        <TouchableOpacity onPress={() => router.push('/add-payment-method')}>
+        <TouchableOpacity 
+          onPress={() => router.push('/add-payment-method')}
+          style={styles.backButton}
+        >
           <Ionicons name="add-circle-outline" size={24} color="#0f172a" />
         </TouchableOpacity>
       </View>
@@ -136,11 +263,22 @@ export default function PaymentMethodsScreen() {
         {/* Wallet Balance */}
         <View style={styles.walletCard}>
           <View style={styles.walletHeader}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.walletLabel}>Số dư ví</Text>
-              <Text style={styles.walletBalance}>500.000đ</Text>
+              {walletBalance > 0 ? (
+                <Text style={styles.walletBalance}>
+                  {walletBalance.toLocaleString('vi-VN')}đ
+                </Text>
+              ) : (
+                <Text style={styles.walletBalanceEmpty}>
+                  Chưa có số dư
+                </Text>
+              )}
             </View>
-            <TouchableOpacity style={styles.topUpButton}>
+            <TouchableOpacity 
+              style={styles.topUpButton}
+              onPress={handleTopUp}
+            >
               <Ionicons name="add" size={20} color="#fff" />
               <Text style={styles.topUpText}>Nạp tiền</Text>
             </TouchableOpacity>
@@ -241,6 +379,149 @@ export default function PaymentMethodsScreen() {
           </>
         )}
       </ScrollView>
+
+      {/* Top Up Modal */}
+      <Modal
+        visible={showTopUpModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowTopUpModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Nạp tiền vào ví</Text>
+              <TouchableOpacity onPress={() => setShowTopUpModal(false)}>
+                <Ionicons name="close" size={24} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {/* Amount Input */}
+              <View style={styles.inputSection}>
+                <Text style={styles.inputLabel}>Số tiền nạp</Text>
+                <View style={styles.amountInputWrapper}>
+                  <TextInput
+                    style={styles.amountInput}
+                    placeholder="Nhập số tiền"
+                    keyboardType="numeric"
+                    value={topUpAmount}
+                    onChangeText={setTopUpAmount}
+                  />
+                  <Text style={styles.currencyText}>đ</Text>
+                </View>
+                {topUpAmount && parseInt(topUpAmount) >= 10000 && (
+                  <Text style={styles.amountPreview}>
+                    {parseInt(topUpAmount).toLocaleString('vi-VN')} đồng
+                  </Text>
+                )}
+              </View>
+
+              {/* Quick Amount Buttons */}
+              <View style={styles.quickAmountSection}>
+                <Text style={styles.inputLabel}>Chọn nhanh</Text>
+                <View style={styles.quickAmountGrid}>
+                  {quickAmounts.map((amount) => (
+                    <TouchableOpacity
+                      key={amount}
+                      style={[
+                        styles.quickAmountBtn,
+                        topUpAmount === amount.toString() && styles.quickAmountBtnActive
+                      ]}
+                      onPress={() => handleQuickAmount(amount)}
+                    >
+                      <Text style={[
+                        styles.quickAmountText,
+                        topUpAmount === amount.toString() && styles.quickAmountTextActive
+                      ]}>
+                        {(amount / 1000).toLocaleString('vi-VN')}K
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              {/* Payment Method Selection */}
+              <View style={styles.inputSection}>
+                <Text style={styles.inputLabel}>Phương thức thanh toán</Text>
+                
+                <TouchableOpacity
+                  style={[
+                    styles.methodOption,
+                    selectedTopUpMethod === 'momo' && styles.methodOptionActive
+                  ]}
+                  onPress={() => setSelectedTopUpMethod('momo')}
+                >
+                  <View style={styles.methodOptionLeft}>
+                    <Ionicons name="wallet" size={24} color="#00BCD4" />
+                    <Text style={styles.methodOptionText}>Ví MoMo</Text>
+                  </View>
+                  {selectedTopUpMethod === 'momo' && (
+                    <Ionicons name="checkmark-circle" size={24} color="#00BCD4" />
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.methodOption,
+                    selectedTopUpMethod === 'banking' && styles.methodOptionActive
+                  ]}
+                  onPress={() => setSelectedTopUpMethod('banking')}
+                >
+                  <View style={styles.methodOptionLeft}>
+                    <Ionicons name="card" size={24} color="#00BCD4" />
+                    <Text style={styles.methodOptionText}>Chuyển khoản ngân hàng</Text>
+                  </View>
+                  {selectedTopUpMethod === 'banking' && (
+                    <Ionicons name="checkmark-circle" size={24} color="#00BCD4" />
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.methodOption,
+                    selectedTopUpMethod === 'card' && styles.methodOptionActive
+                  ]}
+                  onPress={() => setSelectedTopUpMethod('card')}
+                >
+                  <View style={styles.methodOptionLeft}>
+                    <Ionicons name="card-outline" size={24} color="#00BCD4" />
+                    <Text style={styles.methodOptionText}>Thẻ tín dụng/Ghi nợ</Text>
+                  </View>
+                  {selectedTopUpMethod === 'card' && (
+                    <Ionicons name="checkmark-circle" size={24} color="#00BCD4" />
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              {/* Note */}
+              <View style={styles.noteBox}>
+                <Ionicons name="information-circle" size={20} color="#00BCD4" />
+                <Text style={styles.noteBoxText}>
+                  Số tiền tối thiểu: 10.000đ{'\n'}
+                  Số tiền tối đa: 50.000.000đ
+                </Text>
+              </View>
+
+              {/* Confirm Button */}
+              <TouchableOpacity
+                style={[
+                  styles.confirmButton,
+                  (!topUpAmount || parseInt(topUpAmount) < 10000 || isProcessing) && styles.confirmButtonDisabled
+                ]}
+                onPress={handleConfirmTopUp}
+                disabled={!topUpAmount || parseInt(topUpAmount) < 10000 || isProcessing}
+              >
+                {isProcessing ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.confirmButtonText}>Xác nhận nạp tiền</Text>
+                )}
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -263,11 +544,18 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 4,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#0f172a',
+    flex: 1,
+    textAlign: 'center',
+    marginHorizontal: 8,
   },
   content: {
     flex: 1,
@@ -298,6 +586,12 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: '700',
     color: '#fff',
+  },
+  walletBalanceEmpty: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontStyle: 'italic',
   },
   topUpButton: {
     flexDirection: 'row',
@@ -478,6 +772,152 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#fff',
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    maxHeight: '90%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  inputSection: {
+    marginBottom: 24,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0f172a',
+    marginBottom: 12,
+  },
+  amountInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    paddingHorizontal: 16,
+  },
+  amountInput: {
+    flex: 1,
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#0f172a',
+    paddingVertical: 16,
+  },
+  currencyText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#64748b',
+    marginLeft: 8,
+  },
+  amountPreview: {
+    fontSize: 13,
+    color: '#00BCD4',
+    marginTop: 8,
+    fontWeight: '500',
+  },
+  quickAmountSection: {
+    marginBottom: 24,
+  },
+  quickAmountGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  quickAmountBtn: {
+    width: '31%',
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  quickAmountBtnActive: {
+    backgroundColor: '#E0F7FA',
+    borderColor: '#00BCD4',
+  },
+  quickAmountText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+  },
+  quickAmountTextActive: {
+    color: '#00BCD4',
+  },
+  methodOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    padding: 16,
+    marginBottom: 12,
+  },
+  methodOptionActive: {
+    backgroundColor: '#E0F7FA',
+    borderColor: '#00BCD4',
+  },
+  methodOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  methodOptionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0f172a',
+  },
+  noteBox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    backgroundColor: '#E0F7FA',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 24,
+    gap: 8,
+  },
+  noteBoxText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#0f172a',
+    lineHeight: 18,
+  },
+  confirmButton: {
+    backgroundColor: '#00BCD4',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  confirmButtonDisabled: {
+    backgroundColor: '#cbd5e1',
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
     color: '#fff',
   },
 });

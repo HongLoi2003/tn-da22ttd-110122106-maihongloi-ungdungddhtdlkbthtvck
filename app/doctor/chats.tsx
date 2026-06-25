@@ -13,8 +13,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
+import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import { useAuth } from '../context/AuthContext';
 import { deleteDocument, getDocumentsWithQuery } from '../services/firebaseService';
 
@@ -28,6 +27,7 @@ interface Chat {
   lastMessageTime: string;
   lastMessageTimestamp: any;
   unreadCount: number;
+  hasConversation: boolean;
 }
 
 export default function DoctorChats() {
@@ -52,49 +52,25 @@ export default function DoctorChats() {
       console.log('=== LOADING DOCTOR CHATS ===');
       console.log('Doctor userData:', userData);
       
-      // Lấy doctorId từ doctorInfo hoặc uid
+      // Lấy doctorId từ doctorInfo (bs001, bs004, bs003, etc.)
       const doctorIdFromInfo = (userData.doctorInfo as any)?.doctorId;
-      const doctorUid = userData.uid;
       
       console.log('Doctor ID from doctorInfo:', doctorIdFromInfo);
-      console.log('Doctor UID from auth:', doctorUid);
 
-      let allConversations: any[] = [];
-
-      // Query 1: Tìm theo doctorInfo.doctorId (ví dụ: bs004)
-      if (doctorIdFromInfo) {
-        console.log('Querying by doctorInfo.doctorId:', doctorIdFromInfo);
-        const convsByDoctorId = await getDocumentsWithQuery('conversations', [
-          where('doctorId', '==', doctorIdFromInfo)
-        ]);
-        console.log('Found by doctorId:', convsByDoctorId.length);
-        allConversations = [...convsByDoctorId];
+      if (!doctorIdFromInfo) {
+        console.log('❌ Không tìm thấy doctorId trong doctorInfo');
+        setChats([]);
+        setLoading(false);
+        return;
       }
 
-      // Query 2: Tìm theo auth UID (fallback)
-      console.log('Querying by auth UID:', doctorUid);
-      const convsByUid = await getDocumentsWithQuery('conversations', [
-        where('doctorId', '==', doctorUid)
+      // Query theo doctorAuthUid (là userData.uid - Firebase Auth UID)
+      console.log('Querying conversations by doctorAuthUid:', userData.uid);
+      const conversations = await getDocumentsWithQuery('conversations', [
+        where('doctorAuthUid', '==', userData.uid)
       ]);
-      console.log('Found by UID:', convsByUid.length);
       
-      // Query 3: Tìm theo doctorAuthUid (field mới)
-      console.log('Querying by doctorAuthUid:', doctorUid);
-      const convsByAuthUid = await getDocumentsWithQuery('conversations', [
-        where('doctorAuthUid', '==', doctorUid)
-      ]);
-      console.log('Found by doctorAuthUid:', convsByAuthUid.length);
-
-      // Merge và loại bỏ duplicate
-      const convMap = new Map();
-      [...allConversations, ...convsByUid, ...convsByAuthUid].forEach(conv => {
-        if (!convMap.has(conv.id)) {
-          convMap.set(conv.id, conv);
-        }
-      });
-
-      const conversations = Array.from(convMap.values());
-      console.log('Total unique conversations:', conversations.length);
+      console.log('Found conversations:', conversations.length);
       console.log('Conversations data:', conversations);
 
       // Sort manually by lastMessageTimestamp
@@ -104,8 +80,8 @@ export default function DoctorChats() {
         return timeB - timeA;
       });
 
-      // Format conversations thành chats
-      const formattedChats: Chat[] = sortedConversations.map((conv: any) => {
+      // Load patient avatars from users collection
+      const formattedChatsPromises = sortedConversations.map(async (conv: any) => {
         let timeDisplay = '';
         if (conv.lastMessageTimestamp) {
           const timestamp = conv.lastMessageTimestamp.toDate ? 
@@ -131,18 +107,59 @@ export default function DoctorChats() {
           }
         }
 
+        // Load patient avatar from users collection
+        let patientAvatar = '';
+        
+        if (conv.patientId) {
+          try {
+            const users = await getDocumentsWithQuery('users', [
+              where('uid', '==', conv.patientId)
+            ]);
+            if (users.length > 0) {
+              const userAvatar = (users[0] as any).avatar;
+              console.log(`🔍 [Chats] Raw avatar for ${conv.patientName}:`, userAvatar ? userAvatar.substring(0, 50) + '...' : 'none');
+              
+              if (userAvatar) {
+                // Accept any non-empty avatar (URL, data URL, or base64)
+                patientAvatar = userAvatar;
+                console.log(`✅ [Chats] Loaded avatar for ${conv.patientName}`);
+              } else {
+                console.log(`⚠️ [Chats] User has no avatar field`);
+              }
+            } else {
+              console.log(`⚠️ [Chats] No user found with uid: ${conv.patientId}`);
+            }
+          } catch (error) {
+            console.log(`❌ [Chats] Could not load avatar for patient ${conv.patientId}:`, error);
+          }
+        }
+        
+        // Fallback to conversation avatar if user avatar not found
+        if (!patientAvatar && conv.patientAvatar) {
+          console.log(`🔍 [Chats] Fallback to conversation avatar`);
+          patientAvatar = conv.patientAvatar;
+          console.log(`✅ [Chats] Using avatar from conversation for ${conv.patientName}`);
+        }
+        
+        if (!patientAvatar) {
+          console.log(`❌ [Chats] No avatar found for ${conv.patientName}, will use fallback UI`);
+        }
+
         return {
           id: conv.id,
           patientId: conv.patientId || '',
           patientName: conv.patientName || 'Bệnh nhân',
-          patientAvatar: conv.patientAvatar,
+          patientAvatar: patientAvatar,
           patientPhone: conv.patientPhone || '',
           lastMessage: conv.lastMessage || 'Chưa có tin nhắn',
           lastMessageTime: timeDisplay,
           lastMessageTimestamp: conv.lastMessageTimestamp,
           unreadCount: conv.doctorUnreadCount || 0,
+          hasConversation: true,
         };
       });
+
+      const formattedChats = await Promise.all(formattedChatsPromises);
 
       console.log('Formatted chats:', formattedChats);
       setChats(formattedChats);
@@ -202,7 +219,7 @@ export default function DoctorChats() {
     });
 
     return (
-      <Animated.View style={[styles.deleteAction, { transform: [{ translateX }] }]}>
+      <Animated.View style={[styles.deleteAction, { transform: [{ translateX: translateX }] }]}>
         <TouchableOpacity
           style={styles.deleteButton}
           onPress={() => handleDeleteChat(chatId, patientName)}
@@ -241,9 +258,12 @@ export default function DoctorChats() {
           {item.patientAvatar ? (
             <Image source={{ uri: item.patientAvatar }} style={styles.avatar} />
           ) : (
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{item.patientName.charAt(0).toUpperCase()}</Text>
-            </View>
+            <Image 
+              source={{ 
+                uri: `https://ui-avatars.com/api/?name=${encodeURIComponent(item.patientName)}&size=128&background=00BCD4&color=fff&bold=true` 
+              }} 
+              style={styles.avatar} 
+            />
           )}
           <View style={styles.chatInfo}>
             <View style={styles.chatHeader}>

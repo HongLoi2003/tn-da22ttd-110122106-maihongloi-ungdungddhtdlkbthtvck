@@ -13,7 +13,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { db } from './config/firebase';
+import { getFirestoreDb } from './config/firebase';
 
 export default function CheckFirestoreRulesScreen() {
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function CheckFirestoreRulesScreen() {
     for (const collectionName of collectionsToTest) {
       testResults.summary.total++;
       try {
-        const q = query(collection(db, collectionName), limit(1));
+        const q = query(collection(getFirestoreDb(), collectionName), limit(1));
         const snapshot = await getDocs(q);
         
         testResults.collections[collectionName] = {

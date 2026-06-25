@@ -146,18 +146,19 @@ export default function DoctorWorkSchedule() {
   const loadSchedule = async () => {
     try {
       setLoading(true);
-      const doctorId = (userData?.doctorInfo as any)?.doctorId;
+      // ✅ Use display doctor ID for work schedule
+      const displayDoctorId = (userData?.doctorInfo as any)?.doctorId;
       
-      if (!doctorId) {
+      if (!displayDoctorId) {
         console.log('❌ No doctorId found');
         setLoading(false);
         return;
       }
 
-      console.log('🔍 Loading work schedule for doctor:', doctorId);
+      console.log('🔍 Loading work schedule for doctor:', displayDoctorId);
       
       // Load schedule from Firebase
-      const doctorData = await getDocumentById('doctors', doctorId);
+      const doctorData = await getDocumentById('doctors', displayDoctorId);
       
       if (doctorData && (doctorData as any).workSchedule) {
         console.log('✅ Loaded work schedule from Firebase');
@@ -189,18 +190,19 @@ export default function DoctorWorkSchedule() {
   const handleSave = async () => {
     try {
       setSaving(true);
-      const doctorId = (userData?.doctorInfo as any)?.doctorId;
+      // ✅ Use display doctor ID for saving schedule
+      const displayDoctorId = (userData?.doctorInfo as any)?.doctorId;
       
-      if (!doctorId) {
+      if (!displayDoctorId) {
         console.log('❌ No doctorId found');
         setSaving(false);
         return;
       }
 
-      console.log('💾 Saving work schedule for doctor:', doctorId);
+      console.log('💾 Saving work schedule for doctor:', displayDoctorId);
       
       // Save schedule to Firebase
-      await updateDocument('doctors', doctorId, {
+      await updateDocument('doctors', displayDoctorId, {
         workSchedule: schedule,
         updatedAt: new Date().toISOString()
       });

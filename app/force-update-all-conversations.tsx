@@ -9,7 +9,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { db } from './config/firebase';
+import { getFirestoreDb } from './config/firebase';
 
 export default function ForceUpdateAllConversations() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function ForceUpdateAllConversations() {
       let output = '=== FORCE UPDATE ALL CONVERSATIONS ===\n\n';
 
       // 1. Load doctors mapping
-      const doctorsSnapshot = await getDocs(collection(db, 'doctors'));
+      const doctorsSnapshot = await getDocs(collection(getFirestoreDb(), 'doctors'));
       const doctorIdToAuthUid = new Map<string, string>();
       
       doctorsSnapshot.forEach((doc) => {
@@ -35,7 +35,7 @@ export default function ForceUpdateAllConversations() {
       output += `✅ Loaded ${doctorIdToAuthUid.size} doctors\n\n`;
 
       // 2. Load ALL conversations (bypass rules by using admin access)
-      const conversationsSnapshot = await getDocs(collection(db, 'conversations'));
+      const conversationsSnapshot = await getDocs(collection(getFirestoreDb(), 'conversations'));
       output += `📋 Found ${conversationsSnapshot.size} conversations\n\n`;
 
       if (conversationsSnapshot.size === 0) {
@@ -77,7 +77,7 @@ export default function ForceUpdateAllConversations() {
 
         // Update conversation
         try {
-          const convRef = doc(db, 'conversations', convDoc.id);
+          const convRef = doc(getFirestoreDb(), 'conversations', convDoc.id);
           await updateDoc(convRef, {
             doctorAuthUid: authUid
           });

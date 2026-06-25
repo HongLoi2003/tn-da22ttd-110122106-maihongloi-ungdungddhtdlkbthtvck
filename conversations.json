@@ -1,17 +1,5 @@
 [
   {
-    "id": "conv001",
-    "patientId": "user001",
-    "patientName": "Nguyễn Văn A",
-    "doctorId": "bs001",
-    "doctorName": "BS. Nguyễn Văn An",
-    "doctorImage": "nguyenvanam.png",
-    "specialty": "Tim mạch",
-    "lastMessage": "Bạn nên đến khám trực tiếp để tôi kiểm tra kỹ hơn. Tôi sẽ đặt lịch cho bạn vào tuần sau nhé.",
-    "lastMessageTime": "2026-04-28T08:40:00",
-    "unreadCount": 0
-  },
-  {
     "id": "conv002",
     "patientId": "user001",
     "patientName": "Nguyễn Văn A",

@@ -1,4 +1,4 @@
-import { db } from '@/app/config/firebase';
+import { getFirestoreDb,} from '@/config/firebase';
 import {
     collection,
     doc,
@@ -38,7 +38,7 @@ export const validateAndFixFirebaseData = async () => {
 const validateAppointments = async () => {
   try {
     console.log('\n📋 [VALIDATE] Checking appointments collection...');
-    const appointmentsRef = collection(db, 'appointments');
+    const appointmentsRef = collection(getFirestoreDb(), 'appointments');
     const snapshot = await getDocs(appointmentsRef);
 
     if (snapshot.empty) {
@@ -48,7 +48,7 @@ const validateAppointments = async () => {
 
     console.log(`📊 [VALIDATE] Found ${snapshot.size} appointments`);
 
-    const batch = writeBatch(db);
+    const batch = writeBatch(getFirestoreDb());
     let updateCount = 0;
 
     snapshot.forEach((docSnap) => {
@@ -133,7 +133,7 @@ const validateAppointments = async () => {
 
         if (Object.keys(fixes).length > 0) {
           console.log(`   ✏️  Applying fixes:`, fixes);
-          batch.update(doc(db, 'appointments', docSnap.id), fixes);
+          batch.update(doc(getFirestoreDb(), 'appointments', docSnap.id), fixes);
           updateCount++;
         }
       } else {
@@ -166,7 +166,7 @@ const validateAppointments = async () => {
 const validateDoctors = async () => {
   try {
     console.log('\n👨‍⚕️  [VALIDATE] Checking doctors collection...');
-    const doctorsRef = collection(db, 'doctors');
+    const doctorsRef = collection(getFirestoreDb(), 'doctors');
     const snapshot = await getDocs(doctorsRef);
 
     if (snapshot.empty) {
@@ -217,7 +217,7 @@ const validateDoctors = async () => {
 const validateHospitals = async () => {
   try {
     console.log('\n🏥 [VALIDATE] Checking hospitals collection...');
-    const hospitalsRef = collection(db, 'hospitals');
+    const hospitalsRef = collection(getFirestoreDb(), 'hospitals');
     const snapshot = await getDocs(hospitalsRef);
 
     if (snapshot.empty) {
@@ -263,7 +263,7 @@ const validateHospitals = async () => {
 const validateUsers = async () => {
   try {
     console.log('\n👤 [VALIDATE] Checking users collection...');
-    const usersRef = collection(db, 'users');
+    const usersRef = collection(getFirestoreDb(), 'users');
     const snapshot = await getDocs(usersRef);
 
     if (snapshot.empty) {
@@ -306,7 +306,7 @@ export const getFirebaseDataReport = async () => {
     console.log('\n📊 [REPORT] Generating Firebase data report...\n');
 
     // Get appointments
-    const appointmentsRef = collection(db, 'appointments');
+    const appointmentsRef = collection(getFirestoreDb(), 'appointments');
     const appointmentsSnapshot = await getDocs(appointmentsRef);
     console.log(`\n📋 APPOINTMENTS (${appointmentsSnapshot.size} total):`);
     appointmentsSnapshot.forEach((doc) => {
@@ -322,7 +322,7 @@ export const getFirebaseDataReport = async () => {
     });
 
     // Get doctors
-    const doctorsRef = collection(db, 'doctors');
+    const doctorsRef = collection(getFirestoreDb(), 'doctors');
     const doctorsSnapshot = await getDocs(doctorsRef);
     console.log(`\n\n👨‍⚕️  DOCTORS (${doctorsSnapshot.size} total):`);
     doctorsSnapshot.forEach((doc) => {
@@ -335,7 +335,7 @@ export const getFirebaseDataReport = async () => {
     });
 
     // Get hospitals
-    const hospitalsRef = collection(db, 'hospitals');
+    const hospitalsRef = collection(getFirestoreDb(), 'hospitals');
     const hospitalsSnapshot = await getDocs(hospitalsRef);
     console.log(`\n\n🏥 HOSPITALS (${hospitalsSnapshot.size} total):`);
     hospitalsSnapshot.forEach((doc) => {

@@ -18,19 +18,19 @@ import { getDoctorAvatarSmart } from './utils/doctorAvatars';
 
 // Map hình ảnh chuyên khoa
 const specialtyImages: any = {
-  'tim-mach.png': require('@/assets/images/tim-mach.png'),
-  'nhi-khoa.png': require('@/assets/images/nhi-khoa.png'),
-  'san-phu-khoa.png': require('@/assets/images/san-phu-khoa.png'),
-  'da-lieu.png': require('@/assets/images/da-lieu.png'),
-  'mat.png': require('@/assets/images/mat.png'),
-  'rang-ham-mat.png': require('@/assets/images/rang-ham-mat.png'),
-  'tai-mui-hong.png': require('@/assets/images/tai-mui-hong.png'),
-  'tieu-hoa.png': require('@/assets/images/tieu-hoa.png'),
-  'than-kinh.png': require('@/assets/images/than-kinh.png'),
-  'co-xuong-khop.png': require('@/assets/images/co-xuong-khop.png'),
-  'ho-hap.png': require('@/assets/images/ho-hap.png'),
-  'noi-tiet.png': require('@/assets/images/noi-tiet.png'),
-  'khoa.png': require('@/assets/images/khoa.png'),
+  'tim-mach.png': require('../assets/images/tim-mach.png'),
+  'nhi-khoa.png': require('../assets/images/nhi-khoa.png'),
+  'san-phu-khoa.png': require('../assets/images/san-phu-khoa.png'),
+  'da-lieu.png': require('../assets/images/da-lieu.png'),
+  'mat.png': require('../assets/images/mat.png'),
+  'rang-ham-mat.png': require('../assets/images/rang-ham-mat.png'),
+  'tai-mui-hong.png': require('../assets/images/tai-mui-hong.png'),
+  'tieu-hoa.png': require('../assets/images/tieu-hoa.png'),
+  'than-kinh.png': require('../assets/images/than-kinh.png'),
+  'co-xuong-khop.png': require('../assets/images/co-xuong-khop.png'),
+  'ho-hap.png': require('../assets/images/ho-hap.png'),
+  'noi-tiet.png': require('../assets/images/noi-tiet.png'),
+  'khoa.png': require('../assets/images/khoa.png'),
 };
 
 export default function SpecialtiesScreen() {
@@ -38,7 +38,6 @@ export default function SpecialtiesScreen() {
   const [searchText, setSearchText] = useState('');
   const [showAllSpecialties, setShowAllSpecialties] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [unreadCount, setUnreadCount] = useState(0);
   
   const [allSpecialties, setAllSpecialties] = useState<any[]>([]);
   const [popularSpecialties, setPopularSpecialties] = useState<any[]>([]);
@@ -48,30 +47,8 @@ export default function SpecialtiesScreen() {
   useFocusEffect(
     useCallback(() => {
       loadSpecialtiesData();
-      loadUnreadNotifications();
     }, [])
   );
-
-  const loadUnreadNotifications = async () => {
-    try {
-      const { auth } = await import('./config/firebase');
-      const user = auth?.currentUser;
-      
-      if (!user) {
-        setUnreadCount(0);
-        return;
-      }
-
-      const allNotifications = await getAllDocuments('notifications');
-      const userUnreadNotifications = allNotifications.filter(
-        (n: any) => n.userId === user.uid && !n.read
-      );
-      setUnreadCount(userUnreadNotifications.length);
-    } catch (error) {
-      console.error('Error loading notifications:', error);
-      setUnreadCount(0);
-    }
-  };
 
   const loadSpecialtiesData = async () => {
     try {
@@ -143,16 +120,7 @@ export default function SpecialtiesScreen() {
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chuyên khoa</Text>
-        <TouchableOpacity onPress={() => router.push('/notifications')}>
-          <View style={styles.notificationBadge}>
-            <Ionicons name="notifications-outline" size={24} color="#000" />
-            {unreadCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{unreadCount}</Text>
-              </View>
-            )}
-          </View>
-        </TouchableOpacity>
+        <View style={{ width: 24 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -201,11 +169,35 @@ export default function SpecialtiesScreen() {
                     const imageName = specialty.image || 'khoa.png';
                     const imageSource = specialtyImages[imageName] || specialtyImages['khoa.png'];
                     
+                    // Map tên chuyên khoa sang specialty ID
+                    const getSpecialtyId = (name: string) => {
+                      const normalized = name.toLowerCase().trim();
+                      if (normalized.includes('tim') || normalized.includes('mạch')) return 'tim_mach';
+                      if (normalized.includes('da') || normalized.includes('liễu')) return 'da_lieu';
+                      if (normalized.includes('nhi')) return 'nhi_khoa';
+                      if (normalized.includes('sản') || normalized.includes('phụ')) return 'san_phu_khoa';
+                      if (normalized.includes('thần') || normalized.includes('kinh')) return 'than_kinh';
+                      if (normalized.includes('hô') || normalized.includes('hấp')) return 'ho_hap';
+                      if (normalized.includes('tiêu') || normalized.includes('hóa')) return 'tieu_hoa';
+                      if (normalized.includes('cơ') || normalized.includes('xương') || normalized.includes('khớp')) return 'co_xuong_khop';
+                      if (normalized.includes('tai') || normalized.includes('mũi') || normalized.includes('họng')) return 'tai_mui_hong';
+                      if (normalized.includes('mắt') || normalized.includes('nhãn')) return 'mat';
+                      if (normalized.includes('răng') || normalized.includes('hàm') || normalized.includes('nha')) return 'rang_ham_mat';
+                      if (normalized.includes('nội tiết') || normalized.includes('tiết')) return 'noi_tiet';
+                      return 'all';
+                    };
+                    
                     return (
                       <TouchableOpacity
                         key={specialty.id}
                         style={styles.specialtyItemNew}
-                        onPress={() => router.push('/(tabs)/chat')}
+                        onPress={() => router.push({
+                          pathname: '/all-doctors',
+                          params: { 
+                            specialty: getSpecialtyId(specialty.name),
+                            specialtyName: specialty.name
+                          }
+                        })}
                       >
                         <View style={styles.specialtyIconContainerNew}>
                           <Image source={imageSource} style={styles.specialtyIconNew} />
@@ -243,6 +235,7 @@ export default function SpecialtiesScreen() {
                   const hospital = doctor.benh_vien || doctor.hospital || 'Bệnh viện Trường Đại học Trà Vinh';
                   const doctorImage = doctor.image || doctor.hinh_anh || 'logo.png';
                   const doctorPhone = doctor.sdt || doctor.phone || '';
+                  const price = (doctor.phi_kham || doctor.gia_kham) ? `${(doctor.phi_kham || doctor.gia_kham).toLocaleString('vi-VN')}đ` : '200.000đ';
                   
                   const handleChatPress = () => {
                     router.push({
@@ -290,7 +283,7 @@ export default function SpecialtiesScreen() {
                           <View style={styles.cardFooter}>
                             <View style={styles.priceContainer}>
                               <Text style={styles.priceLabel}>Phí tư vấn:</Text>
-                              <Text style={styles.priceValue}>200.000đ</Text>
+                              <Text style={styles.priceValue}>{price}</Text>
                             </View>
                             <View style={styles.cardActions}>
                               <TouchableOpacity 
@@ -368,25 +361,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#000',
   },
-  notificationBadge: {
-    position: 'relative',
-  },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: '#FF4444',
-    borderRadius: 10,
-    width: 18,
-    height: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badgeText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -415,6 +389,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0F7FA',
     borderRadius: 16,
     overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: '#00BCD4',
   },
   bannerContent: {
     flexDirection: 'row',

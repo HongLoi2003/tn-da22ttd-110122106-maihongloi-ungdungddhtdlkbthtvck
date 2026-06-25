@@ -1,32 +1,5 @@
 [
   {
-    "id": "pres001",
-    "userId": "user001",
-    "patientName": "Nguyễn Văn A",
-    "doctorId": "bs001",
-    "doctorName": "BS. Nguyễn Văn An",
-    "date": "2026-04-15",
-    "diagnosis": "Rối loạn nhịp tim",
-    "medications": [
-      {
-        "name": "Bisoprolol 5mg",
-        "dosage": "1 viên/ngày",
-        "duration": "30 ngày",
-        "instructions": "Uống vào buổi sáng sau ăn",
-        "quantity": 30
-      },
-      {
-        "name": "Aspirin 100mg",
-        "dosage": "1 viên/ngày",
-        "duration": "30 ngày",
-        "instructions": "Uống vào buổi tối sau ăn",
-        "quantity": 30
-      }
-    ],
-    "notes": "Tái khám sau 2 tuần",
-    "status": "active"
-  },
-  {
     "id": "pres002",
     "userId": "user001",
     "patientName": "Nguyễn Văn A",

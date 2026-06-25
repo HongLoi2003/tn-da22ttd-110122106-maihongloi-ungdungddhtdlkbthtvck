@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
     Alert,
     Image,
     RefreshControl,
@@ -73,21 +72,22 @@ export default function DoctorAppointments() {
         doctorInfo: userData.doctorInfo
       });
       
-      // Ưu tiên dùng doctorInfo.doctorId (ID từ doctors collection như "bs004")
-      // Nếu không có thì dùng uid (Firebase Auth UID)
-      const doctorId = (userData.doctorInfo as any)?.doctorId || userData.uid;
-      console.log('🔑 [Appointments] Using doctorId:', doctorId);
-      console.log('📝 [Appointments] doctorInfo.doctorId:', (userData.doctorInfo as any)?.doctorId);
-      console.log('📝 [Appointments] userData.uid:', userData.uid);
+      // ✅ Separate IDs for different purposes
+      const firebaseAuthUid = userData.uid;
+      const displayDoctorId = (userData.doctorInfo as any)?.doctorId || userData.uid;
+      console.log('🔑 [Appointments] Firebase Auth UID:', firebaseAuthUid);
+      console.log('📝 [Appointments] Display Doctor ID:', displayDoctorId);
       
-      const allAppointments = await doctorServiceInstance.getDoctorAppointments(doctorId);
+      const allAppointments = await doctorServiceInstance.getDoctorAppointments(displayDoctorId);
       console.log('✅ [Appointments] Loaded', allAppointments.length, 'appointments');
       
       if (allAppointments.length > 0) {
         console.log('📋 [Appointments] First appointment:', JSON.stringify(allAppointments[0], null, 2));
         console.log('📋 [Appointments] Patient name:', allAppointments[0].patientName);
         console.log('📋 [Appointments] Patient phone:', allAppointments[0].patientPhone);
-        console.log('📋 [Appointments] Fee:', allAppointments[0].fee);
+        console.log('💰 [Appointments] Fee:', allAppointments[0].fee);
+        console.log('💰 [Appointments] Fee type:', typeof allAppointments[0].fee);
+        console.log('💰 [Appointments] Fee exists?:', allAppointments[0].fee !== undefined && allAppointments[0].fee !== null);
         console.log('📋 [Appointments] Room:', allAppointments[0].room);
       }
       
@@ -279,11 +279,47 @@ export default function DoctorAppointments() {
     );
   };
 
+  const handleComplete = async (appointmentId: string) => {
+    Alert.alert(
+      'Xác nhận hoàn thành',
+      'Bạn có chắc chắn muốn đánh dấu lịch khám này là hoàn thành?',
+      [
+        {
+          text: 'Không',
+          style: 'cancel'
+        },
+        {
+          text: 'Hoàn thành',
+          onPress: async () => {
+            try {
+              console.log('✅ [Appointments] Completing appointment:', appointmentId);
+              await doctorServiceInstance.updateAppointmentStatus(appointmentId, 'completed');
+              console.log('✅ [Appointments] Appointment completed successfully');
+              
+              await loadAppointments();
+              
+              showToast('success', 'Hoàn thành', 'Lịch khám đã được đánh dấu hoàn thành.');
+            } catch (error: any) {
+              console.error('❌ [Appointments] Error completing appointment:', error);
+              
+              let errorMessage = 'Có lỗi xảy ra khi hoàn thành lịch khám.';
+              
+              if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
+                errorMessage = 'Không có quyền hoàn thành lịch khám.';
+              }
+              
+              showToast('error', 'Lỗi', errorMessage);
+            }
+          }
+        }
+      ]
+    );
+  };
+
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#00BCD4" />
-        <Text style={styles.loadingText}>Đang tải...</Text>
+      <View>
+        
       </View>
     );
   }
@@ -357,7 +393,7 @@ export default function DoctorAppointments() {
             onPress={() => setSelectedTab('confirmed')}
           >
             <Text style={[styles.statusTabText, selectedTab === 'confirmed' && styles.statusTabTextActive]}>
-              Đã xác nhận
+              Sắp tới
             </Text>
             {getTabCount('confirmed') > 0 && (
               <View style={[styles.badge, selectedTab === 'confirmed' && styles.badgeActive]}>
@@ -463,6 +499,13 @@ export default function DoctorAppointments() {
                     <Ionicons name="time-outline" size={14} color="#94a3b8" />
                     <Text style={styles.durationText}>{appointment.duration}</Text>
                   </View>
+                  {/* Fee Display - Always show */}
+                  <View style={styles.feeRow}>
+                    <Ionicons name="cash-outline" size={14} color="#06D6A0" />
+                    <Text style={styles.feeText}>
+                      {appointment.fee ? `${appointment.fee.toLocaleString('vi-VN')}đ` : 'Chưa có phí'}
+                    </Text>
+                  </View>
                 </View>
               </View>
 
@@ -498,6 +541,22 @@ export default function DoctorAppointments() {
                   >
                     <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
                     <Text style={styles.confirmBtnText}>Xác nhận</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Complete Button for Confirmed Appointments */}
+              {appointment.status === 'confirmed' && (
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity
+                    style={styles.completeBtn}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleComplete(appointment.id);
+                    }}
+                  >
+                    <Ionicons name="checkmark-done-circle-outline" size={20} color="#fff" />
+                    <Text style={styles.completeBtnText}>Hoàn thành</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -756,10 +815,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    marginBottom: 4,
   },
   durationText: {
     fontSize: 12,
     color: '#94a3b8',
+  },
+  feeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#f0fdf4',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  feeText: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#06D6A0',
   },
   statusRow: {
     flexDirection: 'row',
@@ -814,6 +889,21 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   confirmBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  completeBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: '#9c27b0',
+    gap: 6,
+  },
+  completeBtnText: {
     fontSize: 14,
     fontWeight: '700',
     color: '#fff',

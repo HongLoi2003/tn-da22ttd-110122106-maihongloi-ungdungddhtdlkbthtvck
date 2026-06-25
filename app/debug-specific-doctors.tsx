@@ -92,7 +92,7 @@ export default function DebugSpecificDoctors() {
           issues.push('Không có user account');
         } else {
           hasUserAccount = true;
-          userAccountUid = users[0].uid;
+          userAccountUid = (users[0] as any).uid;
           console.log(`✅ User account found: ${userAccountUid}`);
           console.log('User data:', users[0]);
           

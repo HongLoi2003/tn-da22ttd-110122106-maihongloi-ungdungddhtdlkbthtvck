@@ -1,4 +1,4 @@
-import { auth } from '@/app/config/firebase';
+import { auth } from '@/config/firebase';
 import { GoogleAuthProvider, signInWithCredential, signInWithPopup } from 'firebase/auth';
 import { Platform } from 'react-native';
 
@@ -18,19 +18,31 @@ if (Platform.OS !== 'web') {
  */
 export const configureGoogleSignIn = () => {
   if (Platform.OS === 'web' || !GoogleSignin) {
+    console.log('⚠️ Google Sign-In: Skipping configure (web or package not available)');
     return;
   }
 
   try {
+    const webClientId = process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID || '';
+    
+    if (!webClientId) {
+      console.error('❌ EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID is missing!');
+      console.error('Add to .env.local: EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID=9119519990-h0ghp9fhpjltof05160ea98bchd42i6n.apps.googleusercontent.com');
+      return;
+    }
+    
+    console.log('🔧 Configuring Google Sign-In...');
+    console.log('   Web Client ID:', webClientId.substring(0, 20) + '...');
+    
     GoogleSignin.configure({
-      // Web Client ID từ Firebase Console
-      // Lấy từ: Firebase Console → Project Settings → General → Web API Key
-      webClientId: process.env.EXPO_PUBLIC_FIREBASE_WEB_CLIENT_ID || '',
+      webClientId: webClientId,
       offlineAccess: true,
     });
-    console.log('✅ Google Sign-In configured for mobile');
+    
+    console.log('✅ Google Sign-In configured successfully!');
   } catch (error) {
     console.error('❌ Error configuring Google Sign-In:', error);
+    console.error('   Make sure SHA-1 fingerprint is added to Firebase Console');
   }
 };
 
@@ -46,6 +58,12 @@ export const signInWithGoogle = async () => {
   // Web: Sử dụng popup
   if (Platform.OS === 'web') {
     return await signInWithGoogleWeb();
+  }
+
+  // Mobile: Kiểm tra package có sẵn không
+  if (!GoogleSignin) {
+    console.warn('⚠️ Google Sign-In chưa sẵn sàng trong dev mode');
+    throw new Error('Google Sign-In chỉ hoạt động trên APK build.\n\nVui lòng:\n1. Build APK: eas build -p android\n2. Hoặc sử dụng đăng nhập Email');
   }
 
   // Mobile: Sử dụng native Google Sign-In

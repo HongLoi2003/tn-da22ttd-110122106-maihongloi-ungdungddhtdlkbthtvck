@@ -3,7 +3,7 @@
  * Utilities for testing and development
  */
 
-import validator from '@/app/utils/validation';
+import validator from '@/utils/validation';
 
 /**
  * Test validation functions
@@ -60,7 +60,7 @@ export const testValidation = () => {
 export const testErrorHandler = () => {
   console.log('🧪 Testing Error Handler...\n');
 
-  import('@/app/utils/errorHandler').then(({ default: errorHandler }) => {
+  import('@/utils/errorHandler').then(({ default: errorHandler }) => {
     // Test Firebase auth error
     console.log('🔥 Firebase Auth Error:');
     const authError = errorHandler.handleFirebaseError({

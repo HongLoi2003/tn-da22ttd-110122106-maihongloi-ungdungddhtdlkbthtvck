@@ -3,35 +3,36 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import CustomToast from '../components/CustomToast';
 import { useAuth } from '../context/AuthContext';
 
-// Mapping ảnh bác sĩ
+// Mapping ảnh bác sĩ - 16 ảnh thật từ Pexels (chất lượng cao, miễn phí bản quyền)
 const doctorImages: { [key: string]: any } = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
+  'nguyenvanam.png': { uri: 'https://images.pexels.com/photos/26336880/pexels-photo-26336880.jpeg' },
+  'leminhtam.png': { uri: 'https://images.pexels.com/photos/5722163/pexels-photo-5722163.jpeg' },
+  'lehoangnam.png': { uri: 'https://images.pexels.com/photos/14438788/pexels-photo-14438788.jpeg' },
+  'dominhtuan.png': { uri: 'https://images.pexels.com/photos/14628069/pexels-photo-14628069.jpeg' },
+  'hoangvanduc.png': { uri: 'https://images.pexels.com/photos/27666713/pexels-photo-27666713.jpeg' },
+  'tranvankhoa.png': { uri: 'https://images.pexels.com/photos/15962798/pexels-photo-15962798.jpeg' },
+  'phamminhquan.png': { uri: 'https://images.pexels.com/photos/29995617/pexels-photo-29995617.jpeg' },
+  'nguyenvanhai.png': { uri: 'https://images.pexels.com/photos/19601385/pexels-photo-19601385.jpeg' },
+  'tranthilan.png': { uri: 'https://images.pexels.com/photos/15641079/pexels-photo-15641079.jpeg' },
+  'tranthimai.png': { uri: 'https://images.pexels.com/photos/27666717/pexels-photo-27666717.jpeg' },
+  'phamthuha.png': { uri: 'https://images.pexels.com/photos/15962796/pexels-photo-15962796.jpeg' },
+  'vuthilan.png': { uri: 'https://images.pexels.com/photos/27392531/pexels-photo-27392531.jpeg' },
+  'ngothihuong.png': { uri: 'https://images.pexels.com/photos/14628046/pexels-photo-14628046.jpeg' },
+  'nguyenthihoa.png': { uri: 'https://images.pexels.com/photos/14628045/pexels-photo-14628045.jpeg' },
+  'lethihang.png': { uri: 'https://images.pexels.com/photos/4173248/pexels-photo-4173248.jpeg' },
+  'dangthithao.jpg': { uri: 'https://images.pexels.com/photos/29995629/pexels-photo-29995629.jpeg' },
 };
 
 export default function DoctorProfile() {
@@ -60,19 +61,20 @@ export default function DoctorProfile() {
   const loadDoctorInfo = async () => {
     try {
       setLoading(true);
-      const doctorId = (userData?.doctorInfo as any)?.doctorId;
+      // ✅ Use display doctor ID for profile operations
+      const displayDoctorId = (userData?.doctorInfo as any)?.doctorId;
       
-      if (!doctorId) {
+      if (!displayDoctorId) {
         console.log('❌ No doctorId found');
         setLoading(false);
         return;
       }
 
-      console.log('🔍 Loading doctor info for:', doctorId);
+      console.log('🔍 Loading doctor info for:', displayDoctorId);
       
       // Lấy thông tin bác sĩ từ doctors collection using document ID
       const { getDocumentById } = await import('../services/firebaseService');
-      const doctor = await getDocumentById('doctors', doctorId);
+      const doctor = await getDocumentById('doctors', displayDoctorId);
 
       if (doctor) {
         console.log('✅ Doctor info loaded:', doctor);
@@ -94,9 +96,10 @@ export default function DoctorProfile() {
     try {
       setAvailableForBooking(value);
       
-      const doctorId = (userData?.doctorInfo as any)?.doctorId;
-      if (!doctorId) {
-        console.log('❌ No doctorId found');
+      // ✅ Use display doctor ID for booking availability
+      const displayDoctorId = (userData?.doctorInfo as any)?.doctorId;
+      if (!displayDoctorId) {
+        console.log('❌ No displayDoctorId found');
         return;
       }
 
@@ -104,7 +107,7 @@ export default function DoctorProfile() {
       
       // Update Firebase
       const { updateDocument } = await import('../services/firebaseService');
-      await updateDocument('doctors', doctorId, {
+      await updateDocument('doctors', displayDoctorId, {
         availableForBooking: value
       });
       
@@ -123,12 +126,23 @@ export default function DoctorProfile() {
         visible: true,
         type: 'info',
         title: 'Đang đăng xuất...',
-        message: `Tạm biệt, ${doctorInfo?.fullName || 'Bác sĩ'}!`,
+        message: `Tạm biệt, ${doctorInfo?.ten || doctorInfo?.fullName || 'Bác sĩ'}!`,
       });
+      
+      // Đợi 1 giây để hiển thị toast
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       await logout();
       
-      // Đợi 1 giây để hiển thị toast rồi chuyển trang
+      // Hiển thị toast thành công
+      setToast({
+        visible: true,
+        type: 'success',
+        title: 'Đăng xuất thành công',
+        message: 'Hẹn gặp lại!',
+      });
+      
+      // Đợi thêm 1 giây để hiển thị toast thành công rồi chuyển trang
       setTimeout(() => {
         router.replace('/login');
       }, 1000);
@@ -137,9 +151,35 @@ export default function DoctorProfile() {
       setToast({
         visible: true,
         type: 'error',
-        title: 'Lỗi',
+        title: 'Lỗi đăng xuất',
         message: 'Không thể đăng xuất. Vui lòng thử lại!',
       });
+    }
+  };
+
+  const isWeb = typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
+  const handleLogoutPress = () => {
+    if (isWeb) {
+      // Sử dụng confirm cho web
+      const confirmed = window.confirm('Bạn có chắc chắn muốn đăng xuất?');
+      if (confirmed) {
+        handleLogout();
+      }
+    } else {
+      // Sử dụng Alert cho mobile
+      Alert.alert(
+        'Đăng xuất',
+        'Bạn có chắc chắn muốn đăng xuất?',
+        [
+          { text: 'Hủy', style: 'cancel' },
+          { 
+            text: 'Đăng xuất', 
+            style: 'destructive', 
+            onPress: handleLogout
+          },
+        ]
+      );
     }
   };
 
@@ -181,18 +221,25 @@ export default function DoctorProfile() {
             <View style={styles.avatarContainer}>
               <Image 
                 source={
+                  // Priority 1: Custom avatar from users collection
+                  userData?.avatar ? { uri: userData.avatar } :
+                  // Priority 2: Default avatar from doctors collection
                   (doctorInfo?.hinh_anh && doctorImages[doctorInfo.hinh_anh]) || 
                   (doctorInfo?.image && doctorImages[doctorInfo.image]) || 
+                  // Priority 3: Fallback
                   doctorImages['nguyenvanam.png']
                 } 
                 style={styles.avatar} 
               />
-              <TouchableOpacity style={styles.cameraButton}>
+              <TouchableOpacity 
+                style={styles.cameraButton}
+                onPress={() => router.push('/doctor/edit-profile')}
+              >
                 <Ionicons name="camera" size={16} color="#fff" />
               </TouchableOpacity>
             </View>
             <View style={styles.profileDetails}>
-              <Text style={styles.doctorName}>BS. {doctorInfo?.ten || userData?.fullName || 'Bác sĩ'}</Text>
+              <Text style={styles.doctorName}>{doctorInfo?.ten || userData?.fullName || 'Bác sĩ'}</Text>
               <Text style={styles.specialty}>{doctorInfo?.chuyen_khoa || 'Chuyên khoa'}</Text>
               <View style={styles.ratingRow}>
                 <Ionicons name="star" size={16} color="#fbbf24" />
@@ -376,12 +423,12 @@ export default function DoctorProfile() {
 
             <View style={styles.menuDivider} />
 
-            <TouchableOpacity style={styles.menuRow}>
+            <TouchableOpacity style={styles.menuRow} onPress={ () => router.push('/support-center')}>
               <View style={styles.menuLeft}>
                 <View style={[styles.menuIconWrapper, { backgroundColor: '#e8f5e9' }]}>
                   <Ionicons name="help-circle" size={22} color="#4caf50" />
                 </View>
-                <Text style={styles.menuTitle}>Trợ giúp & Hỗ trợ</Text>
+                <Text style={styles.menuTitle}>Trợ giúp và Hỗ trợ</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
             </TouchableOpacity>
@@ -390,7 +437,7 @@ export default function DoctorProfile() {
 
         {/* Logout Button */}
         <View style={styles.section}>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogoutPress}>
             <Ionicons name="log-out-outline" size={22} color="#ef4444" />
             <Text style={styles.logoutText}>Đăng xuất</Text>
           </TouchableOpacity>

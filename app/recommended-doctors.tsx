@@ -376,8 +376,8 @@ export default function RecommendedDoctorsScreen() {
           <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
             <Ionicons name="chevron-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Bác sĩ gợi ý</Text>
-          <View style={styles.placeholder} />
+          <Text style={styles.headerTitle}>Bác sĩ chuyên khoa</Text>
+          <View style={{ width: 40 }} />
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#00BCD4" />
@@ -395,12 +395,7 @@ export default function RecommendedDoctorsScreen() {
         <Text style={styles.headerTitle}>
           {symptom ? `Bác sĩ chuyên ${specialtyParam || symptomToSpecialty[symptom] || 'khoa'}` : 'Bác sĩ gợi ý'}
         </Text>
-        <TouchableOpacity 
-          onPress={() => setShowSearch(!showSearch)} 
-          style={styles.searchBtn}
-        >
-          <Ionicons name={showSearch ? "close" : "search"} size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={{ width: 40 }} />
       </View>
 
       {/* Search Bar */}
@@ -480,10 +475,7 @@ export default function RecommendedDoctorsScreen() {
         <View style={styles.emptyContainer}>
           <Ionicons name="search-outline" size={64} color="#cbd5e1" />
           <Text style={styles.emptyText}>Không có bác sĩ nào</Text>
-          <Text style={styles.emptySubtext}>
-            ⚠️ Vui lòng vào trang "Seed Data" và bấm nút{'\n'}
-            "Import Tất Cả Dữ Liệu" để thêm dữ liệu bác sĩ
-          </Text>
+          
           <TouchableOpacity
             style={styles.seedButton}
             onPress={() => router.push('/seed-data')}

@@ -18,16 +18,16 @@ import { useAuth } from './context/AuthContext';
 import { addComment, addReply, Comment, getArticleComments, toggleCommentLike } from './services/commentService';
 
 const doctorImages = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
+  'nguyenvanam.png': { uri: 'https://i.pravatar.cc/200?img=12' },
+  'tranthilan.png': { uri: 'https://i.pravatar.cc/200?img=5' },
+  'leminhtam.png': { uri: 'https://i.pravatar.cc/200?img=33' },
+  'phamthuha.png': { uri: 'https://i.pravatar.cc/200?img=48' },
+  'hoangvanduc.png': { uri: 'https://i.pravatar.cc/200?img=68' },
+  'vuthilan.png': { uri: 'https://i.pravatar.cc/200?img=9' },
+  'dominhtuan.png': { uri: 'https://i.pravatar.cc/200?img=15' },
+  'tranthimai.png': { uri: 'https://i.pravatar.cc/200?img=47' },
+  'ngothihuong.png': { uri: 'https://i.pravatar.cc/200?img=23' },
+  'tranvankhoa.png': { uri: 'https://i.pravatar.cc/200?img=51' },
 };
 
 export default function ArticleCommentsScreen() {
@@ -177,7 +177,7 @@ export default function ArticleCommentsScreen() {
       return doctorImages[avatar as keyof typeof doctorImages];
     }
     // Mặc định dùng logo
-    return require('@/assets/images/logo.png');
+    return { uri: "https://via.placeholder.com/150" };
   };
 
   const getUserAvatar = () => {
@@ -193,7 +193,7 @@ export default function ArticleCommentsScreen() {
       }
     }
     // Mặc định dùng logo
-    return require('@/assets/images/logo.png');
+    return { uri: "https://via.placeholder.com/150" };
   };
 
   return (

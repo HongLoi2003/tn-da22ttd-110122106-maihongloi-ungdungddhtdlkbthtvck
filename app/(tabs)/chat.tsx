@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image as ExpoImage } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useRef } from 'react';
 import {
+    SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
@@ -11,99 +12,105 @@ import {
 
 export default function ChatTabScreen() {
   const router = useRouter();
+  const hasNavigated = useRef(false);
+
+  // Navigate to ai-consultation when tab is focused
+  useFocusEffect(
+    useCallback(() => {
+      // Chỉ navigate một lần khi tab được focus
+      if (!hasNavigated.current) {
+        hasNavigated.current = true;
+        // Delay nhỏ để đảm bảo tab đã render xong
+        setTimeout(() => {
+          router.push('/ai-consultation');
+        }, 100);
+      }
+      
+      return () => {
+        // Reset khi unfocus để lần sau vào lại sẽ navigate
+        hasNavigated.current = false;
+      };
+    }, [])
+  );
+
+  const consultationOptions = [
+    {
+      id: 1,
+      title: 'Tư vấn AI',
+      description: 'Chat với AI để phân tích triệu chứng',
+      icon: 'chatbubble-ellipses',
+      color: '#00BCD4',
+      route: '/ai-consultation',
+    },
+    {
+      id: 2,
+      title: 'Lịch sử tư vấn',
+      description: 'Xem các cuộc hội thoại đã lưu',
+      icon: 'time',
+      color: '#FF9800',
+      route: '/ai-chat-history',
+    },
+  ];
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Tư vấn chuyên khoa</Text>
+        <Text style={styles.headerTitle}>Tư vấn</Text>
+        <Text style={styles.headerSubtitle}>Chọn loại tư vấn bạn cần</Text>
       </View>
 
-      {/* Content - Wrapped in ScrollView */}
-      <ScrollView 
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.aiCard}>
-          <View style={styles.aiIconLarge}>
-            <ExpoImage 
-              source={require('@/assets/images/ai.png')} 
-              style={styles.aiImage}
-              contentFit="contain"
-            />
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Banner */}
+        <View style={styles.banner}>
+          <View style={styles.bannerIcon}>
+            <Ionicons name="medical" size={40} color="#00BCD4" />
           </View>
-          <Text style={styles.aiTitle}>Chat tư vấn chuyên khoa</Text>
-          <Text style={styles.aiDescription}>
-            Mô tả triệu chứng của bạn và nhận tư vấn từ AI về chuyên khoa phù hợp
-          </Text>
-          <TouchableOpacity 
-            style={styles.startButton}
-            onPress={() => router.push('/ai-chat')}
-          >
-            <Text style={styles.startButtonText}>Bắt đầu chat</Text>
-            <Ionicons name="arrow-forward" size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
-
-        {/* How it works */}
-        <View style={styles.howItWorksSection}>
-          <Text style={styles.howItWorksTitle}>Cách sử dụng</Text>
-          <View style={styles.stepsList}>
-            <View style={styles.stepItem}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>1</Text>
-              </View>
-              <Text style={styles.stepText}>Mô tả triệu chứng tự nhiên (VD: "Tôi bị đau đầu và chóng mặt")</Text>
-            </View>
-            <View style={styles.stepItem}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>2</Text>
-              </View>
-              <Text style={styles.stepText}>AI phân tích và gợi ý chuyên khoa phù hợp</Text>
-            </View>
-            <View style={styles.stepItem}>
-              <View style={styles.stepNumber}>
-                <Text style={styles.stepNumberText}>3</Text>
-              </View>
-              <Text style={styles.stepText}>Xem danh sách bác sĩ và đặt lịch khám</Text>
-            </View>
+          <View style={styles.bannerContent}>
+            <Text style={styles.bannerTitle}>Tư vấn sức khỏe 24/7</Text>
+            <Text style={styles.bannerText}>
+              AI phân tích triệu chứng và gợi ý bác sĩ phù hợp
+            </Text>
           </View>
         </View>
 
-        <View style={styles.featuresContainer}>
-          <View style={styles.featureItem}>
-            <View style={styles.featureIcon}>
-              <Ionicons name="shield-checkmark" size={24} color="#06D6A0" />
-            </View>
-            <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>Bảo mật 100%</Text>
-              <Text style={styles.featureDesc}>Thông tin của bạn được bảo mật tuyệt đối</Text>
-            </View>
-          </View>
+        {/* Consultation Options */}
+        <View style={styles.optionsContainer}>
+          {consultationOptions.map((option) => (
+            <TouchableOpacity
+              key={option.id}
+              style={styles.optionCard}
+              onPress={() => router.push(option.route as any)}
+              activeOpacity={0.7}
+            >
+              <View style={[styles.optionIcon, { backgroundColor: option.color + '20' }]}>
+                <Ionicons name={option.icon as any} size={32} color={option.color} />
+              </View>
+              <View style={styles.optionContent}>
+                <Text style={styles.optionTitle}>{option.title}</Text>
+                <Text style={styles.optionDescription}>{option.description}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={24} color="#94a3b8" />
+            </TouchableOpacity>
+          ))}
+        </View>
 
-          <View style={styles.featureItem}>
-            <View style={styles.featureIcon}>
-              <Ionicons name="time" size={24} color="#FFB800" />
-            </View>
-            <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>Hỗ trợ tư vấn chuyên khoa 24/7</Text>
-              <Text style={styles.featureDesc}>AI luôn sẵn sàng tư vấn mọi lúc</Text>
-            </View>
+        {/* Info Section */}
+        <View style={styles.infoSection}>
+          <View style={styles.infoCard}>
+            <Ionicons name="shield-checkmark" size={24} color="#00BCD4" />
+            <Text style={styles.infoText}>
+              Thông tin của bạn được bảo mật tuyệt đối
+            </Text>
           </View>
-
-          <View style={styles.featureItem}>
-            <View style={styles.featureIcon}>
-              <Ionicons name="analytics" size={24} color="#8B5CF6" />
-            </View>
-            <View style={styles.featureContent}>
-              <Text style={styles.featureTitle}>Phân tích chuyên khoa chính xác</Text>
-              <Text style={styles.featureDesc}>Gợi ý chuyên khoa phù hợp với triệu chứng</Text>
-            </View>
+          <View style={styles.infoCard}>
+            <Ionicons name="medical" size={24} color="#00BCD4" />
+            <Text style={styles.infoText}>
+              Chỉ mang tính chất tham khảo, không thay thế bác sĩ
+            </Text>
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -113,159 +120,111 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8fafc',
   },
   header: {
-    backgroundColor: '#fff',
-    paddingTop: 50,
-    paddingHorizontal: 16,
+    paddingTop: 16,
     paddingBottom: 16,
+    paddingHorizontal: 20,
+    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#e2e8f0',
+    borderBottomColor: '#f1f5f9',
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#0f172a',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  aiCard: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 32,
-    alignItems: 'center',
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  aiIconLarge: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#E3F2FD',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-    overflow: 'hidden',
-  },
-  aiImage: {
-    width: 96,
-    height: 96,
-  },
-  aiTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#0f172a',
-    marginBottom: 12,
-  },
-  aiDescription: {
-    fontSize: 14,
-    color: '#64748b',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
-  },
-  startButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    backgroundColor: '#00BCD4',
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 24,
-  },
-  startButtonText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#fff',
-  },
-  featuresContainer: {
-    gap: 16,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
-    gap: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  featureIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#f8fafc',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  featureContent: {
-    flex: 1,
-  },
-  featureTitle: {
-    fontSize: 15,
+    fontSize: 28,
     fontWeight: '700',
     color: '#0f172a',
     marginBottom: 4,
   },
-  featureDesc: {
+  headerSubtitle: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+  content: {
+    flex: 1,
+  },
+  banner: {
+    margin: 16,
+    padding: 20,
+    backgroundColor: '#e0f2f1',
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  bannerIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  bannerContent: {
+    flex: 1,
+  },
+  bannerTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 4,
+  },
+  bannerText: {
     fontSize: 13,
     color: '#64748b',
     lineHeight: 18,
   },
-  howItWorksSection: {
+  optionsContainer: {
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  optionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    padding: 16,
+    borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 1,
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  howItWorksTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0f172a',
-    marginBottom: 16,
-  },
-  stepsList: {
-    gap: 16,
-  },
-  stepItem: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'flex-start',
-  },
-  stepNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#00BCD4',
+  optionIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 16,
   },
-  stepNumberText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#fff',
-  },
-  stepText: {
+  optionContent: {
     flex: 1,
-    fontSize: 14,
-    color: '#475569',
-    lineHeight: 20,
-    paddingTop: 4,
+  },
+  optionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#0f172a',
+    marginBottom: 4,
+  },
+  optionDescription: {
+    fontSize: 13,
+    color: '#64748b',
+  },
+  infoSection: {
+    padding: 16,
+    gap: 12,
+    marginTop: 8,
+  },
+  infoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 16,
+    borderRadius: 12,
+    gap: 12,
+  },
+  infoText: {
+    flex: 1,
+    fontSize: 13,
+    color: '#64748b',
+    lineHeight: 18,
   },
 });

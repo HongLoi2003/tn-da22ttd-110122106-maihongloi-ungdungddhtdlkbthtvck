@@ -1,22 +1,5 @@
 [
   {
-    "id": "mr001",
-    "userId": "user001",
-    "patientName": "Nguyễn Văn A",
-    "doctorId": "bs001",
-    "doctorName": "BS. Nguyễn Văn An",
-    "hospitalName": "Bệnh viện Trung ương",
-    "date": "2026-04-15",
-    "diagnosis": "Rối loạn nhịp tim",
-    "symptoms": ["Đau ngực", "Nhịp tim nhanh", "Khó thở"],
-    "treatment": "Điều trị bằng thuốc chống loạn nhịp",
-    "notes": "Bệnh nhân cần theo dõi thường xuyên, tái khám sau 2 tuần",
-    "prescriptionId": "pres001",
-    "testResults": ["test001"],
-    "followUpDate": "2026-04-29",
-    "status": "active"
-  },
-  {
     "id": "mr002",
     "userId": "user001",
     "patientName": "Nguyễn Văn A",
@@ -25,7 +8,11 @@
     "hospitalName": "Bệnh viện Da liễu TW",
     "date": "2026-04-10",
     "diagnosis": "Mụn trứng cá mức độ trung bình",
-    "symptoms": ["Mụn đỏ", "Mụn mủ", "Sẹo mụn"],
+    "symptoms": [
+      "Mụn đỏ",
+      "Mụn mủ",
+      "Sẹo mụn"
+    ],
     "treatment": "Điều trị bằng thuốc bôi ngoài và uống kháng sinh",
     "notes": "Tránh thức khuya, ăn nhiều rau xanh",
     "prescriptionId": "pres002",
@@ -42,11 +29,17 @@
     "hospitalName": "Bệnh viện Đại học Trà Vinh",
     "date": "2026-03-20",
     "diagnosis": "Viêm phế quản cấp",
-    "symptoms": ["Ho có đờm", "Sốt nhẹ", "Khó thở"],
+    "symptoms": [
+      "Ho có đờm",
+      "Sốt nhẹ",
+      "Khó thở"
+    ],
     "treatment": "Kháng sinh, thuốc long đờm",
     "notes": "Đã khỏi hoàn toàn",
     "prescriptionId": "pres003",
-    "testResults": ["test002"],
+    "testResults": [
+      "test002"
+    ],
     "followUpDate": "2026-04-05",
     "status": "completed"
   },
@@ -59,7 +52,11 @@
     "hospitalName": "Bệnh viện Nhi Trung ương",
     "date": "2026-04-20",
     "diagnosis": "Viêm họng cấp ở trẻ em",
-    "symptoms": ["Sốt cao", "Đau họng", "Khó nuốt"],
+    "symptoms": [
+      "Sốt cao",
+      "Đau họng",
+      "Khó nuốt"
+    ],
     "treatment": "Kháng sinh, hạ sốt",
     "notes": "Bé đã hết sốt, tiếp tục uống thuốc đủ liệu trình",
     "prescriptionId": "pres004",
@@ -76,11 +73,17 @@
     "hospitalName": "Bệnh viện Trung ương",
     "date": "2026-02-10",
     "diagnosis": "Tăng huyết áp nhẹ",
-    "symptoms": ["Đau đầu", "Chóng mặt", "Mệt mỏi"],
+    "symptoms": [
+      "Đau đầu",
+      "Chóng mặt",
+      "Mệt mỏi"
+    ],
     "treatment": "Thuốc hạ huyết áp, thay đổi lối sống",
     "notes": "Huyết áp đã ổn định",
     "prescriptionId": "pres005",
-    "testResults": ["test003"],
+    "testResults": [
+      "test003"
+    ],
     "followUpDate": "2026-03-10",
     "status": "completed"
   }

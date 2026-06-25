@@ -1,25 +1,5 @@
 [
   {
-    "id": "hosp001",
-    "name": "Bệnh viện Trung ương",
-    "address": "1 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội",
-    "phone": "024 3743 0743",
-    "email": "info@bvtw.vn",
-    "website": "https://bvtw.vn",
-    "rating": 4.8,
-    "reviewCount": 1250,
-    "image": "benviennhitrunguong.png",
-    "latitude": 21.0245,
-    "longitude": 105.8412,
-    "specialties": ["Tim mạch", "Ngoại khoa", "Nội khoa", "Thần kinh", "Ung bướu"],
-    "services": ["Khám bệnh", "Cấp cứu 24/7", "Xét nghiệm", "Chẩn đoán hình ảnh", "Phẫu thuật"],
-    "workingHours": "24/7",
-    "emergencyService": true,
-    "parkingAvailable": true,
-    "description": "Bệnh viện hạng đặc biệt với đội ngũ bác sĩ giỏi và trang thiết bị hiện đại",
-    "doctorIds": ["bs001", "bs002", "bs003"]
-  },
-  {
     "id": "hosp002",
     "name": "Bệnh viện Đại học Trà Vinh",
     "address": "78 Giải Phóng, Đống Đa, Hà Nội",
@@ -31,13 +11,29 @@
     "image": "benhvienbachmai.png",
     "latitude": 21.0031,
     "longitude": 105.8438,
-    "specialties": ["Hô hấp", "Tim mạch", "Tiêu hóa", "Thận - Tiết niệu", "Nội tiết"],
-    "services": ["Khám bệnh", "Cấp cứu 24/7", "Xét nghiệm", "Nội soi", "Phẫu thuật"],
+    "specialties": [
+      "Hô hấp",
+      "Tim mạch",
+      "Tiêu hóa",
+      "Thận - Tiết niệu",
+      "Nội tiết"
+    ],
+    "services": [
+      "Khám bệnh",
+      "Cấp cứu 24/7",
+      "Xét nghiệm",
+      "Nội soi",
+      "Phẫu thuật"
+    ],
     "workingHours": "24/7",
     "emergencyService": true,
     "parkingAvailable": true,
     "description": "Bệnh viện đa khoa hạng đặc biệt lớn nhất miền Bắc",
-    "doctorIds": ["bs004", "bs005", "bs006"]
+    "doctorIds": [
+      "bs004",
+      "bs005",
+      "bs006"
+    ]
   },
   {
     "id": "hosp003",
@@ -51,13 +47,29 @@
     "image": "benviennhitrunguong.png",
     "latitude": 21.0167,
     "longitude": 105.8262,
-    "specialties": ["Nhi khoa", "Sơ sinh", "Hô hấp nhi", "Tim mạch nhi", "Tiêu hóa nhi"],
-    "services": ["Khám bệnh", "Cấp cứu nhi 24/7", "Tiêm chủng", "Xét nghiệm", "Phẫu thuật nhi"],
+    "specialties": [
+      "Nhi khoa",
+      "Sơ sinh",
+      "Hô hấp nhi",
+      "Tim mạch nhi",
+      "Tiêu hóa nhi"
+    ],
+    "services": [
+      "Khám bệnh",
+      "Cấp cứu nhi 24/7",
+      "Tiêm chủng",
+      "Xét nghiệm",
+      "Phẫu thuật nhi"
+    ],
     "workingHours": "24/7",
     "emergencyService": true,
     "parkingAvailable": true,
     "description": "Bệnh viện chuyên khoa nhi hàng đầu Việt Nam",
-    "doctorIds": ["bs007", "bs008", "bs009"]
+    "doctorIds": [
+      "bs007",
+      "bs008",
+      "bs009"
+    ]
   },
   {
     "id": "hosp004",
@@ -71,13 +83,27 @@
     "image": "benhvienphusanhonoi.png",
     "latitude": 21.0278,
     "longitude": 105.8542,
-    "specialties": ["Sản phụ khoa", "Sơ sinh", "Vô sinh - Hiếm muộn", "Phụ khoa"],
-    "services": ["Khám thai", "Siêu âm 4D", "Sinh thường", "Sinh mổ", "Điều trị vô sinh"],
+    "specialties": [
+      "Sản phụ khoa",
+      "Sơ sinh",
+      "Vô sinh - Hiếm muộn",
+      "Phụ khoa"
+    ],
+    "services": [
+      "Khám thai",
+      "Siêu âm 4D",
+      "Sinh thường",
+      "Sinh mổ",
+      "Điều trị vô sinh"
+    ],
     "workingHours": "24/7",
     "emergencyService": true,
     "parkingAvailable": true,
     "description": "Bệnh viện chuyên khoa sản phụ khoa uy tín nhất Hà Nội",
-    "doctorIds": ["bs010", "bs011"]
+    "doctorIds": [
+      "bs010",
+      "bs011"
+    ]
   },
   {
     "id": "hosp005",
@@ -91,13 +117,27 @@
     "image": "benhviendalieutrunguong.png",
     "latitude": 21.0089,
     "longitude": 105.8412,
-    "specialties": ["Da liễu", "Thẩm mỹ da", "Laser", "Điều trị mụn"],
-    "services": ["Khám da liễu", "Điều trị mụn", "Laser", "Thẩm mỹ da", "Xét nghiệm da"],
+    "specialties": [
+      "Da liễu",
+      "Thẩm mỹ da",
+      "Laser",
+      "Điều trị mụn"
+    ],
+    "services": [
+      "Khám da liễu",
+      "Điều trị mụn",
+      "Laser",
+      "Thẩm mỹ da",
+      "Xét nghiệm da"
+    ],
     "workingHours": "7:30 - 17:00",
     "emergencyService": false,
     "parkingAvailable": true,
     "description": "Bệnh viện chuyên khoa da liễu hàng đầu",
-    "doctorIds": ["bs012", "bs013"]
+    "doctorIds": [
+      "bs012",
+      "bs013"
+    ]
   },
   {
     "id": "hosp006",
@@ -111,12 +151,27 @@
     "image": "benhvienquany103.png",
     "latitude": 20.9721,
     "longitude": 105.7809,
-    "specialties": ["Chấn thương chỉnh hình", "Ngoại khoa", "Tim mạch", "Thần kinh"],
-    "services": ["Khám bệnh", "Cấp cứu 24/7", "Phẫu thuật", "Vật lý trị liệu", "Xét nghiệm"],
+    "specialties": [
+      "Chấn thương chỉnh hình",
+      "Ngoại khoa",
+      "Tim mạch",
+      "Thần kinh"
+    ],
+    "services": [
+      "Khám bệnh",
+      "Cấp cứu 24/7",
+      "Phẫu thuật",
+      "Vật lý trị liệu",
+      "Xét nghiệm"
+    ],
     "workingHours": "24/7",
     "emergencyService": true,
     "parkingAvailable": true,
     "description": "Bệnh viện quân đội với chuyên môn cao về chấn thương chỉnh hình",
-    "doctorIds": ["bs014", "bs015", "bs016"]
+    "doctorIds": [
+      "bs014",
+      "bs015",
+      "bs016"
+    ]
   }
 ]

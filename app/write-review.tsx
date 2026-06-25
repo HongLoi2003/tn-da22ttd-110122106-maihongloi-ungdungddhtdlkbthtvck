@@ -6,24 +6,24 @@ import CustomToast from './components/CustomToast';
 import { useAuth } from './context/AuthContext';
 import { createDocument, getDocumentById } from './services/firebaseService';
 
-// Mapping ảnh bác sĩ
+// Mapping ảnh bác sĩ - 16 ảnh thật từ Pexels (chất lượng cao, miễn phí bản quyền)
 const doctorImages: any = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
+  'nguyenvanam.png': { uri: 'https://images.pexels.com/photos/26336880/pexels-photo-26336880.jpeg' },
+  'leminhtam.png': { uri: 'https://images.pexels.com/photos/5722163/pexels-photo-5722163.jpeg' },
+  'lehoangnam.png': { uri: 'https://images.pexels.com/photos/14438788/pexels-photo-14438788.jpeg' },
+  'dominhtuan.png': { uri: 'https://images.pexels.com/photos/14628069/pexels-photo-14628069.jpeg' },
+  'hoangvanduc.png': { uri: 'https://images.pexels.com/photos/27666713/pexels-photo-27666713.jpeg' },
+  'tranvankhoa.png': { uri: 'https://images.pexels.com/photos/15962798/pexels-photo-15962798.jpeg' },
+  'phamminhquan.png': { uri: 'https://images.pexels.com/photos/29995617/pexels-photo-29995617.jpeg' },
+  'nguyenvanhai.png': { uri: 'https://images.pexels.com/photos/19601385/pexels-photo-19601385.jpeg' },
+  'tranthilan.png': { uri: 'https://images.pexels.com/photos/15641079/pexels-photo-15641079.jpeg' },
+  'tranthimai.png': { uri: 'https://images.pexels.com/photos/27666717/pexels-photo-27666717.jpeg' },
+  'phamthuha.png': { uri: 'https://images.pexels.com/photos/15962796/pexels-photo-15962796.jpeg' },
+  'vuthilan.png': { uri: 'https://images.pexels.com/photos/27392531/pexels-photo-27392531.jpeg' },
+  'ngothihuong.png': { uri: 'https://images.pexels.com/photos/14628046/pexels-photo-14628046.jpeg' },
+  'nguyenthihoa.png': { uri: 'https://images.pexels.com/photos/14628045/pexels-photo-14628045.jpeg' },
+  'lethihang.png': { uri: 'https://images.pexels.com/photos/4173248/pexels-photo-4173248.jpeg' },
+  'dangthithao.jpg': { uri: 'https://images.pexels.com/photos/29995629/pexels-photo-29995629.jpeg' },
 };
 
 export default function WriteReviewScreen() {
@@ -144,6 +144,7 @@ export default function WriteReviewScreen() {
         comment: comment.trim(),
         tags: selectedTags,
         date: new Date().toLocaleDateString('vi-VN'),
+        createdAt: new Date().toISOString(), // Thêm timestamp để sắp xếp
       });
 
       // Hiển thị toast thành công với tên bác sĩ

@@ -1,0 +1,33 @@
+✅ SẴN SÀNG BUILD APK - HEALTH CARE
+
+═══════════════════════════════════════════════════════════
+
+✅ ĐÃ HOÀN THÀNH
+  - Xóa 14 ảnh bác sĩ local khỏi assets/images/
+  - Sửa tất cả require() thành string tên file
+  - Code dùng URL từ Avatar API
+  - Không còn lỗi compile ảnh
+  - Đã kiểm tra toàn bộ code
+
+═══════════════════════════════════════════════════════════
+
+🚀 LỆNH BUILD APK (Copy & Run):
+
+npx eas-cli build --platform android --profile preview --clear-cache
+
+═══════════════════════════════════════════════════════════
+
+⏱️  THỜI GIAN: 10-20 phút
+📦 KẾT QUẢ: File APK ~50-60MB
+🔗 DOWNLOAD: Link sẽ hiện trong terminal
+
+═══════════════════════════════════════════════════════════
+
+📝 SAU KHI BUILD XONG:
+  1. Download APK từ link
+  2. Test trên điện thoại Android
+  3. Chia sẻ link cho người dùng
+
+═══════════════════════════════════════════════════════════
+
+LET'S BUILD! 🎉

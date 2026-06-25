@@ -12,7 +12,7 @@ export default function TermsPolicyScreen() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Điều khoản & Chính sách</Text>
+        <Text style={styles.headerTitle}>Điều khoản và Chính sách</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -69,13 +69,11 @@ export default function TermsPolicyScreen() {
           <Text style={styles.paragraph}>
             Nếu có thắc mắc về điều khoản và chính sách, vui lòng liên hệ:
           </Text>
-          <Text style={styles.contactInfo}>Email: support@healthcare.vn</Text>
-          <Text style={styles.contactInfo}>Hotline: 1900-xxxx</Text>
+          <Text style={styles.contactInfo}>Email: info@capcuu-115.com</Text>
+          <Text style={styles.contactInfo}>Hotline: 0908971115</Text>
         </View>
 
-        <View style={styles.updateInfo}>
-          <Text style={styles.updateText}>Cập nhật lần cuối: 25/04/2026</Text>
-        </View>
+       
 
         <View style={{ height: 40 }} />
       </ScrollView>

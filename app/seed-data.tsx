@@ -1,10 +1,10 @@
-import { resetAndReseedData } from '@/app/scripts/seedCorrectData';
-import { importAppointments, importNotifications, seedFirebaseData } from '@/app/scripts/seedFirebase';
-import { deleteAndReimportDoctors, deleteCollection, getAllDocuments, import4NewDoctors, importNewDoctors, resetAllData } from '@/app/services/firebaseService';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { resetAndReseedData } from './scripts/seedCorrectData';
+import { importAppointments, importNotifications, seedFirebaseData } from './scripts/seedFirebase';
+import { deleteAndReimportDoctors, deleteCollection, getAllDocuments, import4NewDoctors, importNewDoctors, resetAllData } from './services/firebaseService';
 
 export default function SeedDataScreen() {
   const [loading, setLoading] = useState(false);

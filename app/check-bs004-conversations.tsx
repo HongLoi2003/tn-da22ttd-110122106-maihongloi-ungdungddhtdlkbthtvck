@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { db } from './config/firebase';
+import { getFirestoreDb } from './config/firebase';
 
 interface ConversationData {
   id: string;
@@ -41,7 +41,7 @@ export default function CheckBs004Conversations() {
       console.log('🔍 Checking BS. Trần Thị Mai (bs004)...');
       
       // 1. Lấy doctor document
-      const doctorQuery = query(collection(db, 'doctors'), where('id', '==', 'bs004'));
+      const doctorQuery = query(collection(getFirestoreDb(), 'doctors'), where('id', '==', 'bs004'));
       const doctorDocs = await getDocs(doctorQuery);
       const doctorData = doctorDocs.docs[0]?.data();
       const doctorName = doctorData?.ten || 'Unknown';
@@ -53,7 +53,7 @@ export default function CheckBs004Conversations() {
       // 2. Tìm user account
       let userAccountUid = null;
       const userQuery = query(
-        collection(db, 'users'),
+        collection(getFirestoreDb(), 'users'),
         where('role', '==', 'doctor'),
         where('doctorInfo.doctorId', '==', 'bs004')
       );
@@ -65,7 +65,7 @@ export default function CheckBs004Conversations() {
       
       // 3. Tìm conversations theo doctorId
       const convQuery1 = query(
-        collection(db, 'conversations'),
+        collection(getFirestoreDb(), 'conversations'),
         where('doctorId', '==', 'bs004')
       );
       const convDocs1 = await getDocs(convQuery1);
@@ -75,10 +75,10 @@ export default function CheckBs004Conversations() {
       let convDocs2 = { docs: [], size: 0 };
       if (authUid) {
         const convQuery2 = query(
-          collection(db, 'conversations'),
+          collection(getFirestoreDb(), 'conversations'),
           where('doctorAuthUid', '==', authUid)
         );
-        convDocs2 = await getDocs(convQuery2);
+        convDocs2 = await getDocs(convQuery2) as any;
         console.log(`Conversations (doctorAuthUid=${authUid}): ${convDocs2.size}`);
       }
       
@@ -98,7 +98,7 @@ export default function CheckBs004Conversations() {
         
         // Đếm messages trong conversation này
         const messagesQuery = query(
-          collection(db, 'messages'),
+          collection(getFirestoreDb(), 'messages'),
           where('conversationId', '==', id)
         );
         const messagesDocs = await getDocs(messagesQuery);
@@ -116,7 +116,7 @@ export default function CheckBs004Conversations() {
       
       // 7. Đếm tổng messages
       const allMessagesQuery = query(
-        collection(db, 'messages'),
+        collection(getFirestoreDb(), 'messages'),
         where('doctorId', '==', 'bs004')
       );
       const allMessages = await getDocs(allMessagesQuery);

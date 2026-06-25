@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { where } from 'firebase/firestore';
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View , ActivityIndicator} from 'react-native';
 import { useAuth } from './context/AuthContext';
 import { getDocumentsWithQuery } from './services/firebaseService';
 

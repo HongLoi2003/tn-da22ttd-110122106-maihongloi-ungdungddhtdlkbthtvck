@@ -9,8 +9,15 @@ service cloud.firestore {
       allow read: if true;
       // Cho phép user tạo document của chính họ
       allow create: if request.auth != null;
-      // Chỉ cho phép user cập nhật/xóa document của chính họ
-      allow update, delete: if request.auth != null && 
+      // Cho phép update trong các trường hợp:
+      // 1. User đã đăng nhập và update document của chính họ
+      // 2. Reset password flow - cho phép update password khi chưa đăng nhập (forgot password)
+      //    Kiểm tra: chỉ update field password, oldPassword, passwordResetAt và updatedAt, email phải khớp
+      allow update: if (request.auth != null && 
+        (request.auth.uid == userId || request.auth.uid == resource.data.uid))
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['password', 'oldPassword', 'passwordResetAt', 'updatedAt']) 
+            && request.resource.data.email == resource.data.email);
+      allow delete: if request.auth != null && 
         (request.auth.uid == userId || request.auth.uid == resource.data.uid);
     }
     
@@ -143,6 +150,88 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.auth != null;
       allow update, delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // AI Conversations collection
+    match /ai-conversations/{conversationId} {
+      // Cho phép đọc conversations của chính user
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Cho phép tạo conversation mới
+      allow create: if request.auth != null;
+      // Cho phép cập nhật conversations của chính user
+      allow update: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Cho phép xóa conversations của chính user
+      allow delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // AI Messages collection
+    match /ai-messages/{messageId} {
+      // Cho phép đọc messages nếu đã đăng nhập
+      allow read: if request.auth != null;
+      // Cho phép tạo message mới nếu đã đăng nhập
+      allow create: if request.auth != null;
+      // Cho phép xóa message nếu đã đăng nhập
+      allow delete: if request.auth != null;
+    }
+    
+    // Password Reset OTPs collection
+    match /password_reset_otps/{otpId} {
+      // Cho phép tạo OTP (không cần đăng nhập vì đang reset password)
+      allow create: if true;
+      // Cho phép đọc để verify OTP
+      allow read: if true;
+      // Cho phép cập nhật để đánh dấu đã sử dụng
+      allow update: if true;
+      // Cho phép xóa OTP hết hạn
+      allow delete: if true;
+    }
+    
+    // Wallets collection
+    match /wallets/{walletId} {
+      // Cho phép đọc ví của chính user
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Cho phép tạo ví mới
+      allow create: if request.auth != null;
+      // Cho phép cập nhật ví của chính user
+      allow update: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Cho phép xóa ví của chính user
+      allow delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Transactions collection
+    match /transactions/{transactionId} {
+      // Cho phép đọc transactions của chính user
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Cho phép tạo transaction mới
+      allow create: if request.auth != null;
+      // Cho phép cập nhật transaction của chính user
+      allow update: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Cho phép xóa transaction của chính user
+      allow delete: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // Payment Methods collection
+    match /paymentMethods/{methodId} {
+      // Cho phép đọc payment methods của chính user
+      allow read: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Cho phép tạo payment method mới
+      allow create: if request.auth != null;
+      // Cho phép cập nhật payment method của chính user
+      allow update: if request.auth != null && 
+        resource.data.userId == request.auth.uid;
+      // Cho phép xóa payment method của chính user
+      allow delete: if request.auth != null && 
         resource.data.userId == request.auth.uid;
     }
   }

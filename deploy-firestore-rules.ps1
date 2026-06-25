@@ -1,24 +1,30 @@
+# Deploy Firestore Rules to Firebase
 Write-Host "🚀 Deploying Firestore Rules..." -ForegroundColor Cyan
-Write-Host ""
 
 # Check if Firebase CLI is installed
-$firebaseCmd = Get-Command firebase -ErrorAction SilentlyContinue
-if (-not $firebaseCmd) {
-    Write-Host "❌ Firebase CLI chưa được cài đặt!" -ForegroundColor Red
-    Write-Host "📦 Cài đặt bằng lệnh: npm install -g firebase-tools" -ForegroundColor Yellow
+if (-not (Get-Command firebase -ErrorAction SilentlyContinue)) {
+    Write-Host "❌ Firebase CLI is not installed!" -ForegroundColor Red
+    Write-Host "Install it with: npm install -g firebase-tools" -ForegroundColor Yellow
     exit 1
 }
 
-# Deploy Firestore rules
-Write-Host "📤 Đang deploy Firestore rules..." -ForegroundColor Yellow
+# Check if logged in
+Write-Host "📝 Checking Firebase login status..." -ForegroundColor Cyan
+firebase login:list
+
+# Deploy rules
+Write-Host "`n🔥 Deploying Firestore rules..." -ForegroundColor Cyan
 firebase deploy --only firestore:rules
 
 if ($LASTEXITCODE -eq 0) {
-    Write-Host ""
-    Write-Host "✅ Deploy Firestore rules thành công!" -ForegroundColor Green
-    Write-Host "🎉 Bây giờ bạn có thể đọc collection 'popular-specialties'" -ForegroundColor Green
+    Write-Host "`n✅ Firestore rules deployed successfully!" -ForegroundColor Green
+    Write-Host "`n📋 Rules now allow:" -ForegroundColor Cyan
+    Write-Host "  ✓ Users can create AI conversations" -ForegroundColor White
+    Write-Host "  ✓ Users can read their own conversations" -ForegroundColor White
+    Write-Host "  ✓ Users can update their own conversations" -ForegroundColor White
+    Write-Host "  ✓ Users can delete their own conversations" -ForegroundColor White
+    Write-Host "  ✓ Users can create/delete AI messages" -ForegroundColor White
 } else {
-    Write-Host ""
-    Write-Host "❌ Deploy thất bại!" -ForegroundColor Red
-    Write-Host "💡 Hãy chắc chắn bạn đã đăng nhập Firebase: firebase login" -ForegroundColor Yellow
+    Write-Host "`n❌ Failed to deploy Firestore rules!" -ForegroundColor Red
+    Write-Host "Please check the error message above." -ForegroundColor Yellow
 }

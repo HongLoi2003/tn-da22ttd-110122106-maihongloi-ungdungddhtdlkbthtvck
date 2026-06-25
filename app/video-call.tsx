@@ -24,7 +24,7 @@ export default function VideoCallScreen() {
   const [isFrontCamera, setIsFrontCamera] = useState(true);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
     
     if (isCallActive) {
       interval = setInterval(() => {

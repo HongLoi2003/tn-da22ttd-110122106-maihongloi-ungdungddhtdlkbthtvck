@@ -411,7 +411,7 @@ export default function AllDoctorsScreen() {
             if (router.canGoBack()) {
               router.back();
             } else {
-              router.replace('/(tabs)/');
+              router.replace('/(tabs)/chat');
             }
           }} 
           style={styles.backBtn}

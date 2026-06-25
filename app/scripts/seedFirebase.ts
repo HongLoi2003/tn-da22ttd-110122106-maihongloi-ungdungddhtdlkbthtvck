@@ -1,14 +1,14 @@
-import { createDocument } from '@/app/services/firebaseService';
-import appointmentsData from '@/appointments.json';
-import commentsData from '@/comments.json';
-import conversationsData from '@/conversations.json';
-import doctorsData from '@/doctors.json';
-import hospitalsData from '@/hospitals.json';
-import medicalRecordsData from '@/medical-records.json';
-import messagesData from '@/messages.json';
-import notificationsData from '@/notifications.json';
-import prescriptionsData from '@/prescriptions.json';
-import usersData from '@/users.json';
+import { createDocument } from '../services/firebaseService';
+import appointmentsData from '../../appointments.json';
+import commentsData from '../../comments.json';
+import conversationsData from '../../conversations.json';
+import doctorsData from '../../doctors.json';
+import hospitalsData from '../../hospitals.json';
+import medicalRecordsData from '../../medical-records.json';
+import messagesData from '../../messages.json';
+import notificationsData from '../../notifications.json';
+import prescriptionsData from '../../prescriptions.json';
+import usersData from '../../users.json';
 
 // Dữ liệu chuyên khoa
 const specialtiesData = [

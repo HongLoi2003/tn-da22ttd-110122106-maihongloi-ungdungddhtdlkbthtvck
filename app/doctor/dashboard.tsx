@@ -3,42 +3,42 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
-    Image,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Image,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import doctorServiceInstance, { DoctorAppointment } from '../services/doctorService';
 
-// Mapping ảnh bác sĩ
+// Mapping ảnh bác sĩ - 16 ảnh thật từ Pexels (chất lượng cao, miễn phí bản quyền)
 const doctorImages: any = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
+  'nguyenvanam.png': { uri: 'https://images.pexels.com/photos/26336880/pexels-photo-26336880.jpeg' },
+  'leminhtam.png': { uri: 'https://images.pexels.com/photos/5722163/pexels-photo-5722163.jpeg' },
+  'lehoangnam.png': { uri: 'https://images.pexels.com/photos/14438788/pexels-photo-14438788.jpeg' },
+  'dominhtuan.png': { uri: 'https://images.pexels.com/photos/14628069/pexels-photo-14628069.jpeg' },
+  'hoangvanduc.png': { uri: 'https://images.pexels.com/photos/27666713/pexels-photo-27666713.jpeg' },
+  'tranvankhoa.png': { uri: 'https://images.pexels.com/photos/15962798/pexels-photo-15962798.jpeg' },
+  'phamminhquan.png': { uri: 'https://images.pexels.com/photos/29995617/pexels-photo-29995617.jpeg' },
+  'nguyenvanhai.png': { uri: 'https://images.pexels.com/photos/19601385/pexels-photo-19601385.jpeg' },
+  'tranthilan.png': { uri: 'https://images.pexels.com/photos/15641079/pexels-photo-15641079.jpeg' },
+  'tranthimai.png': { uri: 'https://images.pexels.com/photos/27666717/pexels-photo-27666717.jpeg' },
+  'phamthuha.png': { uri: 'https://images.pexels.com/photos/15962796/pexels-photo-15962796.jpeg' },
+  'vuthilan.png': { uri: 'https://images.pexels.com/photos/27392531/pexels-photo-27392531.jpeg' },
+  'ngothihuong.png': { uri: 'https://images.pexels.com/photos/14628046/pexels-photo-14628046.jpeg' },
+  'nguyenthihoa.png': { uri: 'https://images.pexels.com/photos/14628045/pexels-photo-14628045.jpeg' },
+  'lethihang.png': { uri: 'https://images.pexels.com/photos/4173248/pexels-photo-4173248.jpeg' },
+  'dangthithao.jpg': { uri: 'https://images.pexels.com/photos/29995629/pexels-photo-29995629.jpeg' },
 };
 
 export default function DoctorDashboard() {
   const router = useRouter();
   const { userData } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
@@ -177,12 +177,14 @@ export default function DoctorDashboard() {
         return;
       }
 
-      const doctorId = (userData.doctorInfo as any)?.doctorId || userData.uid;
+      // ✅ Separate IDs for different purposes
+      const firebaseAuthUid = userData.uid;
+      const displayDoctorId = (userData.doctorInfo as any)?.doctorId || userData.uid;
       
       // Load doctor info from Firebase using document ID directly
       try {
         const { getDocumentById } = await import('../services/firebaseService');
-        const doctor = await getDocumentById('doctors', doctorId);
+        const doctor = await getDocumentById('doctors', displayDoctorId);
         if (doctor) {
           setDoctorInfo(doctor);
           console.log('✅ [Dashboard] Doctor info loaded:', doctor);
@@ -193,10 +195,10 @@ export default function DoctorDashboard() {
         console.log('⚠️ Could not load doctor info:', error);
       }
       
-      const statsData = await doctorServiceInstance.getAppointmentStats(doctorId);
+      const statsData = await doctorServiceInstance.getAppointmentStats(displayDoctorId);
       setStats(statsData);
 
-      const todayApts = await doctorServiceInstance.getTodayAppointments(doctorId);
+      const todayApts = await doctorServiceInstance.getTodayAppointments(displayDoctorId);
       setTodayAppointments(todayApts);
       
       // Load patient avatars
@@ -238,14 +240,7 @@ export default function DoctorDashboard() {
     }
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text>Đang tải...</Text>
-      </View>
-    );
-  }
-
+  // Bỏ loading screen, hiển thị dashboard ngay và load data trong background
   return (
     <View style={styles.container}>
       <ScrollView
@@ -268,7 +263,7 @@ export default function DoctorDashboard() {
           <View style={styles.headerCenter}>
             <Text style={styles.greeting}>Xin chào,</Text>
             <View style={styles.doctorNameRow}>
-              <Text style={styles.doctorName}>BS. {doctorInfo?.ten || userData?.fullName}</Text>
+              <Text style={styles.doctorName}>{doctorInfo?.ten || userData?.fullName}</Text>
               <Ionicons name="checkmark-circle" size={20} color="#3b82f6" />
             </View>
             <Text style={styles.specialty}>{doctorInfo?.chuyen_khoa || 'Chuyên khoa'}</Text>
@@ -290,34 +285,33 @@ export default function DoctorDashboard() {
         {/* Stats Cards */}
         <View style={styles.statsContainer}>
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#dbeafe' }]}>
-              <Ionicons name="calendar-outline" size={20} color="#3b82f6" />
+            <View style={styles.statTopRow}>
+              <View style={[styles.statIcon, { backgroundColor: '#dbeafe' }]}>
+                <Ionicons name="calendar-outline" size={20} color="#3b82f6" />
+              </View>
+              <Text style={styles.statNumber}>{stats.today}</Text>
             </View>
-            <Text style={styles.statNumber}>{stats.today}</Text>
             <Text style={styles.statLabel}>Lịch hẹn</Text>
-            <Text style={styles.statSubtext}>
-              <Text style={styles.statGrowth}>↑ 20%</Text>
-            </Text>
           </View>
 
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#dcfce7' }]}>
-              <Ionicons name="people-outline" size={20} color="#10b981" />
+            <View style={styles.statTopRow}>
+              <View style={[styles.statIcon, { backgroundColor: '#dcfce7' }]}>
+                <Ionicons name="people-outline" size={20} color="#10b981" />
+              </View>
+              <Text style={styles.statNumber}>{stats.confirmed}</Text>
             </View>
-            <Text style={styles.statNumber}>{stats.confirmed}</Text>
             <Text style={styles.statLabel}>Bệnh nhân</Text>
-            <Text style={styles.statSubtext}>
-              <Text style={styles.statGrowth}>↑ 25%</Text>
-            </Text>
           </View>
 
           <View style={styles.statCard}>
-            <View style={[styles.statIcon, { backgroundColor: '#f3e8ff' }]}>
-              <Ionicons name="clipboard-outline" size={20} color="#8b5cf6" />
+            <View style={styles.statTopRow}>
+              <View style={[styles.statIcon, { backgroundColor: '#f3e8ff' }]}>
+                <Ionicons name="clipboard-outline" size={20} color="#8b5cf6" />
+              </View>
+              <Text style={styles.statNumber}>{stats.completed}</Text>
             </View>
-            <Text style={styles.statNumber}>{stats.completed}</Text>
             <Text style={styles.statLabel}>Hồ sơ</Text>
-            <Text style={styles.statSubtext}>Tổng số</Text>
           </View>
         </View>
 
@@ -428,18 +422,18 @@ export default function DoctorDashboard() {
       {/* Bottom Navigation */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="home" size={24} color="#00BCD4" />
+          <Ionicons name="home" size={26} color="#00BCD4" />
           <Text style={[styles.navText, { color: '#00BCD4' }]}>Tổng quan</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/doctor/appointments')}>
-          <Ionicons name="calendar-outline" size={24} color="#64748b" />
+          <Ionicons name="calendar-outline" size={26} color="#64748b" />
           <Text style={styles.navText}>Lịch hẹn</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/doctor/chats')}>
           <View style={styles.navIconContainer}>
-            <Ionicons name="chatbubbles-outline" size={24} color="#64748b" />
+            <Ionicons name="chatbubbles-outline" size={26} color="#64748b" />
             {unreadMessageCount > 0 && (
               <View style={styles.messageBadge}>
                 <Text style={styles.messageBadgeText}>
@@ -452,12 +446,12 @@ export default function DoctorDashboard() {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/doctor/patients')}>
-          <Ionicons name="people-outline" size={24} color="#64748b" />
+          <Ionicons name="people-outline" size={26} color="#64748b" />
           <Text style={styles.navText}>Bệnh nhân</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/doctor/profile')}>
-          <Ionicons name="person-outline" size={24} color="#64748b" />
+          <Ionicons name="person-outline" size={26} color="#64748b" />
           <Text style={styles.navText}>Cá nhân</Text>
         </TouchableOpacity>
       </View>
@@ -677,9 +671,16 @@ const styles = StyleSheet.create({
     width: '31%',
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#f1f5f9',
+    padding: 14,
+    paddingVertical: 16,
+    borderWidth: 1.5,
+    borderColor: '#00BCD4',
+  },
+  statTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
   },
   statIcon: {
     width: 40,
@@ -687,26 +688,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 10,
   },
   statNumber: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
     color: '#0f172a',
-    marginBottom: 3,
+    lineHeight: 22,
+    marginLeft: 4,
   },
   statLabel: {
     fontSize: 11,
     color: '#64748b',
-    marginBottom: 3,
-  },
-  statSubtext: {
-    fontSize: 10,
-    color: '#94a3b8',
-  },
-  statGrowth: {
-    color: '#10b981',
-    fontWeight: '600',
+    width: '100%',
+    textAlign: 'center',
   },
   section: {
     padding: 16,
@@ -921,12 +915,12 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#f1f5f9',
     paddingBottom: 20,
-    paddingTop: 8,
+    paddingTop: 16,
   },
   navItem: {
     flex: 1,
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 12,
   },
   navIconContainer: {
     position: 'relative',
@@ -951,7 +945,7 @@ const styles = StyleSheet.create({
   navText: {
     fontSize: 11,
     color: '#64748b',
-    marginTop: 4,
+    marginTop: 2,
   },
   // Modal Styles
   modalOverlay: {

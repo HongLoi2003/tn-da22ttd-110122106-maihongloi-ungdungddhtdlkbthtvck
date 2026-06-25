@@ -1,19 +1,28 @@
+import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
-// Mock Notifications nếu chưa cài expo-notifications
+// Mock Notifications nếu chưa cài expo-notifications hoặc đang chạy trên Expo Go
 let Notifications: any = null;
-try {
-  Notifications = require('expo-notifications');
-  // Cấu hình notification handler
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: true,
-    }),
-  });
-} catch (error) {
-  console.log('expo-notifications not installed. Using mock implementation.');
+
+// Chỉ load expo-notifications khi đang chạy development build (không phải Expo Go)
+const isExpoGo = Constants.appOwnership === 'expo';
+
+if (!isExpoGo) {
+  try {
+    Notifications = require('expo-notifications');
+    // Cấu hình notification handler
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+  } catch (error) {
+    console.log('expo-notifications not available. Using mock implementation.');
+  }
+} else {
+  console.log('Running on Expo Go - Push notifications are not available. Use development build for full notification support.');
 }
 
 export interface NotificationData {
@@ -39,11 +48,27 @@ class NotificationService {
 
     try {
       if (Platform.OS === 'android') {
+        // Create default channel
         await Notifications.setNotificationChannelAsync('default', {
-          name: 'default',
+          name: 'Thông báo chung',
           importance: Notifications.AndroidImportance.MAX,
           vibrationPattern: [0, 250, 250, 250],
           lightColor: '#00BCD4',
+          sound: 'default',
+          enableVibrate: true,
+          showBadge: true,
+        });
+
+        // Create appointment reminders channel
+        await Notifications.setNotificationChannelAsync('appointment_reminders', {
+          name: 'Nhắc lịch khám',
+          importance: Notifications.AndroidImportance.HIGH,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: '#FF9800',
+          sound: 'default',
+          enableVibrate: true,
+          showBadge: true,
+          description: 'Thông báo nhắc nhở lịch khám bệnh',
         });
       }
 
@@ -99,7 +124,8 @@ class NotificationService {
   // Lên lịch notification
   async scheduleNotification(
     notification: NotificationData,
-    trigger: Date | number
+    trigger: Date | number,
+    channelId: string = 'default'
   ): Promise<string> {
     if (!Notifications) {
       console.log('Mock scheduled notification:', notification.title, 'at', trigger);
@@ -107,6 +133,34 @@ class NotificationService {
     }
 
     try {
+      // Create proper trigger object based on type
+      let triggerConfig: any;
+      
+      if (typeof trigger === 'number') {
+        // Validate seconds value
+        if (trigger <= 0) {
+          throw new Error('Trigger seconds must be positive');
+        }
+        triggerConfig = {
+          type: 'timeInterval' as const,
+          seconds: Math.floor(trigger), // Ensure integer
+          repeats: false,
+          channelId: Platform.OS === 'android' ? channelId : undefined,
+        };
+      } else {
+        // Validate date is in the future
+        const now = new Date();
+        if (trigger <= now) {
+          throw new Error('Trigger date must be in the future');
+        }
+        triggerConfig = {
+          type: 'date' as const,
+          date: trigger,
+          repeats: false,
+          channelId: Platform.OS === 'android' ? channelId : undefined,
+        };
+      }
+
       const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
           title: notification.title,
@@ -114,16 +168,15 @@ class NotificationService {
           data: notification.data || {},
           sound: true,
         },
-        trigger:
-          typeof trigger === 'number'
-            ? { seconds: trigger }
-            : { date: trigger },
+        trigger: triggerConfig,
       });
 
+      console.log('✅ Scheduled notification:', notificationId);
       return notificationId;
     } catch (error) {
       console.error('Error scheduling notification:', error);
-      throw error;
+      // Return empty string instead of throwing to prevent app crash
+      return '';
     }
   }
 
@@ -191,7 +244,8 @@ class NotificationService {
           appointmentDate: appointmentDate.toISOString(),
         },
       },
-      reminderDate
+      reminderDate,
+      'appointment_reminders'
     );
   }
 
@@ -212,7 +266,8 @@ class NotificationService {
           appointmentDate: appointmentDate.toISOString(),
         },
       },
-      reminderDate
+      reminderDate,
+      'appointment_reminders'
     );
   }
 
@@ -334,12 +389,20 @@ class NotificationService {
     }
 
     if (this.notificationListener) {
-      Notifications.removeNotificationSubscription(this.notificationListener);
+      try {
+        this.notificationListener.remove();
+      } catch (error) {
+        console.log('Error removing notification listener:', error);
+      }
       this.notificationListener = null;
     }
 
     if (this.responseListener) {
-      Notifications.removeNotificationSubscription(this.responseListener);
+      try {
+        this.responseListener.remove();
+      } catch (error) {
+        console.log('Error removing response listener:', error);
+      }
       this.responseListener = null;
     }
   }

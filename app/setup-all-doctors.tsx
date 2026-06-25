@@ -106,8 +106,8 @@ export default function SetupAllDoctors() {
 
       let appointmentsFixed = 0;
       for (const apt of appointments) {
-        const aptDoctor = apt.doctor;
-        const aptDoctorId = apt.doctorId;
+        const aptDoctor = (apt as any).doctor;
+        const aptDoctorId = (apt as any).doctorId;
 
         const matchingDoctor = doctorsCollection.find((doc: any) => {
           const docName = doc.ten;

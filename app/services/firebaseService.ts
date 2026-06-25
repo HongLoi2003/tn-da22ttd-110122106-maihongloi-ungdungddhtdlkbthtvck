@@ -1,5 +1,5 @@
-import { db } from '@/app/config/firebase';
-import errorHandler from '@/app/utils/errorHandler';
+import { db, getFirestoreDb } from '@/config/firebase';
+import errorHandler from '@/utils/errorHandler';
 import {
     addDoc,
     collection,
@@ -30,7 +30,7 @@ export const createDocument = async (
     
     if (data.id) {
       const { id, ...documentData } = data;
-      const docRef = doc(db, collectionName, id);
+      const docRef = doc(getFirestoreDb(), collectionName, id);
       await setDoc(docRef, {
         ...documentData,
         updatedAt: new Date(),
@@ -39,7 +39,7 @@ export const createDocument = async (
       return { id, ...documentData };
     }
     
-    const docRef = await addDoc(collection(db, collectionName), {
+    const docRef = await addDoc(collection(getFirestoreDb(), collectionName), {
       ...data,
       updatedAt: new Date(),
     });
@@ -47,14 +47,11 @@ export const createDocument = async (
     console.log(`✅ [FIREBASE] Saved data:`, { id: docRef.id, ...data });
     return { id: docRef.id, ...data };
   } catch (error: any) {
-    // Xử lý lỗi permission-denied một cách graceful - không throw
-    if (error?.code === 'permission-denied' || error?.message?.includes('permission')) {
-      console.log(`ℹ️ [FIREBASE] Permission denied for ${collectionName} - returning mock data`);
-      // Trả về mock data thay vì throw error
-      return { id: 'mock-' + Date.now(), ...data };
-    }
+    console.error(`❌ [FIREBASE] Error creating document in ${collectionName}:`, error);
+    console.error(`❌ [FIREBASE] Error code: ${error?.code}, message: ${error?.message}`);
     
-    console.error(`❌ [FIREBASE] Error creating document:`, error);
+    // ALWAYS throw errors - don't return mock data silently
+    // This was causing conversations to appear created when they actually failed
     const appError = errorHandler.handleFirebaseError(error);
     errorHandler.logError(appError);
     throw appError;
@@ -69,7 +66,7 @@ export const getAllDocuments = async (collectionName: string) => {
     if (!db) {
       throw new Error('Firestore not initialized');
     }
-    const querySnapshot = await getDocs(collection(db, collectionName));
+    const querySnapshot = await getDocs(collection(getFirestoreDb(), collectionName));
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
@@ -92,7 +89,7 @@ export const getDocumentById = async (
     if (!db) {
       throw new Error('Firestore not initialized');
     }
-    const docRef = doc(db, collectionName, docId);
+    const docRef = doc(getFirestoreDb(), collectionName, docId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       return { id: docSnap.id, ...docSnap.data() };
@@ -118,7 +115,7 @@ export const getDocumentsWithQuery = async (
     if (!db) {
       throw new Error('Firestore not initialized');
     }
-    const q = query(collection(db, collectionName), ...constraints);
+    const q = query(collection(getFirestoreDb(), collectionName), ...constraints);
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map((doc) => ({
       id: doc.id,
@@ -150,7 +147,7 @@ export const updateDocument = async (
     if (!db) {
       throw new Error('Firestore not initialized');
     }
-    const docRef = doc(db, collectionName, docId);
+    const docRef = doc(getFirestoreDb(), collectionName, docId);
     await updateDoc(docRef, {
       ...data,
       updatedAt: new Date(),
@@ -181,7 +178,7 @@ export const deleteDocument = async (
     if (!db) {
       throw new Error('Firestore not initialized');
     }
-    await deleteDoc(doc(db, collectionName, docId));
+    await deleteDoc(doc(getFirestoreDb(), collectionName, docId));
     return true;
   } catch (error) {
     const appError = errorHandler.handleFirebaseError(error);
@@ -199,11 +196,11 @@ export const deleteCollection = async (collectionName: string) => {
     }
     
     console.log(`🗑️ Đang xóa collection: ${collectionName}...`);
-    const querySnapshot = await getDocs(collection(db, collectionName));
+    const querySnapshot = await getDocs(collection(getFirestoreDb(), collectionName));
     
     let deletedCount = 0;
     const deletePromises = querySnapshot.docs.map(async (document) => {
-      await deleteDoc(doc(db, collectionName, document.id));
+      await deleteDoc(doc(getFirestoreDb(), collectionName, document.id));
       deletedCount++;
       console.log(`  ✓ Đã xóa document: ${document.id}`);
     });
@@ -289,7 +286,7 @@ export const importNewDoctors = async () => {
     
     for (const doctor of newDoctors) {
       const { id, ...doctorData } = doctor;
-      const docRef = doc(db, 'doctors', id);
+      const docRef = doc(getFirestoreDb(), 'doctors', id);
       
       // Sử dụng setDoc để tạo document với ID cụ thể
       const { setDoc } = await import('firebase/firestore');
@@ -365,7 +362,7 @@ export const import4NewDoctors = async () => {
     
     for (const doctor of newDoctors) {
       const { id, ...doctorData } = doctor;
-      const docRef = doc(db, 'doctors', id);
+      const docRef = doc(getFirestoreDb(), 'doctors', id);
       
       // Sử dụng setDoc để tạo document với ID cụ thể
       const { setDoc } = await import('firebase/firestore');
@@ -410,7 +407,7 @@ export const deleteAndReimportDoctors = async () => {
     let count = 0;
     for (const doctor of doctorsData) {
       const { id, ...doctorData } = doctor;
-      const docRef = doc(db, 'doctors', id);
+      const docRef = doc(getFirestoreDb(), 'doctors', id);
       
       await setDoc(docRef, {
         ...doctorData,
@@ -486,7 +483,7 @@ export const resetAllData = async () => {
     const doctorsData = require('@/doctors.json');
     for (const doctor of doctorsData) {
       const { id, ...doctorData } = doctor;
-      await setDoc(doc(db, 'doctors', id), {
+      await setDoc(doc(getFirestoreDb(), 'doctors', id), {
         ...doctorData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -500,7 +497,7 @@ export const resetAllData = async () => {
     const hospitalsData = require('@/hospitals.json');
     for (const hospital of hospitalsData) {
       const { id, ...hospitalData } = hospital;
-      await setDoc(doc(db, 'hospitals', id), {
+      await setDoc(doc(getFirestoreDb(), 'hospitals', id), {
         ...hospitalData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -514,7 +511,7 @@ export const resetAllData = async () => {
     const usersData = require('@/users.json');
     for (const user of usersData) {
       const { id, ...userData } = user;
-      await setDoc(doc(db, 'users', id), {
+      await setDoc(doc(getFirestoreDb(), 'users', id), {
         ...userData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -528,7 +525,7 @@ export const resetAllData = async () => {
     const appointmentsData = require('@/appointments.json');
     for (const appointment of appointmentsData) {
       const { id, ...appointmentData } = appointment;
-      await setDoc(doc(db, 'appointments', id), {
+      await setDoc(doc(getFirestoreDb(), 'appointments', id), {
         ...appointmentData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -542,7 +539,7 @@ export const resetAllData = async () => {
     const conversationsData = require('@/conversations.json');
     for (const conversation of conversationsData) {
       const { id, ...conversationData } = conversation;
-      await setDoc(doc(db, 'conversations', id), {
+      await setDoc(doc(getFirestoreDb(), 'conversations', id), {
         ...conversationData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -556,7 +553,7 @@ export const resetAllData = async () => {
     const messagesData = require('@/messages.json');
     for (const message of messagesData) {
       const { id, ...messageData } = message;
-      await setDoc(doc(db, 'messages', id), {
+      await setDoc(doc(getFirestoreDb(), 'messages', id), {
         ...messageData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -570,7 +567,7 @@ export const resetAllData = async () => {
     const medicalRecordsData = require('@/medical-records.json');
     for (const record of medicalRecordsData) {
       const { id, ...recordData } = record;
-      await setDoc(doc(db, 'medical-records', id), {
+      await setDoc(doc(getFirestoreDb(), 'medical-records', id), {
         ...recordData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -584,7 +581,7 @@ export const resetAllData = async () => {
     const prescriptionsData = require('@/prescriptions.json');
     for (const prescription of prescriptionsData) {
       const { id, ...prescriptionData } = prescription;
-      await setDoc(doc(db, 'prescriptions', id), {
+      await setDoc(doc(getFirestoreDb(), 'prescriptions', id), {
         ...prescriptionData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -598,7 +595,7 @@ export const resetAllData = async () => {
     const specialtiesData = require('@/specialties.json');
     for (const specialty of specialtiesData) {
       const { id, ...specialtyData } = specialty;
-      await setDoc(doc(db, 'specialties', id), {
+      await setDoc(doc(getFirestoreDb(), 'specialties', id), {
         ...specialtyData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -612,7 +609,7 @@ export const resetAllData = async () => {
     const popularSpecialtiesData = require('@/popular-specialties.json');
     for (const specialty of popularSpecialtiesData) {
       const { id, ...specialtyData } = specialty;
-      await setDoc(doc(db, 'popular-specialties', id), {
+      await setDoc(doc(getFirestoreDb(), 'popular-specialties', id), {
         ...specialtyData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -626,7 +623,7 @@ export const resetAllData = async () => {
     const commonSymptomsData = require('@/common-symptoms.json');
     for (const symptom of commonSymptomsData) {
       const { id, ...symptomData } = symptom;
-      await setDoc(doc(db, 'common-symptoms', id), {
+      await setDoc(doc(getFirestoreDb(), 'common-symptoms', id), {
         ...symptomData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -640,7 +637,7 @@ export const resetAllData = async () => {
     const insurancesData = require('@/insurances.json');
     for (const insurance of insurancesData) {
       const { id, ...insuranceData } = insurance;
-      await setDoc(doc(db, 'insurances', id), {
+      await setDoc(doc(getFirestoreDb(), 'insurances', id), {
         ...insuranceData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -654,7 +651,7 @@ export const resetAllData = async () => {
     const insuranceBenefitsData = require('@/insurance-benefits.json');
     for (const benefit of insuranceBenefitsData) {
       const { id, ...benefitData } = benefit;
-      await setDoc(doc(db, 'insurance-benefits', id), {
+      await setDoc(doc(getFirestoreDb(), 'insurance-benefits', id), {
         ...benefitData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -668,7 +665,7 @@ export const resetAllData = async () => {
     const insuranceClaimsData = require('@/insurance-claims.json');
     for (const claim of insuranceClaimsData) {
       const { id, ...claimData } = claim;
-      await setDoc(doc(db, 'insurance-claims', id), {
+      await setDoc(doc(getFirestoreDb(), 'insurance-claims', id), {
         ...claimData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -682,7 +679,7 @@ export const resetAllData = async () => {
     const notificationsData = require('@/notifications.json');
     for (const notification of notificationsData) {
       const { id, ...notificationData } = notification;
-      await setDoc(doc(db, 'notifications', id), {
+      await setDoc(doc(getFirestoreDb(), 'notifications', id), {
         ...notificationData,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -696,7 +693,7 @@ export const resetAllData = async () => {
     const commentsData = require('@/comments.json');
     for (const comment of commentsData) {
       const { id, ...commentData } = comment;
-      await setDoc(doc(db, 'comments', id), {
+      await setDoc(doc(getFirestoreDb(), 'comments', id), {
         ...commentData,
         createdAt: new Date(),
         updatedAt: new Date(),

@@ -4,8 +4,8 @@
  * This is a framework implementation - requires Agora SDK setup
  */
 
-import CONFIG from '@/app/config/config';
-import errorHandler from '@/app/utils/errorHandler';
+import CONFIG from '@/config/config';
+import errorHandler from '@/utils/errorHandler';
 
 export enum CallType {
   VOICE = 'voice',

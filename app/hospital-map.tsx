@@ -39,7 +39,7 @@ export default function HospitalMapScreen() {
       reviews: 1256,
       lat: 10.7547,
       lng: 106.6636,
-      image: require('@/assets/images/benhviendhtv.png'),
+      image: { uri: "https://via.placeholder.com/150" },
     },
     {
       id: 2,
@@ -50,7 +50,7 @@ export default function HospitalMapScreen() {
       reviews: 842,
       lat: 10.7891,
       lng: 106.7198,
-      image: require('@/assets/images/benhviendhtv.png'),
+      image: { uri: "https://via.placeholder.com/150" },
     },
     {
       id: 3,
@@ -61,7 +61,7 @@ export default function HospitalMapScreen() {
       reviews: 615,
       lat: 10.7359,
       lng: 106.7217,
-      image: require('@/assets/images/benhviendhtv.png'),
+      image: { uri: "https://via.placeholder.com/150" },
     },
   ];
 

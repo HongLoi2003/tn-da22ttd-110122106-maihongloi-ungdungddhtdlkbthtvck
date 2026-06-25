@@ -3,17 +3,15 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { where } from 'firebase/firestore';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useAuth } from './context/AuthContext';
 import { getDocumentsWithQuery } from './services/firebaseService';
+import { getDoctorAvatar } from './utils/doctorAvatars';
 
 export default function MedicalRecordsScreen() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, userData } = useAuth();
   const [records, setRecords] = useState<any[]>([]);
-  const [testResults, setTestResults] = useState<any[]>([]);
-  const [prescriptions, setPrescriptions] = useState<any[]>([]);
-  const [healthInfo, setHealthInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useFocusEffect(
@@ -27,75 +25,42 @@ export default function MedicalRecordsScreen() {
       setLoading(true);
       if (!user) {
         setRecords([]);
-        setTestResults([]);
-        setPrescriptions([]);
-        setHealthInfo(null);
         return;
       }
 
-      // Load medical records (lịch sử khám bệnh)
-      const medicalRecords = await getDocumentsWithQuery('medical-records', [
-        where('userId', '==', user.uid)
+      // Load completed appointments as medical records
+      const completedAppointments = await getDocumentsWithQuery('appointments', [
+        where('userId', '==', user.uid),
+        where('status', '==', 'completed')
       ]);
-      const sortedRecords = medicalRecords.sort((a: any, b: any) => {
-        return new Date(b.createdAt || b.date).getTime() - new Date(a.createdAt || a.date).getTime();
+      
+      // Debug log to check data
+      console.log('📋 Medical Records Data:', JSON.stringify(completedAppointments, null, 2));
+      
+      const sortedRecords = completedAppointments.sort((a: any, b: any) => {
+        const dateA = new Date(`${a.date} ${a.time}`).getTime();
+        const dateB = new Date(`${b.date} ${b.time}`).getTime();
+        return dateB - dateA;
       });
       setRecords(sortedRecords);
-
-      // Load test results (kết quả xét nghiệm)
-      const tests = await getDocumentsWithQuery('test-results', [
-        where('userId', '==', user.uid)
-      ]);
-      const sortedTests = tests.sort((a: any, b: any) => {
-        return new Date(b.createdAt || b.date).getTime() - new Date(a.createdAt || a.date).getTime();
-      });
-      setTestResults(sortedTests);
-
-      // Load prescriptions (đơn thuốc)
-      const presc = await getDocumentsWithQuery('prescriptions', [
-        where('userId', '==', user.uid)
-      ]);
-      const sortedPresc = presc.sort((a: any, b: any) => {
-        return new Date(b.createdAt || b.date).getTime() - new Date(a.createdAt || a.date).getTime();
-      });
-      setPrescriptions(sortedPresc);
-
-      // Load health info (thông tin sức khỏe)
-      const healthData = await getDocumentsWithQuery('health-info', [
-        where('userId', '==', user.uid)
-      ]);
-      if (healthData.length > 0) {
-        setHealthInfo(healthData[0]);
-      }
     } catch (error) {
       console.error('Error loading medical data:', error);
       setRecords([]);
-      setTestResults([]);
-      setPrescriptions([]);
-      setHealthInfo(null);
     } finally {
       setLoading(false);
     }
   };
 
   const handleRecordPress = (record: any) => {
-    Alert.alert(
-      'Chi tiết khám bệnh',
-      `Ngày khám: ${record.date}\nBác sĩ: ${record.doctor}\nChuyên khoa: ${record.specialty}\nChẩn đoán: ${record.diagnosis}\n\nGhi chú: Bệnh nhân đã được khám và tư vấn chi tiết.`
-    );
-  };
+    const formattedPrice = new Intl.NumberFormat('vi-VN', { 
+      style: 'currency', 
+      currency: 'VND' 
+    }).format(record.price || 0);
 
-  const handleTestPress = (test: any) => {
     Alert.alert(
-      'Kết quả xét nghiệm',
-      `${test.name}\nNgày xét nghiệm: ${test.date}\n\nKết quả:\n- Hồng cầu: 4.5 triệu/mm³\n- Bạch cầu: 7.000/mm³\n- Tiểu cầu: 250.000/mm³\n\nKết luận: Các chỉ số trong giới hạn bình thường.`
-    );
-  };
-
-  const handlePrescriptionPress = (prescription: any) => {
-    Alert.alert(
-      'Chi tiết đơn thuốc',
-      `Thuốc: ${prescription.medicine}\nSố lượng: ${prescription.quantity}\nNgày kê đơn: ${prescription.date}\n\nCách dùng:\n- Uống 1 viên x 3 lần/ngày\n- Sau bữa ăn\n- Uống đủ liệu trình`
+      'Chi tiết lịch khám',
+      `Ngày khám: ${record.date} lúc ${record.time}\nBác sĩ: ${record.doctorName}\nChuyên khoa: ${record.specialty}\n${record.hospitalName ? `Bệnh viện: ${record.hospitalName}\n` : ''}${record.address ? `Địa chỉ: ${record.address}\n` : ''}Loại khám: ${record.type || 'Khám bệnh'}\n${record.symptoms ? `Triệu chứng: ${record.symptoms}\n` : ''}${record.reason ? `Lý do: ${record.reason}\n` : ''}${record.notes ? `Ghi chú: ${record.notes}\n` : ''}Chi phí: ${formattedPrice}\n\nTrạng thái: Đã hoàn thành`,
+      [{ text: 'Đóng' }]
     );
   };
 
@@ -124,22 +89,22 @@ export default function MedicalRecordsScreen() {
             <View style={styles.summaryItem}>
               <Ionicons name="water" size={24} color="#00BCD4" />
               <Text style={styles.summaryLabel}>Nhóm máu</Text>
-              <Text style={styles.summaryValue}>{healthInfo?.bloodType || 'N/A'}</Text>
+              <Text style={styles.summaryValue}>{userData?.bloodType || 'Chưa cập nhật'}</Text>
             </View>
             <View style={styles.summaryItem}>
               <Ionicons name="fitness" size={24} color="#06D6A0" />
               <Text style={styles.summaryLabel}>Chiều cao</Text>
-              <Text style={styles.summaryValue}>{healthInfo?.height || 'N/A'}</Text>
+              <Text style={styles.summaryValue}>{userData?.height ? `${userData.height} cm` : 'Chưa cập nhật'}</Text>
             </View>
             <View style={styles.summaryItem}>
               <Ionicons name="scale" size={24} color="#FFB800" />
               <Text style={styles.summaryLabel}>Cân nặng</Text>
-              <Text style={styles.summaryValue}>{healthInfo?.weight || 'N/A'}</Text>
+              <Text style={styles.summaryValue}>{userData?.weight ? `${userData.weight} kg` : 'Chưa cập nhật'}</Text>
             </View>
             <View style={styles.summaryItem}>
               <Ionicons name="heart" size={24} color="#EF4444" />
               <Text style={styles.summaryLabel}>Huyết áp</Text>
-              <Text style={styles.summaryValue}>{healthInfo?.bloodPressure || 'N/A'}</Text>
+              <Text style={styles.summaryValue}>{(userData as any)?.bloodPressure || 'Chưa cập nhật'}</Text>
             </View>
           </View>
         </View>
@@ -158,93 +123,79 @@ export default function MedicalRecordsScreen() {
               <Text style={styles.emptyText}>Chưa có lịch sử khám bệnh</Text>
             </View>
           ) : (
-            records.slice(0, 3).map((record) => (
+            records.slice(0, 5).map((record) => {
+              const price = record.price || record.fee || 0;
+              const formattedPrice = price > 0 ? new Intl.NumberFormat('vi-VN').format(price) : '-';
+              const doctorName = record.doctorName || record.doctor || 'Bác sĩ';
+
+              return (
             <TouchableOpacity 
               key={record.id} 
               style={styles.recordCard}
               onPress={() => handleRecordPress(record)}
+              activeOpacity={0.7}
             >
-              <View style={styles.recordIcon}>
-                <Ionicons name="document-text" size={24} color="#00BCD4" />
-              </View>
-              <View style={styles.recordInfo}>
-                <Text style={styles.recordDate}>{record.date}</Text>
-                <Text style={styles.recordDoctor}>{record.doctor}</Text>
-                <Text style={styles.recordSpecialty}>{record.specialty}</Text>
-                <Text style={styles.recordDiagnosis}>{record.diagnosis}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
-            </TouchableOpacity>
-          ))
-          )}
-        </View>
+              {/* Top Orange Bar */}
+              <View style={styles.orangeBar} />
+              
+              {/* Card Content */}
+              <View style={styles.cardContent}>
+                {/* Doctor Info Row */}
+                <View style={styles.doctorRow}>
+                  <Image 
+                    source={getDoctorAvatar(doctorName)} 
+                    style={styles.doctorAvatar}
+                  />
+                  <View style={styles.doctorInfo}>
+                    <Text style={styles.doctorName} numberOfLines={1}>{doctorName}</Text>
+                    <Text style={styles.specialty}>{record.specialty}</Text>
+                    {record.hospitalName && (
+                      <View style={styles.hospitalRow}>
+                        <Ionicons name="business" size={12} color="#64748b" />
+                        <Text style={styles.hospitalText} numberOfLines={1}>{record.hospitalName}</Text>
+                      </View>
+                    )}
+                  </View>
+                  <View style={styles.statusBadge}>
+                    <Text style={styles.statusText}>Đã xác nhận</Text>
+                  </View>
+                </View>
 
-        {/* Test Results */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Kết quả xét nghiệm</Text>
-            <TouchableOpacity onPress={() => router.push('/all-test-results')}>
-              <Text style={styles.seeAll}>Xem tất cả</Text>
-            </TouchableOpacity>
-          </View>
-          {testResults.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="flask-outline" size={48} color="#cbd5e1" />
-              <Text style={styles.emptyText}>Chưa có kết quả xét nghiệm</Text>
-            </View>
-          ) : (
-            testResults.slice(0, 3).map((test) => (
-            <TouchableOpacity 
-              key={test.id} 
-              style={styles.testCard}
-              onPress={() => handleTestPress(test)}
-            >
-              <View style={styles.testIcon}>
-                <Ionicons name="flask" size={24} color="#06D6A0" />
-              </View>
-              <View style={styles.testInfo}>
-                <Text style={styles.testName}>{test.name}</Text>
-                <Text style={styles.testDate}>{test.date}</Text>
-              </View>
-              <View style={styles.availableBadge}>
-                <Text style={styles.availableText}>Có sẵn</Text>
-              </View>
-            </TouchableOpacity>
-          ))
-          )}
-        </View>
+                {/* Date & Time Boxes */}
+                <View style={styles.infoBoxRow}>
+                  <View style={styles.infoBox}>
+                    <Ionicons name="calendar" size={16} color="#00BCD4" />
+                    <View style={styles.infoBoxText}>
+                      <Text style={styles.infoBoxLabel}>Ngày khám</Text>
+                      <Text style={styles.infoBoxValue}>{record.date}</Text>
+                    </View>
+                  </View>
+                  <View style={styles.infoBox}>
+                    <Ionicons name="time" size={16} color="#8B5CF6" />
+                    <View style={styles.infoBoxText}>
+                      <Text style={styles.infoBoxLabel}>Giờ khám</Text>
+                      <Text style={styles.infoBoxValue}>{record.time}</Text>
+                    </View>
+                  </View>
+                </View>
 
-        {/* Prescriptions */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Đơn thuốc</Text>
-            <TouchableOpacity onPress={() => router.push('/all-prescriptions')}>
-              <Text style={styles.seeAll}>Xem tất cả</Text>
-            </TouchableOpacity>
-          </View>
-          {prescriptions.length === 0 ? (
-            <View style={styles.emptyState}>
-              <Ionicons name="medical-outline" size={48} color="#cbd5e1" />
-              <Text style={styles.emptyText}>Chưa có đơn thuốc</Text>
-            </View>
-          ) : (
-            prescriptions.slice(0, 2).map((prescription) => (
-            <TouchableOpacity 
-              key={prescription.id} 
-              style={styles.prescriptionCard}
-              onPress={() => handlePrescriptionPress(prescription)}
-            >
-              <View style={styles.prescriptionIcon}>
-                <Ionicons name="medical" size={24} color="#FFB800" />
+                {/* Price & Button */}
+                <View style={styles.bottomRow}>
+                  <View style={styles.priceContainer}>
+                    <Text style={styles.priceLabel}>Tổng chi phí</Text>
+                    <Text style={styles.priceValue}>
+                      {price > 0 ? `${formattedPrice}đ` : 'Chưa cập nhật'}
+                    </Text>
+                  </View>
+                  <TouchableOpacity style={styles.detailButton}>
+                    <Text style={styles.detailButtonText}>Chi tiết</Text>
+                    <Ionicons name="arrow-forward" size={14} color="#00BCD4" />
+                  </TouchableOpacity>
+                </View>
               </View>
-              <View style={styles.prescriptionInfo}>
-                <Text style={styles.prescriptionName}>{prescription.medicine}</Text>
-                <Text style={styles.prescriptionQuantity}>Số lượng: {prescription.quantity}</Text>
-                <Text style={styles.prescriptionDate}>{prescription.date}</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#94a3b8" />
             </TouchableOpacity>
-          ))
+              );
+            })
           )}
         </View>
 
@@ -346,135 +297,130 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   recordCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+    overflow: 'hidden',
   },
-  recordIcon: {
+  orangeBar: {
+    height: 4,
+    width: '100%',
+    backgroundColor: '#FFB800',
+  },
+  cardContent: {
+    padding: 16,
+  },
+  doctorRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+    gap: 12,
+  },
+  doctorAvatar: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#E0F7FA',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
   },
-  recordInfo: {
+  doctorInfo: {
     flex: 1,
   },
-  recordDate: {
-    fontSize: 12,
-    color: '#64748b',
-    marginBottom: 4,
-  },
-  recordDoctor: {
-    fontSize: 14,
+  doctorName: {
+    fontSize: 15,
     fontWeight: '600',
     color: '#0f172a',
     marginBottom: 2,
   },
-  recordSpecialty: {
+  specialty: {
     fontSize: 13,
     color: '#00BCD4',
-    marginBottom: 2,
-  },
-  recordDiagnosis: {
-    fontSize: 13,
-    color: '#64748b',
-  },
-  testCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  testIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#D1FAE5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  testInfo: {
-    flex: 1,
-  },
-  testName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#0f172a',
+    fontWeight: '500',
     marginBottom: 4,
   },
-  testDate: {
+  hospitalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  hospitalText: {
     fontSize: 12,
     color: '#64748b',
+    flex: 1,
   },
-  availableBadge: {
-    backgroundColor: '#06D6A0',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+  statusBadge: {
+    backgroundColor: '#FFB800',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 12,
   },
-  availableText: {
-    fontSize: 12,
+  statusText: {
+    fontSize: 11,
     fontWeight: '600',
     color: '#fff',
   },
-  prescriptionCard: {
+  infoBoxRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 12,
+  },
+  infoBox: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: '#f8fafc',
+    padding: 10,
+    borderRadius: 10,
+    gap: 8,
   },
-  prescriptionIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#FEF3C7',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  prescriptionInfo: {
+  infoBoxText: {
     flex: 1,
   },
-  prescriptionName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#0f172a',
-    marginBottom: 4,
-  },
-  prescriptionQuantity: {
-    fontSize: 13,
+  infoBoxLabel: {
+    fontSize: 10,
     color: '#64748b',
     marginBottom: 2,
   },
-  prescriptionDate: {
-    fontSize: 12,
+  infoBoxValue: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#0f172a',
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceContainer: {
+    flex: 1,
+  },
+  priceLabel: {
+    fontSize: 11,
     color: '#64748b',
+    marginBottom: 2,
+  },
+  priceValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#00BCD4',
+  },
+  detailButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#00BCD4',
+  },
+  detailButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#00BCD4',
   },
   loadingContainer: {
     flex: 1,

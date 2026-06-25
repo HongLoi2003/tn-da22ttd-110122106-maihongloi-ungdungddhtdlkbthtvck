@@ -134,7 +134,7 @@ export default function HomeScreen() {
             id: '2',
             title: 'Cách ngủ ngon hơn',
             excerpt: 'Giấc ngủ chất lượng là nền tảng của sức khỏe',
-            image: { uri: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800&q=80' },
+            image: { uri: 'https://images.pexels.com/photos/3771069/pexels-photo-3771069.jpeg' },
             date: '17/06/2026',
             category: 'sleep',
           },
@@ -142,7 +142,7 @@ export default function HomeScreen() {
             id: '3',
             title: 'Dấu hiệu bệnh tim',
             excerpt: 'Bệnh tim là nguyên nhân gây tử vong hàng đầu',
-            image: { uri: 'https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?w=800&q=80' },
+            image: { uri: 'https://images.pexels.com/photos/128597/pexels-photo-128597.jpeg' },
             date: '16/06/2026',
             category: 'cardiology',
           },
@@ -160,19 +160,11 @@ export default function HomeScreen() {
         // Nếu lỗi, sử dụng mock data
         setDoctors([
           {
-            id: 'bs001',
-            ten: 'BS. Nguyễn Văn An',
-            chuyen_khoa: 'Tim mạch',
-            rating: 4.9,
-            image: 'hoangvanduc.png',
-            kinh_nghiem: 10,
-          },
-          {
             id: 'bs002',
             ten: 'BS. Trần Thị Lan',
             chuyen_khoa: 'Sản phụ khoa',
             rating: 4.8,
-            image: 'tranthilan.png',
+            image: { uri: 'https://images.pexels.com/photos/15641079/pexels-photo-15641079.jpeg' },
             kinh_nghiem: 7,
           },
           {
@@ -180,17 +172,10 @@ export default function HomeScreen() {
             ten: 'BS. Lê Minh Tâm',
             chuyen_khoa: 'Nhi khoa',
             rating: 4.9,
-            image: 'dominhtuan.png',
+            image: { uri: 'https://images.pexels.com/photos/5722163/pexels-photo-5722163.jpeg' },
             kinh_nghiem: 5,
           },
-          {
-            id: 'bs004',
-            ten: 'BS. Phạm Thu Hà',
-            chuyen_khoa: 'Cấp cứu',
-            rating: 4.7,
-            image: 'dangthithao.jpg',
-            kinh_nghiem: 8,
-          },
+          
         ]);
 
         setArticles([
@@ -375,10 +360,10 @@ export default function HomeScreen() {
             />
             <View>
               <Text style={styles.greeting}>
-                Xin chào, {userData?.fullName || 'Bạn'} 👋
+                Xin chào, {userData?.fullName || 'Bạn'} 
               </Text>
               <Text style={styles.subGreeting}>
-                <Ionicons name="heart" size={12} color="#00BCD4" /> Chăm sóc sức khỏe chu đáo mỗi ngày
+                <Ionicons name="heart" size={12} color="#00BCD4" /> Chăm sóc sức khỏe mỗi ngày
               </Text>
             </View>
           </View>
@@ -415,8 +400,18 @@ export default function HomeScreen() {
 
         {/* Banner */}
         <View style={styles.banner}>
+          <View style={styles.bannerImageContainer}>
+            <Image
+              source={require('../../assets/images/bacsi.png')}
+              style={styles.bannerImage}
+              resizeMode="contain"
+            />
+          </View>
           <View style={styles.bannerContent}>
-            <Text style={styles.bannerTitle}>Đặt lịch khám và tư vấn chuyên khoa <Text style={styles.bannerTitleHighlight}>mỗi ngày</Text></Text>
+            <Text style={styles.bannerTitle}>
+              Đặt lịch khám và tư vấn chuyên khoa{'\n'}
+              <Text style={styles.bannerTitleHighlight}>mỗi ngày</Text>
+            </Text>
             
             <View style={styles.bannerButtonContainer}>
               <TouchableOpacity 
@@ -427,17 +422,11 @@ export default function HomeScreen() {
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.bannerButtonSecondary}
-                onPress={() => router.push('/(tabs)/chat')}
+                onPress={() => router.push('/ai-consultation')}
               >
                 <Text style={styles.bannerButtonSecondaryText}>Tư vấn ngay</Text>
               </TouchableOpacity>
             </View>
-          </View>
-          <View style={styles.bannerImageContainer}>
-            <Image
-              source={require('../../assets/images/bacsi.png')}
-              style={styles.bannerImage}
-            />
           </View>
         </View>
 
@@ -448,7 +437,7 @@ export default function HomeScreen() {
               style={styles.quickMenuGridItem}
               onPress={() => router.push('/booking')}
             >
-              <View style={styles.quickMenuGridIconBox}>
+              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#E3F2FD' }]}>
                 <Image 
                   source={require('../../assets/images/datlichkham.png')} 
                   style={styles.quickMenuImage}
@@ -461,7 +450,7 @@ export default function HomeScreen() {
                           style={styles.quickMenuGridItem}
                           onPress={() => router.push('/(tabs)/appointments')}
                         >
-                          <View style={styles.quickMenuGridIconBox}>
+                          <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#F3E5F5' }]}>
                             <Image 
                               source={require('../../assets/images/lichkham.png')} 
                               style={styles.quickMenuImage}
@@ -472,9 +461,9 @@ export default function HomeScreen() {
             
             <TouchableOpacity 
               style={styles.quickMenuGridItem}
-              onPress={() => router.push('/(tabs)/chat')}
+              onPress={() => router.push('/ai-consultation')}
             >
-              <View style={styles.quickMenuGridIconBox}>
+              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#E8F5E9' }]}>
                 <Image 
                   source={require('../../assets/images/tuvanonline.png')} 
                   style={styles.quickMenuImage}
@@ -487,31 +476,33 @@ export default function HomeScreen() {
 
             <TouchableOpacity 
               style={styles.quickMenuGridItem}
-              onPress={() => router.push('/find-hospital')}
+              onPress={() => router.push('/specialties')}
             >
-              <View style={styles.quickMenuGridIconBox}>
+              <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FFF3E0' }]}>
                 <Image 
-                  source={require('../../assets/images/timbenhvien.png')} 
+                  source={require(' ../../assets/images/chuyenkhoa.png')} 
                   style={styles.quickMenuImage}
                 />
               </View>
-              <Text style={styles.quickMenuGridItemLabel}>Bệnh viện</Text>
+              <Text style={styles.quickMenuGridItemLabel}>Chuyên khoa</Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.quickMenuGrid}>
             <TouchableOpacity 
               style={styles.quickMenuGridItem}
-              onPress={() => router.push('/specialties')}
+              onPress={() => router.push('/find-hospital')}
             >
               <View style={[styles.quickMenuGridIconBox, { backgroundColor: '#FFF5F5' }]}>
                 <Image 
-                  source={require('../../assets/images/chuyenkhoa.png')} 
+                  source={require('../../assets/images/timbenhvien.png')} 
                   style={styles.quickMenuImage}
                 />
               </View>
-              <Text style={styles.quickMenuGridItemLabel}>Chuyên khoa</Text>
+              <Text style={styles.quickMenuGridItemLabel}> Bệnh viện</Text>
             </TouchableOpacity>
+
+            
 
             <TouchableOpacity 
               style={styles.quickMenuGridItem}
@@ -681,12 +672,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginHorizontal: 20,
     marginVertical: 12,
-    paddingHorizontal: 10,
+    paddingHorizontal: 16,
     paddingVertical: 20,
     backgroundColor: '#E0F7FA',
     borderRadius: 20,
     alignItems: 'center',
-    justifyContent: 'space-between',
     minHeight: 160,
     position: 'relative',
     overflow: 'hidden',
@@ -700,9 +690,8 @@ const styles = StyleSheet.create({
   },
   bannerContent: {
     flex: 1,
-    paddingRight: 16,
-    justifyContent: 'center',
-    zIndex: 1,
+    zIndex: 2,
+    paddingRight: 10,
   },
   bannerLabel: {
     fontSize: 11,
@@ -713,11 +702,11 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   bannerTitle: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: '800',
     color: '#00695C',
-    marginBottom: 10,
-    lineHeight: 26,
+    marginBottom: 14,
+    lineHeight: 21,
   },
   bannerTitleHighlight: {
     color: '#00BCD4',
@@ -733,22 +722,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     alignItems: 'center',
+    flexWrap: 'wrap',
   },
   bannerButton: {
     flexDirection: 'row',
     backgroundColor: '#00BCD4',
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 19,
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 5,
   },
   bannerButtonSecondary: {
     backgroundColor: '#fff',
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 19,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: '#00BCD4',
   },
@@ -764,18 +756,16 @@ const styles = StyleSheet.create({
   },
   bannerImageContainer: {
     position: 'absolute',
-    right: -30,
-    bottom: -30,
-    width: 160,
-    height: 180,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 0,
+    right: -25,
+    bottom: 0,
+    width: 150,
+    height: 165,
+    opacity: 0.75,
+    zIndex: 1,
   },
   bannerImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'contain',
   },
   decorIcon: {
     position: 'absolute',

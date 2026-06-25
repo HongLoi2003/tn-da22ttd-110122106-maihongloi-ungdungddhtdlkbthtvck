@@ -98,7 +98,7 @@ export default function CompareWorkingVsBrokenDoctors() {
       where('doctorInfo.doctorId', '==', doctorId)
     ]);
     const userAccount = users.length > 0 ? users[0] : null;
-    const userUid = userAccount ? userAccount.uid : '';
+    const userUid = userAccount ? (userAccount as any).uid : '';
     
     console.log('User account:', userAccount);
     console.log('User UID:', userUid);

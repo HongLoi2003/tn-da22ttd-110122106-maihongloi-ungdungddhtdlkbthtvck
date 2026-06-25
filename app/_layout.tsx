@@ -3,10 +3,8 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { StyleSheet, useColorScheme } from 'react-native';
 import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 import MobileFrame from './components/MobileFrame';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { configureGoogleSignIn } from './services/googleAuthService';
@@ -91,29 +89,8 @@ function RootLayoutContent() {
     };
   }, [isLoggedIn, loading]);
 
-  // Hiển thị splash screen trong khi loading
-  if (loading) {
-    console.log('⏳ [LAYOUT] Showing splash screen...');
-    return (
-      <MobileFrame>
-        <View style={styles.splashContainer}>
-          <View style={styles.iconContainer}>
-            <Image 
-              source={require('../assets/images/logo.png')} 
-              style={styles.logoImage}
-              resizeMode="contain"
-            />
-          </View>
-          <Text style={styles.appName}>HealthCare</Text>
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#00BCD4" />
-            <Text style={styles.loadingText}>Đang tải...</Text>
-          </View>
-        </View>
-      </MobileFrame>
-    );
-  }
-
+  // Không cần hiển thị loading screen ở đây nữa, để splash-screen.tsx xử lý
+  // Auth loading sẽ được xử lý trong background
   console.log('✅ [LAYOUT] Rendering navigation with isLoggedIn:', isLoggedIn);
 
   return (
@@ -156,6 +133,11 @@ function RootLayoutContent() {
           <Stack.Screen name="all-products" options={{ headerShown: false }} />
           <Stack.Screen name="all-test-results" options={{ headerShown: false }} />
           <Stack.Screen name="all-transactions" options={{ headerShown: false }} />
+          <Stack.Screen name="booking-patient-info" options={{ headerShown: false }} />
+          <Stack.Screen name="booking-confirmation" options={{ headerShown: false }} />
+          <Stack.Screen name="booking-success" options={{ headerShown: false }} />
+          <Stack.Screen name="appointment-detail" options={{ headerShown: false }} />
+          <Stack.Screen name="reschedule-appointment" options={{ headerShown: false }} />
           <Stack.Screen name="change-password" options={{ headerShown: false }} />
           <Stack.Screen name="claim-detail" options={{ headerShown: false }} />
           <Stack.Screen name="edit-profile" options={{ headerShown: false }} />
@@ -195,7 +177,11 @@ function RootLayoutContent() {
           <Stack.Screen name="compare-working-vs-broken-doctors" options={{ headerShown: false }} />
           <Stack.Screen name="analyze-all-doctors-conversations" options={{ headerShown: false }} />
           <Stack.Screen name="check-all-conversations-in-firestore" options={{ headerShown: false }} />
+          <Stack.Screen name="quick-check-all-doctors-chat" options={{ headerShown: false }} />
+          <Stack.Screen name="chat-debug-center" options={{ headerShown: false }} />
+          <Stack.Screen name="debug-3-specific-doctors" options={{ headerShown: false }} />
           <Stack.Screen name="debug-web" options={{ headerShown: false }} />
+          <Stack.Screen name="debug-splash-stuck" options={{ headerShown: false }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
@@ -222,7 +208,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 30,
-    backgroundColor: '#E8F4F8',
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
@@ -253,7 +239,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    color: '#64748b',
+    color: '#ffffff',
     marginTop: 8,
   },
 });

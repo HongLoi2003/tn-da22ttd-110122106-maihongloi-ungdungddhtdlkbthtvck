@@ -91,10 +91,10 @@ export default function AddPaymentMethodScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Thêm phương thức</Text>
-        <View style={{ width: 24 }} />
+        <Text style={styles.headerTitle}>Thêm phương thức thanh toán </Text>
+        <View style={styles.backButton} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -259,11 +259,18 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 4,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#0f172a',
+    flex: 1,
+    textAlign: 'center',
+    marginHorizontal: 8,
   },
   content: {
     flex: 1,

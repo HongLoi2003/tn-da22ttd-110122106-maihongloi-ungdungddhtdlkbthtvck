@@ -15,6 +15,15 @@ import {
     View
 } from 'react-native';
 import { getDocumentById, getDocumentsWithQuery, updateDocument } from './services/firebaseService';
+import { getImageSource } from './utils/imageHelper';
+
+// Helper để get avatar - fallback về URL hoặc require local
+function getDoctorAvatarSmart(doctorName: string, imageUrl?: string) {
+  if (imageUrl && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+    return { uri: imageUrl };
+  }
+  return getImageSource('logo.png', 'common');
+}
 
 const timeSlots = [
   '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',

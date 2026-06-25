@@ -1,4 +1,4 @@
-import { db } from '@/app/config/firebase';
+import { getFirestoreDb, } from '../config/firebase';
 import { collection, doc, getDocs, writeBatch } from 'firebase/firestore';
 
 /**
@@ -94,9 +94,9 @@ const seedDoctors = async () => {
       },
     ];
 
-    const batch = writeBatch(db);
+    const batch = writeBatch(getFirestoreDb());
     doctors.forEach((doctor) => {
-      const docRef = doc(db, 'doctors', doctor.id);
+      const docRef = doc(getFirestoreDb(), 'doctors', doctor.id);
       batch.set(docRef, {
         ...doctor,
         createdAt: new Date().toISOString(),
@@ -161,9 +161,9 @@ const seedHospitals = async () => {
       },
     ];
 
-    const batch = writeBatch(db);
+    const batch = writeBatch(getFirestoreDb());
     hospitals.forEach((hospital) => {
-      const docRef = doc(db, 'hospitals', hospital.id);
+      const docRef = doc(getFirestoreDb(), 'hospitals', hospital.id);
       batch.set(docRef, {
         ...hospital,
         createdAt: new Date().toISOString(),
@@ -231,9 +231,9 @@ const seedSampleAppointments = async () => {
       },
     ];
 
-    const batch = writeBatch(db);
+    const batch = writeBatch(getFirestoreDb());
     appointments.forEach((appointment, index) => {
-      const docRef = doc(collection(db, 'appointments'));
+      const docRef = doc(collection(getFirestoreDb(), 'appointments'));
       batch.set(docRef, {
         ...appointment,
         createdAt: new Date().toISOString(),
@@ -255,10 +255,10 @@ export const clearCollection = async (collectionName: string) => {
   try {
     console.log(`🗑️  [SEED] Clearing ${collectionName} collection...`);
 
-    const collectionRef = collection(db, collectionName);
+    const collectionRef = collection(getFirestoreDb(), collectionName);
     const snapshot = await getDocs(collectionRef);
 
-    const batch = writeBatch(db);
+    const batch = writeBatch(getFirestoreDb());
     snapshot.forEach((docSnap) => {
       batch.delete(docSnap.ref);
     });

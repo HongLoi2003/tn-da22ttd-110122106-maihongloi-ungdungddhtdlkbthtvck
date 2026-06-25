@@ -1,12 +1,22 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { Tabs } from 'expo-router';
 import React from 'react';
+import { Pressable, PressableProps } from 'react-native';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+// Simple HapticTab component
+const HapticTab = (props: PressableProps) => {
+  return (
+    <Pressable
+      onPressIn={() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }}
+      {...props}
+    />
+  );
+};
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
 
   return (
     <Tabs
@@ -19,7 +29,7 @@ export default function TabLayout() {
           backgroundColor: '#fff',
           borderTopWidth: 1,
           borderTopColor: '#f1f5f9',
-          height: 78,
+          height: 100,
           paddingBottom: 25,
           paddingTop: 5,
         },
@@ -46,6 +56,12 @@ export default function TabLayout() {
             <Ionicons name={focused ? 'chatbubbles' : 'chatbubbles-outline'} size={24} color={color} />
           ),
         }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate('ai-consultation' as never);
+          },
+        })}
       />
       <Tabs.Screen
         name="booking"

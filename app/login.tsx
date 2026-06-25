@@ -3,16 +3,17 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
+import CustomToast from './components/CustomToast';
 import { useAuth } from './context/AuthContext';
 import errorHandler from './utils/errorHandler';
 import validator from './utils/validation';
@@ -27,13 +28,26 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Toast state
+  const [toast, setToast] = useState({
+    visible: false,
+    type: 'success' as 'success' | 'error' | 'warning' | 'info',
+    title: '',
+    message: '',
+  });
 
   const handleLogin = async () => {
     // Validate form
     const validation = validator.validateLoginForm(email, password);
     if (!validation.isValid) {
       setErrors(validation.errors);
-      Alert.alert('Lỗi xác thực', Object.values(validation.errors)[0]);
+      setToast({
+        visible: true,
+        type: 'error',
+        title: 'Lỗi xác thực',
+        message: Object.values(validation.errors)[0],
+      });
       return;
     }
 
@@ -65,10 +79,15 @@ export default function LoginScreen() {
       // Provide helpful error message
       let errorMessage = appError.message;
       if (error?.code === 'auth/invalid-credential' || error?.code === 'auth/user-not-found' || error?.code === 'auth/wrong-password') {
-        errorMessage = 'Email hoặc mật khẩu không đúng.\n\nNếu bạn chưa có tài khoản, vui lòng đăng ký trước.';
+        errorMessage = 'Email hoặc mật khẩu không đúng. Nếu bạn chưa có tài khoản, vui lòng đăng ký trước.';
       }
       
-      Alert.alert('Đăng nhập thất bại', errorMessage);
+      setToast({
+        visible: true,
+        type: 'error',
+        title: 'Đăng nhập thất bại',
+        message: errorMessage,
+      });
       setLoading(false);
     }
   };
@@ -107,32 +126,53 @@ export default function LoginScreen() {
         errorMessage = error.message;
       }
       
-      Alert.alert('Đăng nhập thất bại', errorMessage);
+      setToast({
+        visible: true,
+        type: 'error',
+        title: 'Đăng nhập thất bại',
+        message: errorMessage,
+      });
       setLoadingGoogle(false);
     }
   };
 
   return (
     <View style={styles.container}>
+      {/* Toast Notification */}
+      <CustomToast
+        visible={toast.visible}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        onHide={() => setToast({ ...toast, visible: false })}
+        duration={3000}
+      />
+      
       <Image
-        source={require('@/assets/images/bckgour.png')}
+        source={require('../assets/images/backgourd.png')}
         style={styles.backgroundImage}
         contentFit="cover"
       />
       <KeyboardAvoidingView
         style={styles.keyboardAvoidingView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
-        <View style={styles.content}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          bounces={false}
+        >
         {/* Logo */}
         <View style={styles.logoContainer}>
           <Image
-            source={require('@/assets/images/logo.png')}
+            source={require('../assets/images/logo.png')}
             style={styles.logo}
             contentFit="contain"
           />
           <Text style={styles.title}>Chào mừng trở lại</Text>
-          <Text style={styles.subtitle}>Đăng nhập để tiếp tục</Text>
+          <Text style={styles.subtitle}>Đặt lịch khám và nhận tư vấn sức khỏe dễ dàng</Text>
         </View>
 
         {/* Form */}
@@ -229,21 +269,22 @@ export default function LoginScreen() {
                 <ActivityIndicator color="#00BCD4" size="small" />
               ) : (
                 <Image
-                  source={require('@/assets/images/Google.png')}
+                  source={require('../assets/images/Google.png')}
                   style={styles.googleIcon}
                 />
               )}
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.socialButton}
-              onPress={() => Alert.alert(
-                'Thông báo',
-                'Tính năng đăng nhập bằng Facebook đang được phát triển. Vui lòng đăng nhập bằng Email.',
-                [{ text: 'OK' }]
-              )}
+              onPress={() => setToast({
+                visible: true,
+                type: 'info',
+                title: 'Thông báo',
+                message: 'Tính năng đăng nhập bằng Facebook đang được phát triển. Vui lòng đăng nhập bằng Email.',
+              })}
             >
               <Image
-                source={require('@/assets/images/Facebook.png')}
+                source={require('../assets/images/Facebook.png')}
                 style={styles.facebookIcon}
               />
             </TouchableOpacity>
@@ -257,7 +298,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
         </View>
-        </View>
+      </ScrollView>
       </KeyboardAvoidingView>
     </View>
   );
@@ -280,15 +321,12 @@ const styles = StyleSheet.create({
     zIndex: -1,
   },
   keyboardAvoidingView: {
-  },
-  content: {
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: 0,
+    flex: 1,
   },
   scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 24,
   },
   logoContainer: {

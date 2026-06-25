@@ -1,4 +1,4 @@
-import symptomsData from '@/symptoms-mapping.json';
+import symptomsData from '../../symptoms-mapping.json';
 
 export interface SymptomItem {
   id: number;
@@ -158,22 +158,43 @@ class SymptomAnalysisService {
     const matchedSymptoms: Set<number> = new Set();
     const matchedSymptomNames: string[] = [];
 
+    // Helper function: Kiểm tra whole-word match (tránh partial match)
+    const isWholeWordMatch = (text: string, keyword: string): boolean => {
+      // Nếu keyword quá ngắn (1-2 ký tự), yêu cầu exact match
+      if (keyword.length <= 2) {
+        // Tách thành từng từ và kiểm tra exact match
+        const words = text.split(/\s+/);
+        return words.includes(keyword);
+      }
+      
+      // Với keyword dài hơn, kiểm tra có xuất hiện không (có thể là substring)
+      // Nhưng phải có ranh giới từ (word boundary)
+      const regex = new RegExp(`(^|\\s)${keyword}(\\s|$)`, 'i');
+      return regex.test(text) || text.includes(keyword);
+    };
+
     // Tìm tất cả triệu chứng có keyword xuất hiện trong text
     this.symptoms.forEach(symptom => {
-      // Kiểm tra tên triệu chứng
+      // Kiểm tra tên triệu chứng (yêu cầu whole-word match)
       const normalizedName = this.normalizeText(symptom.name);
-      if (normalizedInput.includes(normalizedName)) {
+      if (isWholeWordMatch(normalizedInput, normalizedName)) {
         matchedSymptoms.add(symptom.id);
         matchedSymptomNames.push(symptom.name);
         console.log(`✅ [SYMPTOM_ANALYSIS] Found: "${symptom.name}" (from name)`);
         return;
       }
 
-      // Kiểm tra keywords
+      // Kiểm tra keywords (yêu cầu whole-word match)
       if (symptom.keywords && symptom.keywords.length > 0) {
         for (const keyword of symptom.keywords) {
           const normalizedKeyword = this.normalizeText(keyword);
-          if (normalizedInput.includes(normalizedKeyword)) {
+          
+          // Bỏ qua keyword quá ngắn hoặc chung chung (1-2 ký tự, trừ keyword cụ thể)
+          if (normalizedKeyword.length <= 2 && !['ho', 'oi', 'o'].includes(normalizedKeyword)) {
+            continue;
+          }
+          
+          if (isWholeWordMatch(normalizedInput, normalizedKeyword)) {
             matchedSymptoms.add(symptom.id);
             matchedSymptomNames.push(symptom.name);
             console.log(`✅ [SYMPTOM_ANALYSIS] Found: "${symptom.name}" (keyword: "${keyword}")`);

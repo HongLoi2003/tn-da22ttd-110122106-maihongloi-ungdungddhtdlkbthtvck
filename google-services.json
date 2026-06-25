@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "9119519990-f6d996q0pc1ou5islsgab3a15fecvqsk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.maihongloi23.heatlecare",
+            "certificate_hash": "2facaa76d7138573b5f90b72479efbe69ca1267f"
+          }
+        },
+        {
           "client_id": "9119519990-h0ghp9fhpjltof05160ea98bchd42i6n.apps.googleusercontent.com",
           "client_type": 3
         }

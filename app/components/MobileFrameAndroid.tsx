@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ReactNode } from 'react';
 import { Dimensions, Platform, StyleSheet, View } from 'react-native';
 

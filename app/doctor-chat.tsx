@@ -4,45 +4,57 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Timestamp, where } from 'firebase/firestore';
 import { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Animated,
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useAuth } from './context/AuthContext';
 import { createDocument, getDocumentsWithQuery, updateDocument } from './services/firebaseService';
 
 // Helper function to get doctor image
 const getDoctorImage = (imageName: string, doctorName?: string) => {
+  console.log('🖼️ [getDoctorImage] Input:', imageName);
+  
+  // Nếu imageName đã là URL (bắt đầu bằng http/https), dùng trực tiếp
+  if (imageName && (imageName.startsWith('http://') || imageName.startsWith('https://'))) {
+    console.log('✅ [getDoctorImage] Using URL directly:', imageName);
+    return { uri: imageName };
+  }
+  
+  // Map filename sang URL (backward compatibility)
   const images: { [key: string]: any } = {
-    'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-    'tranthilan.png': require('@/assets/images/tranthilan.png'),
-    'leminhtam.png': require('@/assets/images/leminhtam.png'),
-    'phamthuha.png': require('@/assets/images/phamthuha.png'),
-    'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-    'vuthilan.png': require('@/assets/images/vuthilan.png'),
-    'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-    'tranthimai.png': require('@/assets/images/tranthimai.png'),
-    'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-    'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-    'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-    'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-    'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-    'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-    'lethihang.png': require('@/assets/images/lethihang.png'),
-    'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
+    'nguyenvanam.png': { uri: 'https://images.pexels.com/photos/26336880/pexels-photo-26336880.jpeg' },
+    'leminhtam.png': { uri: 'https://images.pexels.com/photos/5722163/pexels-photo-5722163.jpeg' },
+    'lehoangnam.png': { uri: 'https://images.pexels.com/photos/14438788/pexels-photo-14438788.jpeg' },
+    'dominhtuan.png': { uri: 'https://images.pexels.com/photos/14628069/pexels-photo-14628069.jpeg' },
+    'hoangvanduc.png': { uri: 'https://images.pexels.com/photos/27666713/pexels-photo-27666713.jpeg' },
+    'tranvankhoa.png': { uri: 'https://images.pexels.com/photos/15962798/pexels-photo-15962798.jpeg' },
+    'phamminhquan.png': { uri: 'https://images.pexels.com/photos/29995617/pexels-photo-29995617.jpeg' },
+    'nguyenvanhai.png': { uri: 'https://images.pexels.com/photos/19601385/pexels-photo-19601385.jpeg' },
+    'tranthilan.png': { uri: 'https://images.pexels.com/photos/15641079/pexels-photo-15641079.jpeg' },
+    'tranthimai.png': { uri: 'https://images.pexels.com/photos/27666717/pexels-photo-27666717.jpeg' },
+    'phamthuha.png': { uri: 'https://images.pexels.com/photos/15962796/pexels-photo-15962796.jpeg' },
+    'vuthilan.png': { uri: 'https://images.pexels.com/photos/27392531/pexels-photo-27392531.jpeg' },
+    'ngothihuong.png': { uri: 'https://images.pexels.com/photos/14628046/pexels-photo-14628046.jpeg' },
+    'nguyenthihoa.png': { uri: 'https://images.pexels.com/photos/14628045/pexels-photo-14628045.jpeg' },
+    'lethihang.png': { uri: 'https://images.pexels.com/photos/4173248/pexels-photo-4173248.jpeg' },
+    'dangthithao.jpg': { uri: 'https://images.pexels.com/photos/29995629/pexels-photo-29995629.jpeg' },
   };
   
   if (imageName && images[imageName]) {
+    console.log('✅ [getDoctorImage] Mapped to URL:', images[imageName].uri);
     return images[imageName];
   }
   
-  return require('@/assets/images/logo.png');
+  console.log('⚠️ [getDoctorImage] Using placeholder for:', imageName);
+  return { uri: "https://via.placeholder.com/150" };
 };
 
 export default function DoctorChatScreen() {
@@ -51,18 +63,22 @@ export default function DoctorChatScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const { userData } = useAuth();
   
+  // Accept conversationId from params (from notifications)
+  const paramConversationId = params.conversationId as string | undefined;
   const doctorId = params.doctorId as string;
   const doctorName = params.doctorName as string || 'BS. Nguyễn Văn An';
-  const doctorSpecialty = params.doctorSpecialty as string || 'Chuyên khoa Hô hấp';
-  const doctorImage = params.doctorImage as string || 'logo.png';
   const doctorPhone = params.doctorPhone as string || '';
   
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<any[]>([]);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(paramConversationId || null);
   const [loading, setLoading] = useState(true);
   const [messageAnimations, setMessageAnimations] = useState<{ [key: string]: Animated.Value }>({});
   const [patientAvatar, setPatientAvatar] = useState<string | null>(null);
+  
+  // State for doctor info (can be updated dynamically)
+  const [doctorImage, setDoctorImage] = useState<string>(params.doctorImage as string || 'logo.png');
+  const [doctorSpecialty, setDoctorSpecialty] = useState<string>(params.doctorSpecialty as string || 'Chuyên khoa Hô hấp');
 
   const handlePhoneCall = async () => {
     if (!doctorPhone) {
@@ -97,6 +113,7 @@ export default function DoctorChatScreen() {
   };
 
   useEffect(() => {
+    console.log('🎨 [DOCTOR-CHAT] doctorImage state changed:', doctorImage);
     initializeChat();
     
     // Load patient avatar
@@ -115,10 +132,9 @@ export default function DoctorChatScreen() {
 
   const initializeChat = async () => {
     try {
-      if (!userData?.uid || !doctorId) {
-        console.log('Missing userData or doctorId');
+      if (!userData?.uid) {
+        console.log('Missing userData');
         console.log('userData:', userData);
-        console.log('doctorId:', doctorId);
         setLoading(false);
         return;
       }
@@ -126,8 +142,62 @@ export default function DoctorChatScreen() {
       console.log('=== INITIALIZING CHAT ===');
       console.log('Patient ID:', userData.uid);
       console.log('Patient Name:', userData.fullName);
+      console.log('Conversation ID from params:', paramConversationId);
       console.log('Doctor ID from params:', doctorId);
       console.log('Doctor Name:', doctorName);
+
+      // If conversationId is provided (from notification), use it directly
+      if (paramConversationId) {
+        console.log('Using conversationId from notification:', paramConversationId);
+        setConversationId(paramConversationId);
+        
+        // Load conversation details to get doctor info including avatar
+        const { getDocumentById } = await import('./services/firebaseService');
+        const conversation = await getDocumentById('conversations', paramConversationId);
+        if (conversation) {
+          const conv = conversation as any;
+          // Update local state with doctor info from conversation
+          if (conv.doctorImage) {
+            console.log('✅ Loaded doctor avatar from conversation:', conv.doctorImage);
+            setDoctorImage(conv.doctorImage);
+          } else if (conv.doctorId) {
+            // If no doctorImage in conversation, try to load from doctors collection
+            console.log('⚠️ No doctorImage in conversation, loading from doctors collection...');
+            try {
+              const doctors = await getDocumentsWithQuery('doctors', [
+                where('id', '==', conv.doctorId)
+              ]);
+              if (doctors.length > 0) {
+                const doctor = doctors[0] as any;
+                if (doctor.image) {
+                  console.log('✅ Loaded doctor avatar from doctors collection:', doctor.image);
+                  setDoctorImage(doctor.image);
+                  // Update conversation with doctorImage for future use
+                  await updateDocument('conversations', paramConversationId, {
+                    doctorImage: doctor.image
+                  });
+                }
+              }
+            } catch (error) {
+              console.log('❌ Error loading doctor from doctors collection:', error);
+            }
+          }
+          if (conv.doctorSpecialty) {
+            setDoctorSpecialty(conv.doctorSpecialty);
+          }
+        }
+        
+        await loadMessagesForConversation(paramConversationId);
+        setLoading(false);
+        return;
+      }
+
+      // Otherwise, find or create conversation by doctorId
+      if (!doctorId) {
+        console.log('Missing doctorId');
+        setLoading(false);
+        return;
+      }
 
       // Try to find existing conversation by patientId and doctorId
       let existingConversations = await getDocumentsWithQuery('conversations', [
@@ -154,20 +224,52 @@ export default function DoctorChatScreen() {
       } else {
         console.log('Creating new conversation...');
         
-        // Cần map doctorId (bs004) sang Firebase Auth UID
-        // Lấy thông tin bác sĩ từ doctors collection
+        // Load doctor info from doctors collection to get avatar
+        let doctorImageToSave = doctorImage;
+        let doctorSpecialtyToSave = doctorSpecialty;
+        
+        if (doctorId && (doctorImage === 'logo.png' || !doctorImage)) {
+          console.log('⚠️ Loading doctor details from doctors collection...');
+          try {
+            const doctors = await getDocumentsWithQuery('doctors', [
+              where('id', '==', doctorId)
+            ]);
+            if (doctors.length > 0) {
+              const doctor = doctors[0] as any;
+              if (doctor.image) {
+                doctorImageToSave = doctor.image;
+                setDoctorImage(doctor.image); // Update state
+                console.log('✅ Loaded doctor avatar from doctors collection:', doctor.image);
+              }
+              if (doctor.specialty) {
+                doctorSpecialtyToSave = doctor.specialty;
+                setDoctorSpecialty(doctor.specialty); // Update state
+                console.log('✅ Loaded doctor specialty from doctors collection:', doctor.specialty);
+              }
+            }
+          } catch (error) {
+            console.log('❌ Error loading doctor from doctors collection:', error);
+          }
+        }
+        
+        // Cần map doctorId (bs004) sang Firebase Auth UID từ users collection
         let doctorAuthUid = doctorId; // Default fallback
         try {
-          const { getDocumentById } = await import('./services/firebaseService');
-          const doctorData = await getDocumentById('doctors', doctorId);
-          if (doctorData && (doctorData as any).authUid) {
-            doctorAuthUid = (doctorData as any).authUid;
-            console.log('Found doctor authUid:', doctorAuthUid);
+          // Query users collection to find doctor's auth UID
+          const allUsers = await getDocumentsWithQuery('users', [
+            where('role', '==', 'doctor')
+          ]);
+          
+          const doctorUser = allUsers.find((u: any) => u.doctorInfo?.doctorId === doctorId);
+          
+          if (doctorUser && (doctorUser as any).uid) {
+            doctorAuthUid = (doctorUser as any).uid;
+            console.log('✅ Found doctor authUid from users collection:', doctorAuthUid);
           } else {
-            console.log('Doctor document does not have authUid field');
+            console.log('⚠️ Doctor user not found for doctorId:', doctorId);
           }
         } catch (error) {
-          console.log('Could not fetch doctor authUid:', error);
+          console.log('❌ Could not fetch doctor authUid:', error);
         }
         
         // Lưu cả doctorId gốc (từ doctors collection) và doctorAuthUid (Firebase Auth UID)
@@ -179,7 +281,8 @@ export default function DoctorChatScreen() {
           doctorAuthUid: doctorAuthUid, // Firebase Auth UID của bác sĩ
           doctorIdOriginal: doctorId, // Backup để query
           doctorName: doctorName,
-          doctorSpecialty: doctorSpecialty,
+          doctorSpecialty: doctorSpecialtyToSave,
+          doctorImage: doctorImageToSave, // ✅ Lưu avatar bác sĩ từ doctors collection
           lastMessage: '',
           lastMessageTimestamp: Timestamp.now(),
           lastMessageSender: '',

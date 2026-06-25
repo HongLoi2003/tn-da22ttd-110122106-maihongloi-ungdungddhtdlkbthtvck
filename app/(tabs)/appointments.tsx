@@ -7,26 +7,27 @@ import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity,
 import { useAuth } from '../context/AuthContext';
 import { getDocumentsWithQuery } from '../services/firebaseService';
 
-const doctorImages = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
+// Doctor Images - Ảnh thật từ Pexels
+const DOCTOR_IMAGES: { [key: string]: any } = {
+  'nguyenvanam.png': { uri: 'https://images.pexels.com/photos/26336880/pexels-photo-26336880.jpeg' },
+  'leminhtam.png': { uri: 'https://images.pexels.com/photos/5722163/pexels-photo-5722163.jpeg' },
+  'lehoangnam.png': { uri: 'https://images.pexels.com/photos/14438788/pexels-photo-14438788.jpeg' },
+  'dominhtuan.png': { uri: 'https://images.pexels.com/photos/14628069/pexels-photo-14628069.jpeg' },
+  'hoangvanduc.png': { uri: 'https://images.pexels.com/photos/27666713/pexels-photo-27666713.jpeg' },
+  'tranvankhoa.png': { uri: 'https://images.pexels.com/photos/15962798/pexels-photo-15962798.jpeg' },
+  'phamminhquan.png': { uri: 'https://images.pexels.com/photos/29995617/pexels-photo-29995617.jpeg' },
+  'nguyenvanhai.png': { uri: 'https://images.pexels.com/photos/19601385/pexels-photo-19601385.jpeg' },
+  'tranthilan.png': { uri: 'https://images.pexels.com/photos/15641079/pexels-photo-15641079.jpeg' },
+  'tranthimai.png': { uri: 'https://images.pexels.com/photos/27666717/pexels-photo-27666717.jpeg' },
+  'phamthuha.png': { uri: 'https://images.pexels.com/photos/15962796/pexels-photo-15962796.jpeg' },
+  'vuthilan.png': { uri: 'https://images.pexels.com/photos/27392531/pexels-photo-27392531.jpeg' },
+  'ngothihuong.png': { uri: 'https://images.pexels.com/photos/14628046/pexels-photo-14628046.jpeg' },
+  'nguyenthihoa.png': { uri: 'https://images.pexels.com/photos/14628045/pexels-photo-14628045.jpeg' },
+  'lethihang.png': { uri: 'https://images.pexels.com/photos/4173248/pexels-photo-4173248.jpeg' },
+  'dangthithao.jpg': { uri: 'https://images.pexels.com/photos/29995629/pexels-photo-29995629.jpeg' },
 };
 
-const doctorNameToImage: { [key: string]: string } = {
+const DOCTOR_NAME_TO_IMAGE: { [key: string]: string } = {
   'Nguyễn Văn An': 'nguyenvanam.png',
   'Trần Thị Lan': 'tranthilan.png',
   'Lê Minh Tâm': 'leminhtam.png',
@@ -43,8 +44,6 @@ const doctorNameToImage: { [key: string]: string } = {
   'Lê Thị Hằng': 'lethihang.png',
   'Nguyễn Văn Hải': 'nguyenvanhai.png',
   'Đặng Thị Thảo': 'dangthithao.jpg',
-  // Thêm các biến thể tên có thể có
-  'BS. Nguyễn Thị Hoa': 'nguyenthihoa.png',
   'BS. Nguyễn Văn An': 'nguyenvanam.png',
   'BS. Trần Thị Lan': 'tranthilan.png',
   'BS. Lê Minh Tâm': 'leminhtam.png',
@@ -55,12 +54,15 @@ const doctorNameToImage: { [key: string]: string } = {
   'BS. Vũ Thị Lan': 'vuthilan.png',
   'BS. Hoàng Văn Đức': 'hoangvanduc.png',
   'BS. Ngô Thị Hương': 'ngothihuong.png',
+  'BS. Nguyễn Thị Hoa': 'nguyenthihoa.png',
   'BS. Trần Văn Khoa': 'tranvankhoa.png',
   'BS. Phạm Minh Quân': 'phamminhquan.png',
   'BS. Lê Thị Hằng': 'lethihang.png',
   'BS. Nguyễn Văn Hải': 'nguyenvanhai.png',
   'BS. Đặng Thị Thảo': 'dangthithao.jpg',
 };
+
+const DEFAULT_AVATAR = { uri: 'https://images.pexels.com/photos/26336880/pexels-photo-26336880.jpeg' };
 
 export default function AppointmentsScreen() {
   const router = useRouter();
@@ -191,39 +193,36 @@ export default function AppointmentsScreen() {
     const aptDate = new Date(item.appointmentDate || item.createdAt);
     const isUpcoming = aptDate >= now && item.status !== 'cancelled' && item.status !== 'completed';
     
-    // Debug log
-    console.log('🖼️ [APPOINTMENTS] Rendering card for:', item.doctor);
-    console.log('🖼️ [APPOINTMENTS] item.image:', item.image);
-    console.log('🖼️ [APPOINTMENTS] item.hinh_anh:', item.hinh_anh);
-    
-    // Lấy avatar bác sĩ với fallback
-    const getAvatar = () => {
-      const imageFileName = item.image || item.hinh_anh;
+    // Lấy avatar bác sĩ
+    const getDoctorAvatar = () => {
+      const doctorName = item.doctor || item.doctorName;
+      const imageName = item.image || item.hinh_anh;
       
-      console.log('🖼️ [APPOINTMENTS] imageFileName:', imageFileName);
-      
-      // Priority 1: Từ file name
-      if (imageFileName && doctorImages[imageFileName as keyof typeof doctorImages]) {
-        console.log('✅ [APPOINTMENTS] Found image by filename:', imageFileName);
-        return doctorImages[imageFileName as keyof typeof doctorImages];
+      // Priority 1: Từ imageName
+      if (imageName && DOCTOR_IMAGES[imageName]) {
+        return DOCTOR_IMAGES[imageName];
       }
       
       // Priority 2: Từ tên bác sĩ
-      if (item.doctor) {
-        const mappedImage = doctorNameToImage[item.doctor];
-        console.log('🔍 [APPOINTMENTS] Mapped image for', item.doctor, ':', mappedImage);
-        if (mappedImage && doctorImages[mappedImage as keyof typeof doctorImages]) {
-          console.log('✅ [APPOINTMENTS] Found image by doctor name:', mappedImage);
-          return doctorImages[mappedImage as keyof typeof doctorImages];
+      if (doctorName) {
+        let mappedImage = DOCTOR_NAME_TO_IMAGE[doctorName];
+        
+        // Thử bỏ prefix "BS. " nếu có
+        if (!mappedImage && doctorName.startsWith('BS. ')) {
+          const nameWithoutPrefix = doctorName.substring(4);
+          mappedImage = DOCTOR_NAME_TO_IMAGE[nameWithoutPrefix];
+        }
+        
+        if (mappedImage && DOCTOR_IMAGES[mappedImage]) {
+          return DOCTOR_IMAGES[mappedImage];
         }
       }
       
       // Priority 3: Default
-      console.log('⚠️ [APPOINTMENTS] Using default logo');
-      return require('@/assets/images/logo.png');
+      return DEFAULT_AVATAR;
     };
     
-    const doctorImage = getAvatar();
+    const doctorImage = getDoctorAvatar();
     
     // Đảm bảo các field không undefined
     const doctorName = item.doctor || 'Bác sĩ';
@@ -232,127 +231,91 @@ export default function AppointmentsScreen() {
     const date = item.date || '';
     const fullDate = item.fullDate || '';
     const time = item.time || '';
-    const duration = item.duration || '30 phút';
-    const room = item.room || 'Phòng khám';
-    const floor = item.floor || 'Tầng 1';
+    
+    // Lấy giá từ nhiều field có thể có, ưu tiên fee
+    const feeAmount = item.fee || item.price || item.doctorFee || 300000; // Default 300k
+    const formattedPrice = new Intl.NumberFormat('vi-VN').format(feeAmount);
     
     return (
       <View style={styles.appointmentCard}>
-        <View style={styles.cardHeader}>
-          <View style={styles.doctorInfo}>
+        {/* Status Bar */}
+        <View style={[styles.statusBar, { backgroundColor: getStatusColor(item.status) }]} />
+        
+        {/* Card Content */}
+        <View style={styles.cardContent}>
+          {/* Top Section: Doctor Info */}
+          <View style={styles.topSection}>
             <Image 
               source={doctorImage}
               style={styles.doctorAvatar}
             />
-            <View style={styles.doctorDetails}>
-              <Text style={styles.doctorName} numberOfLines={1}>{doctorName}</Text>
-              <Text style={styles.specialty} numberOfLines={1}>{specialty}</Text>
-              <View style={styles.locationRow}>
-                <Ionicons name="location-outline" size={12} color="#64748b" />
-                <Text style={styles.hospital} numberOfLines={1}>{hospital}</Text>
-              </View>
-            </View>
-          </View>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) + '20' }]}>
-            <Text style={[styles.statusText, { color: getStatusColor(item.status) }]}>
-              {getStatusText(item.status)}
-            </Text>
-          </View>
-        </View>
-
-        {isUpcoming && (
-          <>
-            <View style={styles.appointmentDetails}>
-              <View style={styles.detailItem}>
-                <View style={styles.detailIcon}>
-                  <Ionicons name="calendar-outline" size={18} color="#00BCD4" />
-                </View>
-                <View style={styles.detailContent}>
-                  <Text style={styles.detailLabel}>{date}</Text>
-                  <Text style={styles.detailValue} numberOfLines={1}>{fullDate}</Text>
+            <View style={styles.doctorInfoSection}>
+              <View style={styles.doctorNameRow}>
+                <Text style={styles.doctorName} numberOfLines={1}>{doctorName}</Text>
+                <View style={[styles.miniStatusBadge, { backgroundColor: getStatusColor(item.status) }]}>
+                  <Text style={styles.miniStatusText}>{getStatusText(item.status)}</Text>
                 </View>
               </View>
-
-              <View style={styles.detailItem}>
-                <View style={styles.detailIcon}>
-                  <Ionicons name="time-outline" size={18} color="#00BCD4" />
-                </View>
-                <View style={styles.detailContent}>
-                  <Text style={styles.detailLabel}>{time}</Text>
-                  <Text style={styles.detailValue} numberOfLines={1}>({duration})</Text>
-                </View>
-              </View>
-
-              <View style={styles.detailItem}>
-                <View style={styles.detailIcon}>
-                  <Ionicons name="business-outline" size={18} color="#00BCD4" />
-                </View>
-                <View style={styles.detailContent}>
-                  <Text style={styles.detailLabel} numberOfLines={1}>{room}</Text>
-                  <Text style={styles.detailValue} numberOfLines={1}>{floor}</Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Fee Display */}
-            {item.fee && (
-              <View style={styles.feeContainer}>
-                <Text style={styles.feeLabel}>Phí khám:</Text>
-                <Text style={styles.feeValue}>{item.fee.toLocaleString('vi-VN')} đ</Text>
-              </View>
-            )}
-          </>
-        )}
-
-        {!isUpcoming && (
-          <>
-            <View style={styles.simpleDetails}>
-              <View style={styles.simpleDetailRow}>
-                <Ionicons name="calendar-outline" size={14} color="#64748b" />
-                <Text style={styles.simpleDetailText} numberOfLines={1}>
-                  {date}, {fullDate}
-                </Text>
-                <Text style={styles.simpleDetailText}>•</Text>
-                <Text style={styles.simpleDetailText}>{time}</Text>
-              </View>
-              <View style={styles.simpleDetailRow}>
-                <Ionicons name="location-outline" size={14} color="#64748b" />
-                <Text style={styles.simpleDetailText} numberOfLines={1}>{hospital}</Text>
-              </View>
-              {item.fee && (
-                <View style={styles.simpleDetailRow}>
-                  <Ionicons name="card-outline" size={14} color="#64748b" />
-                  <Text style={styles.simpleDetailText}>
-                    Phí khám: {item.fee.toLocaleString('vi-VN')} đ
-                  </Text>
+              <Text style={styles.specialty}>{specialty}</Text>
+              {hospital && (
+                <View style={styles.hospitalRow}>
+                  <Ionicons name="business" size={13} color="#64748b" />
+                  <Text style={styles.hospitalText} numberOfLines={1}>{hospital}</Text>
                 </View>
               )}
             </View>
-          </>
-        )}
+          </View>
 
-        <View style={styles.cardActions}>
-          {isUpcoming ? (
-            <>
+          {/* Divider */}
+          <View style={styles.divider} />
+
+          {/* Middle Section: Date & Time */}
+          <View style={styles.middleSection}>
+            <View style={styles.infoItem}>
+              <View style={styles.infoIconCircle}>
+                <Ionicons name="calendar" size={18} color="#00BCD4" />
+              </View>
+              <View style={styles.infoTextBlock}>
+                <Text style={styles.infoLabel}>Ngày khám</Text>
+                <Text style={styles.infoValue}>{date}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.infoItem}>
+              <View style={styles.infoIconCircle}>
+                <Ionicons name="time" size={18} color="#8B5CF6" />
+              </View>
+              <View style={styles.infoTextBlock}>
+                <Text style={styles.infoLabel}>Giờ khám</Text>
+                <Text style={styles.infoValue}>{time}</Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Bottom Section: Price & Action */}
+          <View style={styles.bottomSection}>
+            <View style={styles.priceSection}>
+              <Text style={styles.priceLabel}>Tổng chi phí</Text>
+              <Text style={styles.priceAmount}>{formattedPrice}đ</Text>
+            </View>
+            {isUpcoming ? (
               <TouchableOpacity 
-                style={styles.outlineButton}
+                style={styles.actionButton}
                 onPress={() => router.push(`/appointment-detail?id=${item.id}`)}
               >
-                <Text style={styles.outlineButtonText}>Chi tiết</Text>
+                <Text style={styles.actionButtonText}>Đến khám</Text>
+                <Ionicons name="arrow-forward" size={16} color="#fff" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.primaryButton}>
-                <Text style={styles.primaryButtonText}>Đến khám</Text>
-                <Ionicons name="chevron-forward" size={16} color="#fff" />
+            ) : (
+              <TouchableOpacity 
+                style={styles.detailButton}
+                onPress={() => router.push(`/appointment-detail?id=${item.id}`)}
+              >
+                <Text style={styles.detailButtonText}>Chi tiết</Text>
+                <Ionicons name="arrow-forward" size={16} color="#00BCD4" />
               </TouchableOpacity>
-            </>
-          ) : (
-            <TouchableOpacity 
-              style={styles.fullWidthButton}
-              onPress={() => router.push(`/appointment-detail?id=${item.id}`)}
-            >
-              <Ionicons name="chevron-forward" size={20} color="#64748b" />
-            </TouchableOpacity>
-          )}
+            )}
+          </View>
         </View>
       </View>
     );
@@ -570,174 +533,166 @@ const styles = StyleSheet.create({
   },
   appointmentCard: {
     backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 20,
     marginBottom: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
+    overflow: 'hidden',
   },
-  cardHeader: {
+  statusBar: {
+    height: 4,
+    width: '100%',
+  },
+  cardContent: {
+    padding: 16,
+  },
+  topSection: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
     marginBottom: 16,
   },
-  doctorInfo: {
-    flexDirection: 'row',
-    flex: 1,
-  },
   doctorAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     marginRight: 12,
+    borderWidth: 2,
+    borderColor: '#f1f5f9',
   },
-  doctorDetails: {
+  doctorInfoSection: {
     flex: 1,
     justifyContent: 'center',
-    minWidth: 0,
+  },
+  doctorNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
   },
   doctorName: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: 16,
+    fontWeight: '700',
     color: '#0f172a',
-    marginBottom: 4,
+    flex: 1,
+    marginRight: 8,
+  },
+  miniStatusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  miniStatusText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#fff',
   },
   specialty: {
     fontSize: 13,
-    color: '#64748b',
+    color: '#00BCD4',
+    fontWeight: '600',
     marginBottom: 4,
   },
-  locationRow: {
+  hospitalRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    flex: 1,
-    minWidth: 0,
   },
-  hospital: {
+  hospitalText: {
     fontSize: 12,
     color: '#64748b',
     flex: 1,
   },
-  statusBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  appointmentDetails: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  divider: {
+    height: 1,
+    backgroundColor: '#f1f5f9',
     marginBottom: 16,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#f1f5f9',
   },
-  detailItem: {
+  middleSection: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    gap: 12,
+  },
+  infoItem: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    flex: 1,
-    minWidth: 0,
+    backgroundColor: '#f8fafc',
+    padding: 12,
+    borderRadius: 12,
+    gap: 10,
   },
-  detailIcon: {
-    width: 36,
-    height: 36,
-    backgroundColor: '#E0F7FA',
-    borderRadius: 8,
+  infoIconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  detailContent: {
+  infoTextBlock: {
     flex: 1,
-    justifyContent: 'center',
   },
-  detailLabel: {
+  infoLabel: {
+    fontSize: 10,
+    color: '#64748b',
+    marginBottom: 2,
+  },
+  infoValue: {
     fontSize: 13,
     fontWeight: '600',
     color: '#0f172a',
   },
-  detailValue: {
-    fontSize: 11,
-    color: '#64748b',
-  },
-  feeContainer: {
+  bottomSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 12,
-    paddingBottom: 4,
+    paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: '#f1f5f9',
   },
-  feeLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#64748b',
+  priceSection: {
+    flex: 1,
   },
-  feeValue: {
-    fontSize: 16,
+  priceLabel: {
+    fontSize: 11,
+    color: '#64748b',
+    marginBottom: 2,
+  },
+  priceAmount: {
+    fontSize: 18,
     fontWeight: '700',
-    color: '#00BCD4',
+    color: '#06D6A0',
   },
-  simpleDetails: {
-    gap: 8,
-    marginBottom: 12,
-  },
-  simpleDetailRow: {
+  actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-  },
-  simpleDetailText: {
-    fontSize: 12,
-    color: '#64748b',
-  },
-  cardActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  outlineButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#00BCD4',
-    alignItems: 'center',
-  },
-  outlineButtonText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#00BCD4',
-  },
-  primaryButton: {
-    flex: 1,
-    flexDirection: 'row',
-    paddingVertical: 12,
-    borderRadius: 24,
-    backgroundColor: '#00BCD4',
-    alignItems: 'center',
-    justifyContent: 'center',
     gap: 4,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+    backgroundColor: '#00BCD4',
   },
-  primaryButtonText: {
+  actionButtonText: {
     fontSize: 13,
     fontWeight: '600',
     color: '#fff',
   },
-  fullWidthButton: {
-    marginLeft: 'auto',
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
+  detailButton: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#00BCD4',
+  },
+  detailButtonText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#00BCD4',
   },
   loadingContainer: {
     flex: 1,

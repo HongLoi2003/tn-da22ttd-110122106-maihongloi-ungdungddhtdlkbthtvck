@@ -92,7 +92,7 @@ export default function ProfileScreen() {
           <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
               <Image
-                source={require('@/assets/images/logo.png')}
+                source={{ uri: "https://via.placeholder.com/150" }}
                 style={styles.avatar}
               />
               <View style={styles.editBadge}>

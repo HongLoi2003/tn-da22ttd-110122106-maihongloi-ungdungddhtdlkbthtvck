@@ -12,7 +12,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { db } from './config/firebase';
+import { getFirestoreDb,} from './config/firebase';
 
 export default function RemoveDuplicateSpecialtiesScreen() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function RemoveDuplicateSpecialtiesScreen() {
 
     try {
       // Lấy tất cả documents từ popular-specialties
-      const querySnapshot = await getDocs(collection(db, 'popular-specialties'));
+      const querySnapshot = await getDocs(collection(getFirestoreDb(), 'popular-specialties'));
       const allSpecialties: any[] = [];
       
       querySnapshot.forEach((doc) => {
@@ -80,7 +80,7 @@ export default function RemoveDuplicateSpecialtiesScreen() {
           output += `   ❌ Xóa: ${spec.id}\n`;
           
           try {
-            await deleteDoc(doc(db, 'popular-specialties', spec.id));
+            await deleteDoc(doc(getFirestoreDb(), 'popular-specialties', spec.id));
             deletedCount++;
           } catch (error: any) {
             output += `   ⚠️ Lỗi khi xóa: ${error.message}\n`;
@@ -114,7 +114,7 @@ export default function RemoveDuplicateSpecialtiesScreen() {
     let output = '🔍 KIỂM TRA CHUYÊN KHOA TRÙNG (KHÔNG XÓA)\n\n';
 
     try {
-      const querySnapshot = await getDocs(collection(db, 'popular-specialties'));
+      const querySnapshot = await getDocs(collection(getFirestoreDb(), 'popular-specialties'));
       const allSpecialties: any[] = [];
       
       querySnapshot.forEach((doc) => {

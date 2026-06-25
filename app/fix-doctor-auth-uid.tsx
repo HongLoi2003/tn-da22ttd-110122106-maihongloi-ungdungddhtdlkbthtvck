@@ -54,7 +54,7 @@ export default function FixDoctorAuthUid() {
         ]);
         
         if (users.length > 0) {
-          const authUid = users[0].uid;
+          const authUid = (users[0] as any).uid;
           addLog(`  ✅ Tìm thấy authUid: ${authUid}`);
           
           // 3. Cập nhật authUid vào doctor document

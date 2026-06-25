@@ -102,19 +102,25 @@ export default function DoctorPatientDetail() {
         patientData = {
           id: patientId,
           uid: patientId,
-          fullName: firstAppointment.patientName || 'Bệnh nhân',
-          email: firstAppointment.patientEmail || '',
-          phone: firstAppointment.patientPhone || '',
-          address: firstAppointment.patientAddress || '',
+          fullName: (firstAppointment as any).patientName || 'Bệnh nhân',
+          email: (firstAppointment as any).patientEmail || '',
+          phone: (firstAppointment as any).patientPhone || '',
+          address: (firstAppointment as any).patientAddress || '',
           dateOfBirth: undefined,
           gender: undefined,
-        };
+        } as any;
         
         console.log('✅ Created patient data from appointment:', patientData);
       }
 
       if (patientData) {
         console.log('✅ Patient data loaded:', patientData);
+        console.log('📅 DateOfBirth field:', (patientData as any).dateOfBirth);
+        console.log('📅 All date fields:', {
+          dateOfBirth: (patientData as any).dateOfBirth,
+          ngay_sinh: (patientData as any).ngay_sinh,
+          birthday: (patientData as any).birthday,
+        });
         setPatient(patientData as PatientDetail);
       } else {
         console.log('❌ No patient data found for ID:', patientId);
@@ -128,16 +134,42 @@ export default function DoctorPatientDetail() {
   };
 
   const calculateAge = (dateOfBirth: string) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (!dateOfBirth) return null;
     
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
+    try {
+      // Support multiple date formats: DD/MM/YYYY, YYYY-MM-DD, ISO
+      let birthDate: Date;
+      
+      if (dateOfBirth.includes('/')) {
+        // DD/MM/YYYY format
+        const parts = dateOfBirth.split('/');
+        if (parts.length === 3) {
+          birthDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+        } else {
+          return null;
+        }
+      } else {
+        // ISO or YYYY-MM-DD format
+        birthDate = new Date(dateOfBirth);
+      }
+      
+      if (isNaN(birthDate.getTime())) {
+        return null;
+      }
+      
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      return age > 0 ? age : null;
+    } catch (error) {
+      console.error('Error calculating age:', error);
+      return null;
     }
-    
-    return age;
   };
 
   if (loading) {
@@ -202,7 +234,10 @@ export default function DoctorPatientDetail() {
             <View style={styles.statDivider} />
             <View style={styles.statItem}>
               <Text style={styles.statValue}>
-                {patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : '--'}
+                {(() => {
+                  const age = patient.dateOfBirth ? calculateAge(patient.dateOfBirth) : null;
+                  return age !== null ? age : '--';
+                })()}
               </Text>
               <Text style={styles.statLabel}>Tuổi</Text>
             </View>
@@ -238,6 +273,25 @@ export default function DoctorPatientDetail() {
                 <Text style={styles.infoValue}>{patient.email}</Text>
               </View>
             </View>
+
+            {patient.dateOfBirth && (
+              <>
+                <View style={styles.divider} />
+                <View style={styles.infoRow}>
+                  <Ionicons name="calendar" size={20} color="#00BCD4" />
+                  <View style={styles.infoContent}>
+                    <Text style={styles.infoLabel}>Ngày sinh</Text>
+                    <Text style={styles.infoValue}>
+                      {patient.dateOfBirth}
+                      {(() => {
+                        const age = calculateAge(patient.dateOfBirth);
+                        return age !== null ? ` (${age} tuổi)` : '';
+                      })()}
+                    </Text>
+                  </View>
+                </View>
+              </>
+            )}
             
             {patient.address && (
               <>

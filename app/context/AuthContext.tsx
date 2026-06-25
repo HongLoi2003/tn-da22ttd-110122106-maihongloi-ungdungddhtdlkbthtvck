@@ -1,9 +1,9 @@
 import {
-    createUserWithEmailAndPassword,
-    onAuthStateChanged,
-    signInWithEmailAndPassword,
-    signOut,
-    User,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  User,
 } from 'firebase/auth';
 import { collection, getDocs, onSnapshot, query, where } from 'firebase/firestore';
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
@@ -32,6 +32,10 @@ interface UserData {
     phone: string;
   };
   insuranceNumber?: string;
+  insuranceCode?: string;
+  insuranceStartDate?: string;
+  insuranceEndDate?: string;
+  insuranceStatus?: string;
   doctorInfo?: {
     specialty: string;
     licenseNumber: string;
@@ -70,8 +74,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Timeout safety: Force stop loading after 10 seconds
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.warn('⚠️ [AUTH] Loading timeout after 10s, forcing stop');
+        setLoading(false);
+      }
+    }, 10000);
+
     if (!auth) {
       console.warn('Firebase auth not initialized');
+      clearTimeout(timeoutId);
       setLoading(false);
       return;
     }
@@ -147,7 +160,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    return unsubscribe;
+    return () => {
+      clearTimeout(timeoutId);
+      unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -161,11 +177,122 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error('Firebase not initialized');
       }
       
+      if (!db) {
+        console.error('❌ [AUTH] Firestore not initialized');
+        throw new Error('Database not initialized');
+      }
+      
       // Trim email to remove any whitespace
       const trimmedEmail = email.trim().toLowerCase();
-      console.log('✅ [AUTH] Firebase auth initialized, attempting signIn with:', trimmedEmail);
+      console.log('✅ [AUTH] Firebase initialized, checking Firestore for user...');
       
-      const result = await signInWithEmailAndPassword(auth, trimmedEmail, password);
+      // ✅ BƯỚC 1: Kiểm tra user trong Firestore
+      const usersQuery = query(
+        collection(db, 'users'),
+        where('email', '==', trimmedEmail)
+      );
+      const usersSnapshot = await getDocs(usersQuery);
+      
+      if (usersSnapshot.empty) {
+        console.error('❌ [AUTH] User not found in Firestore');
+        throw new Error('Email không tồn tại. Vui lòng đăng ký trước.');
+      }
+      
+      const userDoc = usersSnapshot.docs[0];
+      const firestoreUserData = userDoc.data();
+      const firestorePassword = firestoreUserData.password;
+      
+      console.log('✅ [AUTH] User found in Firestore');
+      console.log('🔍 [AUTH] Checking password match...');
+      
+      // ✅ BƯỚC 2: So sánh password với Firestore
+      if (firestorePassword !== password) {
+        console.error('❌ [AUTH] Password mismatch with Firestore');
+        throw new Error('Mật khẩu không đúng. Vui lòng thử lại.');
+      }
+      
+      console.log('✅ [AUTH] Password matches Firestore!');
+      
+      // ✅ BƯỚC 3: Thử đăng nhập Firebase Auth (KHÔNG BẮT BUỘC)
+      let result;
+      
+      try {
+        // Thử với password hiện tại
+        result = await signInWithEmailAndPassword(auth, trimmedEmail, firestorePassword);
+        console.log('✅ [AUTH] Firebase Auth login successful with current password!');
+      } catch (authError: any) {
+        console.warn('⚠️ [AUTH] Firebase Auth failed with current password:', authError.code);
+        
+        // Nếu lỗi password, thử với oldPassword để sync
+        if (authError.code === 'auth/wrong-password' || authError.code === 'auth/invalid-credential') {
+          const oldPassword = firestoreUserData.oldPassword;
+          
+          if (oldPassword && oldPassword !== password) {
+            try {
+              console.log('🔄 [AUTH] Trying old password to sync Firebase Auth...');
+              result = await signInWithEmailAndPassword(auth, trimmedEmail, oldPassword);
+              
+              // Sync password
+              const { updatePassword: updateAuthPassword } = await import('firebase/auth');
+              await updateAuthPassword(result.user, password);
+              console.log('✅ [AUTH] Firebase Auth password synced!');
+            } catch (oldPwError: any) {
+              console.warn('⚠️ [AUTH] Old password also failed:', oldPwError.code);
+              result = null;
+            }
+          } else {
+            result = null;
+          }
+        } else {
+          result = null;
+        }
+      }
+      
+      // ✅ BƯỚC 4: Nếu Firebase Auth không work và email đã tồn tại
+      //     Đây là trường hợp user đã reset password nhưng Firebase Auth chưa sync
+      //     GI ẢI PHÁP: Hướng dẫn user xóa và cài lại app, hoặc đợi admin xử lý
+      if (!result) {
+        console.log('🔄 [AUTH] Trying to create new Firebase Auth account...');
+        
+        try {
+          result = await createUserWithEmailAndPassword(auth, trimmedEmail, password);
+          console.log('✅ [AUTH] New Firebase Auth account created!');
+          
+          // Update UID nếu khác
+          if (result.user.uid !== firestoreUserData.uid) {
+            const { updateDoc, doc } = await import('firebase/firestore');
+            await updateDoc(doc(db, 'users', userDoc.id), {
+              uid: result.user.uid,
+            });
+            console.log('✅ [AUTH] UID updated in Firestore');
+          }
+        } catch (createError: any) {
+          // Email already exists trong Firebase Auth
+          if (createError.code === 'auth/email-already-in-use') {
+            console.warn('⚠️ [AUTH] Firebase Auth account exists but password mismatch');
+            console.log('⚠️ [AUTH] Firestore password is correct - attempting fallback login');
+            
+            // FALLBACK: Thử đăng nhập một lần nữa với password hiện tại
+            // Có thể Firebase Auth đã được tạo với password này
+            try {
+              result = await signInWithEmailAndPassword(auth, trimmedEmail, password);
+              console.log('✅ [AUTH] Fallback login successful!');
+            } catch (fallbackError: any) {
+              console.error('❌ [AUTH] Fallback login failed:', fallbackError.code);
+              
+              // Thông báo user một cách thân thiện hơn
+              throw new Error(
+                'Mật khẩu đã được đổi thành công, nhưng cần một chút thời gian để đồng bộ.\n\n' +
+                'Vui lòng thử lại sau 1-2 phút.\n\n' +
+                'Nếu vẫn không được, vui lòng liên hệ hỗ trợ.'
+              );
+            }
+          } else {
+            throw createError;
+          }
+        }
+      }
+      
       console.log('✅ [AUTH] Login successful!');
       console.log('👤 [AUTH] User UID:', result.user.uid);
       console.log('📧 [AUTH] User Email:', result.user.email);
@@ -218,6 +345,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             chronicDiseases: [],
             emergencyContact: null,
             insuranceNumber: '',
+            insuranceCode: '',
             createdAt: new Date().toISOString(),
           };
           
@@ -262,10 +390,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password
       );
       
-      // Tạo user document trong Firestore
+      // Tạo user document trong Firestore (BAO GỒM PASSWORD)
       const newUserData = {
         uid: userCredential.user.uid,
         email,
+        password: password, // ✅ Lưu password vào Firestore để login có thể kiểm tra
         fullName: userData.fullName || '',
         phone: userData.phone || '',
         role: userData.role || 'patient', // Mặc định là patient
@@ -280,10 +409,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         chronicDiseases: userData.chronicDiseases || [],
         emergencyContact: userData.emergencyContact || null,
         insuranceNumber: userData.insuranceNumber || '',
+        insuranceCode: userData.insuranceCode || '',
         createdAt: new Date().toISOString(),
       };
       
       await createDocument('users', newUserData);
+      console.log('✅ [REGISTER] User document created with password in Firestore');
       
       // Trả về userCredential để có thể gửi email verification
       return userCredential;
@@ -298,7 +429,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!user) throw new Error('No user logged in');
       if (!userData) throw new Error('User data not found');
       
-      const { updateDocument } = await import('@/app/services/firebaseService');
+      const { updateDocument } = await import('../services/firebaseService');
       
       // Nếu userData có id, sử dụng trực tiếp
       if (userData.id) {

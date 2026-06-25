@@ -1,20 +1,5 @@
 [
   {
-    "id": "apt001",
-    "userId": "user001",
-    "doctorId": "bs001",
-    "doctorName": "BS. Nguyễn Văn An",
-    "specialty": "Tim mạch",
-    "date": "2026-05-05",
-    "time": "09:00",
-    "status": "confirmed",
-    "type": "Khám tổng quát",
-    "notes": "Khám định kỳ tim mạch",
-    "hospitalName": "Bệnh viện Trung ương",
-    "address": "1 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội",
-    "price": 300000
-  },
-  {
     "id": "apt002",
     "userId": "user001",
     "doctorId": "bs002",
@@ -73,20 +58,5 @@
     "hospitalName": "Bệnh viện Nhi Trung ương",
     "address": "18A Tôn Thất Tùng, Đống Đa, Hà Nội",
     "price": 200000
-  },
-  {
-    "id": "apt006",
-    "userId": "user002",
-    "doctorId": "bs001",
-    "doctorName": "BS. Nguyễn Văn An",
-    "specialty": "Tim mạch",
-    "date": "2026-04-20",
-    "time": "11:00",
-    "status": "cancelled",
-    "type": "Khám bệnh",
-    "notes": "Đau ngực",
-    "hospitalName": "Bệnh viện Trung ương",
-    "address": "1 Trần Hưng Đạo, Hoàn Kiếm, Hà Nội",
-    "price": 300000
   }
 ]

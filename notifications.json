@@ -1,19 +1,5 @@
 [
   {
-    "id": "notif_001",
-    "userId": "user001",
-    "title": "Nhắc lịch khám",
-    "body": "Bạn có lịch khám với BS. Nguyễn Văn An vào ngày mai lúc 09:00 tại Bệnh viện Trung ương",
-    "type": "appointment",
-    "read": false,
-    "createdAt": "2026-05-04T10:30:00.000Z",
-    "data": {
-      "appointmentId": "apt001",
-      "doctorName": "BS. Nguyễn Văn An",
-      "appointmentDate": "2026-05-05T09:00:00.000Z"
-    }
-  },
-  {
     "id": "notif_002",
     "userId": "user001",
     "title": "Kết quả xét nghiệm",

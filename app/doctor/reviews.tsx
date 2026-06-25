@@ -3,12 +3,12 @@ import { useRouter } from 'expo-router';
 import { where } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import {
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { getDocumentsWithQuery } from '../services/firebaseService';
@@ -84,19 +84,20 @@ export default function DoctorReviews() {
   const loadReviews = async () => {
     try {
       setLoading(true);
-      const doctorId = (userData?.doctorInfo as any)?.doctorId;
+      // ✅ Use display doctor ID for reviews
+      const displayDoctorId = (userData?.doctorInfo as any)?.doctorId;
       
-      if (!doctorId) {
+      if (!displayDoctorId) {
         console.log('❌ No doctorId found');
         setLoading(false);
         return;
       }
 
-      console.log('🔍 Loading reviews for doctor:', doctorId);
+      console.log('🔍 Loading reviews for doctor:', displayDoctorId);
       
       // Load reviews from Firebase
       const reviewsData = await getDocumentsWithQuery('reviews', [
-        where('doctorId', '==', doctorId)
+        where('doctorId', '==', displayDoctorId)
       ]);
       
       console.log('✅ Loaded', reviewsData.length, 'reviews');
@@ -117,7 +118,7 @@ export default function DoctorReviews() {
             
             if (patients.length > 0) {
               patientsMap.set(patientId, patients[0]);
-              console.log('✅ Loaded patient:', patients[0].fullName);
+              console.log('✅ Loaded patient:', (patients[0] as any).fullName);
             }
           } catch (error) {
             console.error('❌ Error loading patient:', patientId, error);

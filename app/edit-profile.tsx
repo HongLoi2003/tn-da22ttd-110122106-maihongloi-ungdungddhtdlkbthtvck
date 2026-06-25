@@ -17,12 +17,14 @@ import {
 } from 'react-native';
 import CustomToast from './components/CustomToast';
 import { useAuth } from './context/AuthContext';
+import { calculateAge } from './utils/dateHelper';
 
 export default function EditProfileScreen() {
   const router = useRouter();
   const { userData, updateUserData } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showGenderPicker, setShowGenderPicker] = useState(false);
+  const [calculatedAge, setCalculatedAge] = useState<number | null>(null);
   
   // Toast state
   const [toast, setToast] = useState({
@@ -42,6 +44,7 @@ export default function EditProfileScreen() {
     bloodType: '',
     height: '',
     weight: '',
+    insuranceCode: '',
     avatar: '',
   });
 
@@ -57,10 +60,28 @@ export default function EditProfileScreen() {
         bloodType: userData.bloodType || '',
         height: userData.height?.toString() || '',
         weight: userData.weight?.toString() || '',
+        insuranceCode: userData.insuranceCode || '',
         avatar: userData.avatar || '',
       });
+      
+      // Tính tuổi từ ngày sinh
+      if (userData.dateOfBirth) {
+        const age = calculateAge(userData.dateOfBirth);
+        setCalculatedAge(age > 0 ? age : null);
+      }
     }
   }, [userData]);
+
+  // Tự động tính tuổi khi người dùng nhập ngày sinh
+  useEffect(() => {
+    if (formData.dateOfBirth) {
+      const age = calculateAge(formData.dateOfBirth);
+      setCalculatedAge(age > 0 ? age : null);
+      console.log('✅ [EDIT_PROFILE] Calculated age:', age);
+    } else {
+      setCalculatedAge(null);
+    }
+  }, [formData.dateOfBirth]);
 
   const handleChangeAvatar = async () => {
     Alert.alert(
@@ -121,6 +142,7 @@ export default function EditProfileScreen() {
         bloodType: formData.bloodType,
         height: formData.height ? parseInt(formData.height) : 0,
         weight: formData.weight ? parseInt(formData.weight) : 0,
+        insuranceCode: formData.insuranceCode,
         avatar: formData.avatar,
       });
       
@@ -253,6 +275,9 @@ export default function EditProfileScreen() {
                 placeholder="DD/MM/YYYY"
               />
             </View>
+            {calculatedAge !== null && (
+              <Text style={styles.ageHint}>Tuổi: {calculatedAge} tuổi</Text>
+            )}
           </View>
 
           <View style={styles.inputGroup}>
@@ -307,6 +332,19 @@ export default function EditProfileScreen() {
                 value={formData.bloodType}
                 onChangeText={(text) => setFormData({ ...formData, bloodType: text })}
                 placeholder="Ví dụ: O+, A+, B+, AB+"
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Mã số BHYT</Text>
+            <View style={styles.inputContainer}>
+              <Ionicons name="card-outline" size={20} color="#64748b" />
+              <TextInput
+                style={styles.input}
+                value={formData.insuranceCode}
+                onChangeText={(text) => setFormData({ ...formData, insuranceCode: text })}
+                placeholder="Nhập mã số bảo hiểm y tế"
               />
             </View>
           </View>
@@ -491,6 +529,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#64748b',
     marginTop: 4,
+  },
+  ageHint: {
+    fontSize: 12,
+    color: '#00BCD4',
+    marginTop: 4,
+    fontWeight: '500',
     marginLeft: 4,
   },
   row: {

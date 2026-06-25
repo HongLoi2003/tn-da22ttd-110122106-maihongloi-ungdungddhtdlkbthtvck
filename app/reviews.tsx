@@ -7,24 +7,24 @@ import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacit
 import { useAuth } from './context/AuthContext';
 import { getDocumentsWithQuery } from './services/firebaseService';
 
-// Mapping ảnh bác sĩ
+// Mapping ảnh bác sĩ - 16 ảnh thật từ Pexels (chất lượng cao, miễn phí bản quyền)
 const doctorImages: any = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
-  'dangthithao.jpg': require('@/assets/images/dangthithao.jpg'),
+  'nguyenvanam.png': { uri: 'https://images.pexels.com/photos/26336880/pexels-photo-26336880.jpeg' },
+  'leminhtam.png': { uri: 'https://images.pexels.com/photos/5722163/pexels-photo-5722163.jpeg' },
+  'lehoangnam.png': { uri: 'https://images.pexels.com/photos/14438788/pexels-photo-14438788.jpeg' },
+  'dominhtuan.png': { uri: 'https://images.pexels.com/photos/14628069/pexels-photo-14628069.jpeg' },
+  'hoangvanduc.png': { uri: 'https://images.pexels.com/photos/27666713/pexels-photo-27666713.jpeg' },
+  'tranvankhoa.png': { uri: 'https://images.pexels.com/photos/15962798/pexels-photo-15962798.jpeg' },
+  'phamminhquan.png': { uri: 'https://images.pexels.com/photos/29995617/pexels-photo-29995617.jpeg' },
+  'nguyenvanhai.png': { uri: 'https://images.pexels.com/photos/19601385/pexels-photo-19601385.jpeg' },
+  'tranthilan.png': { uri: 'https://images.pexels.com/photos/15641079/pexels-photo-15641079.jpeg' },
+  'tranthimai.png': { uri: 'https://images.pexels.com/photos/27666717/pexels-photo-27666717.jpeg' },
+  'phamthuha.png': { uri: 'https://images.pexels.com/photos/15962796/pexels-photo-15962796.jpeg' },
+  'vuthilan.png': { uri: 'https://images.pexels.com/photos/27392531/pexels-photo-27392531.jpeg' },
+  'ngothihuong.png': { uri: 'https://images.pexels.com/photos/14628046/pexels-photo-14628046.jpeg' },
+  'nguyenthihoa.png': { uri: 'https://images.pexels.com/photos/14628045/pexels-photo-14628045.jpeg' },
+  'lethihang.png': { uri: 'https://images.pexels.com/photos/4173248/pexels-photo-4173248.jpeg' },
+  'dangthithao.jpg': { uri: 'https://images.pexels.com/photos/29995629/pexels-photo-29995629.jpeg' },
 };
 
 export default function ReviewsScreen() {
@@ -50,13 +50,22 @@ export default function ReviewsScreen() {
         return;
       }
       
+      console.log('📋 [REVIEWS] Loading reviews for user:', user.uid);
+      
       // Lấy đánh giá đã viết
       const reviews = await getDocumentsWithQuery('reviews', [
         where('userId', '==', user.uid)
       ]);
+      
+      console.log('📋 [REVIEWS] Loaded', reviews.length, 'reviews');
+      
+      // Sort theo createdAt (mới nhất lên đầu)
       const sortedReviews = reviews.sort((a: any, b: any) => {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA; // Ngày mới nhất trước
       });
+      
       setMyReviews(sortedReviews);
 
       // Lấy lịch hẹn chưa đánh giá
@@ -65,6 +74,8 @@ export default function ReviewsScreen() {
         where('status', '==', 'completed')
       ]);
       
+      console.log('📋 [REVIEWS] Loaded', appointments.length, 'completed appointments');
+      
       // Lọc những lịch hẹn chưa có đánh giá
       const reviewedAppointmentIds = reviews.map((r: any) => r.appointmentId);
       const pending = appointments.filter((apt: any) => 
@@ -72,10 +83,12 @@ export default function ReviewsScreen() {
       );
       setPendingReviews(pending);
 
+      console.log('📋 [REVIEWS] Found', pending.length, 'pending reviews');
+      
       // Load doctor avatars
       await loadDoctorAvatars([...sortedReviews, ...pending]);
     } catch (error) {
-      console.error('Error loading reviews:', error);
+      console.error('❌ [REVIEWS] Error loading reviews:', error);
       setMyReviews([]);
       setPendingReviews([]);
     } finally {
@@ -88,8 +101,20 @@ export default function ReviewsScreen() {
       const { getDocumentById } = await import('./services/firebaseService');
       const avatarMap: { [key: string]: any } = {};
       
-      // Get unique doctor IDs
-      const doctorIds = [...new Set(items.map(item => item.doctorId).filter(Boolean))];
+      // Get unique doctor IDs - with null/undefined check and safe property access
+      const doctorIds = [...new Set(
+        items
+          .map(item => {
+            // Safely access doctorId property
+            if (item && typeof item === 'object' && 'doctorId' in item) {
+              return item.doctorId;
+            }
+            return null;
+          })
+          .filter(id => id != null && id !== '')
+      )];
+      
+      console.log('📋 [REVIEWS] Loading avatars for doctor IDs:', doctorIds);
       
       for (const doctorId of doctorIds) {
         try {
@@ -107,12 +132,15 @@ export default function ReviewsScreen() {
       
       setDoctorAvatars(avatarMap);
     } catch (error) {
-      console.error('Error loading doctor avatars:', error);
+      console.error('❌ [REVIEWS] Error loading doctor avatars:', error);
     }
   };
 
-  const getDoctorAvatar = (doctorId: string) => {
-    return doctorAvatars[doctorId] || require('@/assets/images/logo.png');
+  const getDoctorAvatar = (doctorId: string | undefined) => {
+    if (!doctorId) {
+      return require('../assets/images/logo.png');
+    }
+    return doctorAvatars[doctorId] || require('../assets/images/logo.png');
   };
 
   const renderStars = (rating: number) => {
@@ -182,13 +210,13 @@ export default function ReviewsScreen() {
             {pendingReviews.map((review) => (
               <TouchableOpacity key={review.id} style={styles.pendingCard}>
                 <Image
-                  source={getDoctorAvatar(review.doctorId)}
+                  source={getDoctorAvatar(review?.doctorId)}
                   style={styles.doctorAvatar}
                 />
                 <View style={styles.pendingInfo}>
-                  <Text style={styles.doctorName}>{review.doctor}</Text>
-                  <Text style={styles.specialty}>{review.specialty}</Text>
-                  <Text style={styles.reviewDate}>Khám ngày: {review.date}</Text>
+                  <Text style={styles.doctorName}>{review.doctor || 'Bác sĩ'}</Text>
+                  <Text style={styles.specialty}>{review.specialty || ''}</Text>
+                  <Text style={styles.reviewDate}>Khám ngày: {review.date || review.fullDate || ''}</Text>
                 </View>
                 <TouchableOpacity 
                   style={styles.reviewButton}
@@ -204,26 +232,32 @@ export default function ReviewsScreen() {
         {/* My Reviews */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Đánh giá của tôi</Text>
-          {myReviews.map((review) => (
-            <View key={review.id} style={styles.reviewCard}>
-              <View style={styles.reviewHeader}>
-                <Image
-                  source={getDoctorAvatar(review.doctorId)}
-                  style={styles.doctorAvatar}
-                />
-                <View style={styles.reviewHeaderInfo}>
-                  <Text style={styles.doctorName}>{review.doctor}</Text>
-                  <Text style={styles.specialty}>{review.specialty}</Text>
-                  {renderStars(review.rating)}
-                </View>
-                <TouchableOpacity style={styles.moreButton}>
-                  <Ionicons name="ellipsis-vertical" size={20} color="#64748b" />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.reviewComment}>{review.comment}</Text>
-              <Text style={styles.reviewDate}>{review.date}</Text>
+          {myReviews.length === 0 ? (
+            <View style={styles.emptyReviews}>
+              <Text style={styles.emptyText}>Bạn chưa có đánh giá nào</Text>
             </View>
-          ))}
+          ) : (
+            myReviews.map((review) => (
+              <View key={review.id} style={styles.reviewCard}>
+                <View style={styles.reviewHeader}>
+                  <Image
+                    source={getDoctorAvatar(review?.doctorId)}
+                    style={styles.doctorAvatar}
+                  />
+                  <View style={styles.reviewHeaderInfo}>
+                    <Text style={styles.doctorName}>{review.doctor || 'Bác sĩ'}</Text>
+                    <Text style={styles.specialty}>{review.specialty || ''}</Text>
+                    {renderStars(review.rating || 0)}
+                  </View>
+                  <TouchableOpacity style={styles.moreButton}>
+                    <Ionicons name="ellipsis-vertical" size={20} color="#64748b" />
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.reviewComment}>{review.comment || ''}</Text>
+                <Text style={styles.reviewDate}>{review.date || ''}</Text>
+              </View>
+            ))
+          )}
         </View>
 
         <View style={{ height: 40 }} />
@@ -390,5 +424,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 60,
+  },
+  emptyReviews: {
+    backgroundColor: '#fff',
+    padding: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 14,
+    color: '#94a3b8',
+    textAlign: 'center',
   },
 });

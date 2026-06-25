@@ -1,23 +1,123 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    Image,
+    Alert,
+    Modal,
     SafeAreaView,
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useAuth } from './context/AuthContext';
+
+interface InsuranceInfo {
+  name: string;
+  code: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+}
 
 export default function HealthInsuranceScreen() {
   const router = useRouter();
+  const { userData, updateUserData } = useAuth();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const guideSectionRef = useRef<View>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  
+  const [insuranceInfo, setInsuranceInfo] = useState<InsuranceInfo | null>(null);
+  
+  const [formData, setFormData] = useState<InsuranceInfo>({
+    name: '',
+    code: '',
+    startDate: '',
+    endDate: '',
+    status: 'Đang hiệu lực'
+  });
+
+  // Load insurance info from userData when component mounts
+  useEffect(() => {
+    if (userData?.insuranceCode) {
+      setInsuranceInfo({
+        name: userData.fullName || '',
+        code: userData.insuranceCode,
+        startDate: userData.insuranceStartDate || '',
+        endDate: userData.insuranceEndDate || '',
+        status: userData.insuranceStatus || 'Đang hiệu lực'
+      });
+    }
+  }, [userData]);
 
   const handleQuickAction = (action: string) => {
     setSelectedSection(action);
+  };
+
+  const handleAddInsurance = () => {
+    if (insuranceInfo) {
+      setFormData({
+        name: insuranceInfo.name,
+        code: insuranceInfo.code,
+        startDate: insuranceInfo.startDate,
+        endDate: insuranceInfo.endDate,
+        status: insuranceInfo.status
+      });
+    } else {
+      setFormData({
+        name: '',
+        code: '',
+        startDate: '',
+        endDate: '',
+        status: 'Đang hiệu lực'
+      });
+    }
+    setShowAddModal(true);
+  };
+
+  const handleSaveInsurance = async () => {
+    if (!formData.name || !formData.code || !formData.startDate || !formData.endDate) {
+      Alert.alert('Thông báo', 'Vui lòng điền đầy đủ thông tin');
+      return;
+    }
+    
+    try {
+      // Save to local state
+      setInsuranceInfo(formData);
+      
+      // Save to Firebase userData
+      await updateUserData({
+        insuranceCode: formData.code,
+        insuranceStartDate: formData.startDate,
+        insuranceEndDate: formData.endDate,
+        insuranceStatus: formData.status,
+      });
+      
+      setShowAddModal(false);
+      const message = insuranceInfo 
+        ? 'Đã cập nhật thông tin bảo hiểm y tế' 
+        : 'Đã thêm thẻ bảo hiểm y tế thành công';
+      Alert.alert('Thành công', message);
+    } catch (error) {
+      console.error('Error saving insurance info:', error);
+      Alert.alert('Lỗi', 'Không thể lưu thông tin bảo hiểm');
+    }
+  };
+
+  const scrollToGuideSection = () => {
+    if (guideSectionRef.current && scrollViewRef.current) {
+      guideSectionRef.current.measureLayout(
+        scrollViewRef.current as any,
+        (x, y) => {
+          scrollViewRef.current?.scrollTo({ y: y - 20, animated: true });
+        },
+        () => {}
+      );
+    }
   };
 
   return (
@@ -27,70 +127,87 @@ export default function HealthInsuranceScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Bảo hiểm y tế</Text>
-        <TouchableOpacity>
-          <View style={styles.helpButton}>
-            <Ionicons name="help-circle-outline" size={20} color="#00BCD4" />
-            <Text style={styles.helpText}>Hướng dẫn</Text>
-          </View>
+        <Text style={styles.headerTitle}> Bảo hiểm y tế </Text>
+        <TouchableOpacity onPress={handleAddInsurance}>
+          <Ionicons name="add-circle" size={28} color="#00BCD4" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
-        {/* Insurance Card */}
-        <View style={styles.cardContainer}>
-          <View style={styles.insuranceCard}>
-            <View style={styles.cardHeader}>
-              <View>
-                <View style={styles.cardTitleRow}>
-                  <Text style={styles.cardTitle}>Thẻ bảo hiểm y tế</Text>
-                  <View style={styles.cardBadge}>
-                    <Text style={styles.cardBadgeText}>Đang hiệu lực</Text>
+      <ScrollView ref={scrollViewRef} showsVerticalScrollIndicator={false} style={styles.scrollView}>
+        {/* Insurance Card or Empty State */}
+        {insuranceInfo ? (
+          <View style={styles.cardContainer}>
+            <View style={styles.insuranceCard}>
+              <View style={styles.cardHeader}>
+                <View>
+                  <View style={styles.cardTitleRow}>
+                    <Text style={styles.cardTitle}>Thẻ bảo hiểm y tế</Text>
+                    <View style={styles.cardBadge}>
+                      <Text style={styles.cardBadgeText}>{insuranceInfo.status}</Text>
+                    </View>
+                  </View>
+                </View>
+                <View style={styles.shieldContainer}>
+                  <View style={styles.shieldIcon}>
+                    <Ionicons name="shield-checkmark" size={40} color="#fff" />
                   </View>
                 </View>
               </View>
-              <View style={styles.shieldContainer}>
-                <View style={styles.shieldIcon}>
-                  <Ionicons name="shield-checkmark" size={40} color="#fff" />
+              
+              <Text style={styles.cardName}>{insuranceInfo.name}</Text>
+              <Text style={styles.cardNumber}>Mã số BHYT: {insuranceInfo.code}</Text>
+              
+              <View style={styles.cardDates}>
+                <View style={styles.dateItem}>
+                  <Ionicons name="calendar-outline" size={18} color="#fff" />
+                  <View style={styles.dateInfo}>
+                    <Text style={styles.dateLabel}>Ngày hiệu lực</Text>
+                    <Text style={styles.dateValue}>{insuranceInfo.startDate}</Text>
+                  </View>
+                </View>
+                <View style={styles.dateItem}>
+                  <Ionicons name="time-outline" size={18} color="#fff" />
+                  <View style={styles.dateInfo}>
+                    <Text style={styles.dateLabel}>Ngày hết hạn</Text>
+                    <Text style={styles.dateValue}>{insuranceInfo.endDate}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-            
-            <Text style={styles.cardName}>NGUYỄN VĂN A</Text>
-            <Text style={styles.cardNumber}>Mã số BHYT: DN 4 01 01 123 456 7890</Text>
-            
-            <View style={styles.cardDates}>
-              <View style={styles.dateItem}>
-                <Ionicons name="calendar-outline" size={18} color="#fff" />
-                <View style={styles.dateInfo}>
-                  <Text style={styles.dateLabel}>Ngày hiệu lực</Text>
-                  <Text style={styles.dateValue}>01/01/2024</Text>
-                </View>
-              </View>
-              <View style={styles.dateItem}>
-                <Ionicons name="time-outline" size={18} color="#fff" />
-                <View style={styles.dateInfo}>
-                  <Text style={styles.dateLabel}>Ngày hết hạn</Text>
-                  <Text style={styles.dateValue}>31/12/2024</Text>
-                </View>
-              </View>
+
+              <TouchableOpacity 
+                style={styles.viewCardButton}
+                onPress={() => handleQuickAction('view-card')}
+              >
+                <Ionicons name="qr-code-outline" size={18} color="#00BCD4" />
+                <Text style={styles.viewCardText}>Xem thẻ BHYT</Text>
+              </TouchableOpacity>
             </View>
 
-            <TouchableOpacity 
-              style={styles.viewCardButton}
-              onPress={() => handleQuickAction('view-card')}
-            >
-              <Ionicons name="qr-code-outline" size={18} color="#00BCD4" />
-              <Text style={styles.viewCardText}>Xem thẻ BHYT</Text>
-            </TouchableOpacity>
+            {/* Card Indicators */}
+            <View style={styles.cardIndicators}>
+              <View style={[styles.indicator, styles.indicatorActive]} />
+            </View>
           </View>
-
-          {/* Card Indicators */}
-          <View style={styles.cardIndicators}>
-            <View style={[styles.indicator, styles.indicatorActive]} />
-            <View style={styles.indicator} />
+        ) : (
+          <View style={styles.emptyStateContainer}>
+            <View style={styles.emptyStateCard}>
+              <View style={styles.emptyStateIcon}>
+                <Ionicons name="shield-outline" size={80} color="#00BCD4" />
+              </View>
+              <Text style={styles.emptyStateTitle}>Chưa có thẻ bảo hiểm y tế</Text>
+              <Text style={styles.emptyStateDescription}>
+                Thêm thông tin thẻ BHYT của bạn để quản lý và tra cứu quyền lợi bảo hiểm
+              </Text>
+              <TouchableOpacity 
+                style={styles.emptyStateButton}
+                onPress={handleAddInsurance}
+              >
+                <Ionicons name="add-circle-outline" size={24} color="#fff" />
+                <Text style={styles.emptyStateButtonText}>Thêm thẻ BHYT</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
@@ -378,10 +495,7 @@ export default function HealthInsuranceScreen() {
 
         {/* Health Insurance Banner */}
         <View style={styles.bannerContainer}>
-          <Image
-            source={require('@/assets/images/logo.png')}
-            style={styles.bannerImage}
-          />
+          
           <View style={styles.bannerContent}>
             <Text style={styles.bannerTitle}>Bảo vệ sức khỏe toàn diện cho bạn và gia đình</Text>
             <Text style={styles.bannerSubtitle}>Tham gia bảo hiểm bổ sung để được hưởng quyền lợi cao hơn</Text>
@@ -411,35 +525,32 @@ export default function HealthInsuranceScreen() {
           <View style={styles.benefitsGrid}>
             <View style={styles.benefitItem}>
               <View style={styles.benefitIcon}>
-                <Ionicons name="medical-outline" size={28} color="#00BCD4" />
+                <Ionicons name="medical-outline" size={24} color="#00BCD4" />
               </View>
-              <Text style={styles.benefitTitle}>Khám chữa bệnh{'\n'}đúng tuyến</Text>
+              <Text style={styles.benefitTitle}>Đúng tuyến</Text>
               <Text style={styles.benefitPercentage}>100%</Text>
-              <Text style={styles.benefitDescription}>Chi phí được chi trả</Text>
             </View>
 
             <View style={styles.benefitItem}>
               <View style={styles.benefitIcon}>
-                <Ionicons name="medical-outline" size={28} color="#00BCD4" />
+                <Ionicons name="medical-outline" size={24} color="#00BCD4" />
               </View>
-              <Text style={styles.benefitTitle}>Khám chữa bệnh{'\n'}trái tuyến</Text>
-              <Text style={styles.benefitPercentage}>40% - 100%</Text>
-              <Text style={styles.benefitDescription}>Chi phí được chi trả</Text>
+              <Text style={styles.benefitTitle}>Trái tuyến</Text>
+              <Text style={styles.benefitPercentage}>40 - 100%</Text>
             </View>
 
             <View style={styles.benefitItem}>
               <View style={styles.benefitIcon}>
-                <Ionicons name="medkit-outline" size={28} color="#00BCD4" />
+                <Ionicons name="medkit-outline" size={24} color="#00BCD4" />
               </View>
-              <Text style={styles.benefitTitle}>Tỷ lệ chi trả{'\n'}thuốc, vật tư y tế</Text>
-              <Text style={styles.benefitPercentage}>80% - 100%</Text>
-              <Text style={styles.benefitDescription}>Tùy theo loại dịch vụ</Text>
+              <Text style={styles.benefitTitle}>Thuốc và Vật tư</Text>
+              <Text style={styles.benefitPercentage}>80 - 100%</Text>
             </View>
           </View>
         </View>
 
         {/* Guide Section */}
-        <View style={styles.guideSection}>
+        <View ref={guideSectionRef} style={styles.guideSection}>
           <Text style={styles.sectionTitle}>Hướng dẫn & Tiện ích</Text>
           
           <TouchableOpacity 
@@ -487,6 +598,111 @@ export default function HealthInsuranceScreen() {
         
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Add/Edit Insurance Modal */}
+      <Modal
+        visible={showAddModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowAddModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {insuranceInfo ? 'Cập nhật thông tin BHYT' : 'Thêm thẻ bảo hiểm y tế'}
+              </Text>
+              <TouchableOpacity onPress={() => setShowAddModal(false)}>
+                <Ionicons name="close-circle" size={28} color="#666" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Họ và tên</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={formData.name}
+                  onChangeText={(text) => setFormData({...formData, name: text})}
+                  placeholder="Nhập họ và tên"
+                  placeholderTextColor="#999"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Mã số BHYT</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={formData.code}
+                  onChangeText={(text) => setFormData({...formData, code: text})}
+                  placeholder="Ví dụ: DN 4 01 01 123 456 7890"
+                  placeholderTextColor="#999"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Ngày hiệu lực</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={formData.startDate}
+                  onChangeText={(text) => setFormData({...formData, startDate: text})}
+                  placeholder="dd/mm/yyyy"
+                  placeholderTextColor="#999"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Ngày hết hạn</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={formData.endDate}
+                  onChangeText={(text) => setFormData({...formData, endDate: text})}
+                  placeholder="dd/mm/yyyy"
+                  placeholderTextColor="#999"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Trạng thái</Text>
+                <View style={styles.statusButtons}>
+                  <TouchableOpacity 
+                    style={[
+                      styles.statusButton,
+                      formData.status === 'Đang hiệu lực' && styles.statusButtonActive
+                    ]}
+                    onPress={() => setFormData({...formData, status: 'Đang hiệu lực'})}
+                  >
+                    <Text style={[
+                      styles.statusButtonText,
+                      formData.status === 'Đang hiệu lực' && styles.statusButtonTextActive
+                    ]}>Đang hiệu lực</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={[
+                      styles.statusButton,
+                      formData.status === 'Hết hạn' && styles.statusButtonActive
+                    ]}
+                    onPress={() => setFormData({...formData, status: 'Hết hạn'})}
+                  >
+                    <Text style={[
+                      styles.statusButtonText,
+                      formData.status === 'Hết hạn' && styles.statusButtonTextActive
+                    ]}>Hết hạn</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <TouchableOpacity 
+                style={styles.saveButton}
+                onPress={handleSaveInsurance}
+              >
+                <Text style={styles.saveButtonText}>Lưu thông tin</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -677,6 +893,8 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     gap: 12,
+    borderWidth: 2,
+    borderColor: '#00BCD4',
   },
   bannerImage: {
     width: 60,
@@ -742,30 +960,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
+    padding: 12,
     alignItems: 'center',
   },
   benefitIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#E0F7FA',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   benefitTitle: {
     fontSize: 11,
     color: '#666',
     textAlign: 'center',
-    marginBottom: 8,
-    lineHeight: 15,
+    marginBottom: 6,
+    fontWeight: '500',
   },
   benefitPercentage: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
     color: '#00BCD4',
-    marginBottom: 4,
   },
   benefitDescription: {
     fontSize: 10,
@@ -1017,5 +1234,153 @@ const styles = StyleSheet.create({
   costInsurance: {
     fontSize: 12,
     color: '#666',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: '85%',
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#000',
+  },
+  modalBody: {
+    padding: 20,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  formLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  formInput: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 15,
+    color: '#000',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  statusButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  statusButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: '#f8f9fa',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    alignItems: 'center',
+  },
+  statusButtonActive: {
+    backgroundColor: '#E0F7FA',
+    borderColor: '#00BCD4',
+  },
+  statusButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666',
+  },
+  statusButtonTextActive: {
+    color: '#00BCD4',
+  },
+  saveButton: {
+    backgroundColor: '#00BCD4',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 12,
+    shadowColor: '#00BCD4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  emptyStateContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  emptyStateCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  emptyStateIcon: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: '#E0F7FA',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  emptyStateTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#000',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  emptyStateDescription: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  emptyStateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#00BCD4',
+    paddingVertical: 14,
+    paddingHorizontal: 28,
+    borderRadius: 12,
+    shadowColor: '#00BCD4',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  emptyStateButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
 });

@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { db } from './config/firebase';
+import { getFirestoreDb } from './config/firebase';
 
 export default function ClearAllAppointments() {
   const router = useRouter();
@@ -37,7 +37,7 @@ export default function ClearAllAppointments() {
               console.log('🗑️ [CLEAR] Starting to delete all appointments...');
               
               // Get all appointments
-              const appointmentsRef = collection(db, 'appointments');
+              const appointmentsRef = collection(getFirestoreDb(), 'appointments');
               const snapshot = await getDocs(appointmentsRef);
               
               console.log(`📋 [CLEAR] Found ${snapshot.size} appointments to delete`);

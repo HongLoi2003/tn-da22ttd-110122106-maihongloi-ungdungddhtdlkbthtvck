@@ -7,7 +7,7 @@ import {
     getDocumentById,
     getDocumentsWithQuery,
     updateDocument,
-} from '@/app/services/firebaseService';
+} from '@/services/firebaseService';
 import { where } from 'firebase/firestore';
 
 // 1. Tạo bác sĩ mới

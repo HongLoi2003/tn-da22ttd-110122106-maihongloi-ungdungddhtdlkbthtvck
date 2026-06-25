@@ -30,7 +30,9 @@ export default function CreateTestAppointments() {
         return;
       }
 
-      const doctorId = (userData.doctorInfo as any)?.doctorId || userData.uid;
+      // ✅ Separate IDs for different purposes
+      const firebaseAuthUid = userData.uid;
+      const displayDoctorId = (userData.doctorInfo as any)?.doctorId || userData.uid;
       const doctorName = (userData.doctorInfo as any)?.ten || userData.fullName || 'BS. Test';
       
       console.log('🔍 [CREATE_TEST] Creating test appointments for doctorId:', doctorId);

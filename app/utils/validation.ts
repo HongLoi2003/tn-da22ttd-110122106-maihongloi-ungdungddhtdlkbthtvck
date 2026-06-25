@@ -3,7 +3,7 @@
  * Form validation and data validation helpers
  */
 
-import CONFIG from '@/app/config/config';
+import CONFIG from '@/config/config';
 
 export interface ValidationResult {
   isValid: boolean;

@@ -3,17 +3,17 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Timestamp, where } from 'firebase/firestore';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    FlatList,
-    Image,
-    KeyboardAvoidingView,
-    Linking,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Animated,
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { createDocument, getDocumentsWithQuery, updateDocument } from '../services/firebaseService';
@@ -165,8 +165,7 @@ export default function DoctorChatDetail() {
       setMessages(formattedMessages);
       setLoading(false);
 
-      // Mark messages as read
-      const doctorId = (userData?.doctorInfo as any)?.doctorId || userData?.uid;
+      // Mark messages as read (not used, messages filtered by senderType instead)
       const unreadMessages = messagesData.filter((msg: any) => 
         msg.senderType === 'patient' && !msg.read
       );
@@ -199,14 +198,16 @@ export default function DoctorChatDetail() {
     setMessage('');
 
     try {
-      const doctorId = (userData.doctorInfo as any)?.doctorId || userData.uid;
+      // ✅ CRITICAL: Always use Firebase Auth UID for all operations
+      const firebaseAuthUid = userData.uid;
+      const displayDoctorId = (userData as any).doctorId || userData.uid;
 
       // Create message
       await createDocument('messages', {
         conversationId,
         text: messageText,
         message: messageText,
-        senderId: doctorId,
+        senderId: firebaseAuthUid, // ✅ Firebase Auth UID
         senderType: 'doctor',
         timestamp: Timestamp.now(),
         read: false,
@@ -227,9 +228,7 @@ export default function DoctorChatDetail() {
 
       // Send notification to patient
       try {
-        await notificationService.notifyNewMessage(doctorName, messageText);
-        
-        // Also create notification in Firestore for patient
+        // Create notification in Firestore for patient
         await createDocument('notifications', {
           userId: patientId,
           title: `💬 Tin nhắn từ ${doctorName}`,
@@ -239,7 +238,8 @@ export default function DoctorChatDetail() {
           createdAt: new Date().toISOString(),
           data: {
             conversationId,
-            doctorId: doctorId,
+            doctorId: displayDoctorId, // Display ID (bs001, bs004, etc.) for UI purposes only
+            doctorAuthUid: firebaseAuthUid, // ✅ Firebase Auth UID for queries
             doctorName: doctorName,
           },
         });

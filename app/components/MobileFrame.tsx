@@ -1,55 +1,13 @@
 import { ReactNode } from 'react';
-import { Dimensions, Platform, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 interface MobileFrameProps {
   children: ReactNode;
 }
 
 export default function MobileFrame({ children }: MobileFrameProps) {
-  // Tạm thời disable frame để debug
+  // Tắt frame để tránh bị 2 lớp điện thoại chồng lên nhau
   return <>{children}</>;
-  
-  // Chỉ áp dụng frame trên web
-  if (Platform.OS !== 'web') {
-    return <>{children}</>;
-  }
-
-  const windowWidth = Dimensions.get('window').width;
-  const windowHeight = Dimensions.get('window').height;
-
-  // Nếu màn hình nhỏ hơn mobile, không dùng frame
-  if (windowWidth < 500) {
-    return <>{children}</>;
-  }
-
-  return (
-    <View style={styles.container}>
-      <View style={[styles.mobileFrame, { maxHeight: windowHeight - 40 }]}>
-        {/* Status bar giả */}
-        <View style={styles.statusBar}>
-          <View style={styles.statusBarLeft}>
-            <Text style={styles.time}>9:41</Text>
-          </View>
-          <View style={styles.notch} />
-          <View style={styles.statusBarRight}>
-            <Text style={styles.statusIcon}>📶</Text>
-            <Text style={styles.statusIcon}>📡</Text>
-            <Text style={styles.statusIcon}>🔋</Text>
-          </View>
-        </View>
-
-        {/* App content */}
-        <View style={styles.appContent}>
-          {children}
-        </View>
-
-        {/* Home indicator (iPhone style) */}
-        <View style={styles.homeIndicatorContainer}>
-          <View style={styles.homeIndicator} />
-        </View>
-      </View>
-    </View>
-  );
 }
 
 const styles = StyleSheet.create({
@@ -61,10 +19,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   mobileFrame: {
-    width: 390,
-    height: 844,
+    width: 405,
+    height: 900,
     backgroundColor: '#fff',
-    borderRadius: 40,
+    borderRadius: 30,
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 20 },
@@ -72,17 +30,17 @@ const styles = StyleSheet.create({
     shadowRadius: 40,
     elevation: 15,
     borderWidth: 8,
-    borderColor: '#0f172a',
+    borderColor: '#1a1a1a',
   },
   statusBar: {
-    height: 44,
+    height: 28,
     backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
     zIndex: 1000,
   },
   statusBarLeft: {
@@ -94,14 +52,15 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   notch: {
-    width: 150,
-    height: 30,
+    width: 100,
+    height: 20,
     backgroundColor: '#000',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
     position: 'absolute',
     top: 0,
-    left: 120,
+    left: '50%',
+    marginLeft: -50,
   },
   statusBarRight: {
     flexDirection: 'row',
@@ -118,18 +77,18 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   homeIndicatorContainer: {
-    height: 34,
+    height: 20,
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    borderBottomLeftRadius: 22,
+    borderBottomRightRadius: 22,
   },
   homeIndicator: {
-    width: 134,
-    height: 5,
+    width: 100,
+    height: 4,
     backgroundColor: '#000',
-    borderRadius: 3,
+    borderRadius: 2,
     opacity: 0.3,
   },
 });

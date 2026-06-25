@@ -1,19 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
+import { sendEmailVerification } from 'firebase/auth';
 import { useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import CustomToast from './components/CustomToast';
 import { useAuth } from './context/AuthContext';
 import errorHandler from './utils/errorHandler';
 import validator from './utils/validation';
@@ -31,6 +32,14 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // Toast state
+  const [toast, setToast] = useState({
+    visible: false,
+    type: 'success' as 'success' | 'error' | 'warning' | 'info',
+    title: '',
+    message: '',
+  });
 
   const handleRegister = async () => {
     // Validate form
@@ -44,12 +53,22 @@ export default function RegisterScreen() {
 
     if (!validation.isValid) {
       setErrors(validation.errors);
-      Alert.alert('Lỗi xác thực', Object.values(validation.errors)[0]);
+      setToast({
+        visible: true,
+        type: 'error',
+        title: 'Lỗi xác thực',
+        message: Object.values(validation.errors)[0],
+      });
       return;
     }
 
     if (!agreeTerms) {
-      Alert.alert('Lỗi', 'Vui lòng đồng ý với điều khoản sử dụng');
+      setToast({
+        visible: true,
+        type: 'warning',
+        title: 'Lưu ý',
+        message: 'Vui lòng đồng ý với điều khoản sử dụng',
+      });
       return;
     }
 
@@ -78,26 +97,45 @@ export default function RegisterScreen() {
       await logout();
       setLoading(false);
       
-      Alert.alert(
-        'Đăng ký thành công!', 
-        `Tài khoản của bạn đã được tạo.\n\n📧 Chúng tôi đã gửi email xác minh đến:\n${email}\n\nVui lòng kiểm tra hộp thư (kể cả thư mục Spam) và xác minh email trước khi đăng nhập.`,
-        [{ 
-          text: 'OK',
-          onPress: () => router.replace('/login')
-        }]
-      );
+      // Hiển thị toast thành công
+      setToast({
+        visible: true,
+        type: 'success',
+        title: 'Đăng ký thành công!',
+        message: 'Vui lòng kiểm tra email để xác minh tài khoản',
+      });
+      
+      // Chuyển về trang login sau 2 giây
+      setTimeout(() => {
+        router.replace('/login');
+      }, 2000);
     } catch (error: any) {
       const appError = errorHandler.handleError(error);
       errorHandler.logError(appError);
-      Alert.alert('Đăng ký thất bại', appError.message);
+      setToast({
+        visible: true,
+        type: 'error',
+        title: 'Đăng ký thất bại',
+        message: appError.message,
+      });
       setLoading(false);
     }
   };
 
   return (
     <View style={styles.container}>
+      {/* Toast Notification */}
+      <CustomToast
+        visible={toast.visible}
+        type={toast.type}
+        title={toast.title}
+        message={toast.message}
+        onHide={() => setToast({ ...toast, visible: false })}
+        duration={3000}
+      />
+      
       <Image
-        source={require('@/assets/images/bckgour.png')}
+        source={require('../assets/images/backgourd.png')}
         style={styles.backgroundImage}
         contentFit="cover"
       />
@@ -112,12 +150,12 @@ export default function RegisterScreen() {
         {/* Logo */}
         <View style={styles.logoContainer}>
           <Image
-            source={require('@/assets/images/logo.png')}
+            source={require('../assets/images/logo.png')}
             style={styles.logo}
             contentFit="contain"
           />
           <Text style={styles.title}>Tạo tài khoản mới</Text>
-          <Text style={styles.subtitle}>Đăng ký để bắt đầu sử dụng</Text>
+          <Text style={styles.subtitle}>Đăng ký để đặt lịch khám và nhận tư vấn sức khỏe dễ dàng</Text>
         </View>
 
         {/* Form */}
@@ -130,6 +168,7 @@ export default function RegisterScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Nhập họ và tên"
+                placeholderTextColor="#64748b"
                 value={fullName}
                 onChangeText={(text) => {
                   setFullName(text);
@@ -149,6 +188,7 @@ export default function RegisterScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Nhập email"
+                placeholderTextColor="#64748b"
                 value={email}
                 onChangeText={(text) => {
                   setEmail(text);
@@ -170,6 +210,7 @@ export default function RegisterScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Nhập số điện thoại"
+                placeholderTextColor="#64748b"
                 value={phone}
                 onChangeText={(text) => {
                   setPhone(text);
@@ -189,6 +230,7 @@ export default function RegisterScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Nhập mật khẩu (tối thiểu 8 ký tự)"
+                placeholderTextColor="#64748b"
                 value={password}
                 onChangeText={(text) => {
                   setPassword(text);
@@ -219,6 +261,7 @@ export default function RegisterScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Nhập lại mật khẩu"
+                placeholderTextColor="#64748b"
                 value={confirmPassword}
                 onChangeText={(text) => {
                   setConfirmPassword(text);
@@ -270,42 +313,7 @@ export default function RegisterScreen() {
             )}
           </TouchableOpacity>
 
-          {/* Divider */}
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>Hoặc đăng ký với</Text>
-            <View style={styles.dividerLine} />
-          </View>
-
-          {/* Social Register */}
-          <View style={styles.socialContainer}>
-            <TouchableOpacity 
-              style={styles.socialButton}
-              onPress={() => Alert.alert(
-                'Thông báo',
-                'Tính năng đăng ký bằng Google đang được phát triển. Vui lòng đăng ký bằng Email.',
-                [{ text: 'OK' }]
-              )}
-            >
-              <Image
-                source={require('@/assets/images/Google.png')}
-                style={styles.googleIcon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.socialButton}
-              onPress={() => Alert.alert(
-                'Thông báo',
-                'Tính năng đăng ký bằng Facebook đang được phát triển. Vui lòng đăng ký bằng Email.',
-                [{ text: 'OK' }]
-              )}
-            >
-              <Image
-                source={require('@/assets/images/Facebook.png')}
-                style={styles.facebookIcon}
-              />
-            </TouchableOpacity>
-          </View>
+          
 
           {/* Login Link */}
           <View style={styles.loginContainer}>
@@ -389,10 +397,10 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#ffffff',
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
+    borderColor: '#cbd5e1',
     paddingHorizontal: 14,
     height: 48,
   },
@@ -402,7 +410,8 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 15,
-    color: '#0f172a',
+    color: '#1e293b',
+    fontWeight: '500',
   },
   eyeIcon: {
     padding: 4,

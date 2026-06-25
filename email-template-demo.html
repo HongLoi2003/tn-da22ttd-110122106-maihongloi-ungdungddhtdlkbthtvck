@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Xác Nhận Đặt Lịch - HeartCare</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .email-container {
+            background-color: #ffffff;
+            margin: 20px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #00BCD4 0%, #0097A7 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+        }
+        .header p {
+            margin: 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .greeting {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .code-box {
+            background: #E0F7FA;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border: 2px dashed #80DEEA;
+            text-align: center;
+        }
+        .code-label {
+            font-size: 13px;
+            color: #00838F;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .code-value {
+            font-size: 26px;
+            font-weight: bold;
+            color: #00BCD4;
+            letter-spacing: 3px;
+            margin: 12px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .code-note {
+            font-size: 12px;
+            color: #00838F;
+            margin-top: 8px;
+        }
+        .info-box {
+            background: #f9f9f9;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 4px solid #00BCD4;
+        }
+        .info-box h3 {
+            color: #00BCD4;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+        }
+        .info-row {
+            display: flex;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #666;
+            min-width: 140px;
+            font-size: 14px;
+        }
+        .info-value {
+            color: #000;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .note-box {
+            background: #FFF9C4;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 10px;
+            border-left: 4px solid #FF9800;
+        }
+        .note-title {
+            font-weight: bold;
+            color: #F57F17;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .note-item {
+            color: #F57F17;
+            margin: 10px 0;
+            padding-left: 5px;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            background: #00BCD4;
+            color: white;
+            padding: 14px 32px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 25px auto;
+            font-weight: bold;
+            text-align: center;
+            font-size: 15px;
+        }
+        .button-container {
+            text-align: center;
+        }
+        .footer {
+            background: #f5f5f5;
+            text-align: center;
+            padding: 25px 20px;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .footer a {
+            color: #00BCD4;
+            text-decoration: none;
+        }
+        .signature {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+            .header {
+                padding: 30px 20px;
+            }
+            .code-value {
+                font-size: 20px;
+                letter-spacing: 2px;
+            }
+            .info-row {
+                flex-direction: column;
+            }
+            .info-label {
+                min-width: auto;
+                margin-bottom: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <h1>✅ Đặt lịch thành công!</h1>
+            <p>Lịch khám đang chờ bác sĩ xác nhận</p>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                <p>Xin chào <strong>{{to_name}}</strong>,</p>
+                <p>Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của <strong>HeartCare</strong>. Lịch khám của bạn đã được đặt thành công!</p>
+            </div>
+            
+            <!-- Mã đặt lịch -->
+            <div class="code-box">
+                <div class="code-label">📋 MÃ ĐẶT LỊCH</div>
+                <div class="code-value">{{appointment_code}}</div>
+                <div class="code-note">Vui lòng lưu mã này để tra cứu lịch khám</div>
+            </div>
+            
+            <!-- Mã check-in -->
+            <div class="code-box">
+                <div class="code-label">🎫 MÃ CHECK-IN</div>
+                <div class="code-value">{{checkin_code}}</div>
+                <div class="code-note">Xuất trình mã này khi đến bệnh viện</div>
+            </div>
+            
+            <!-- Thông tin bác sĩ -->
+            <div class="info-box">
+                <h3>👨‍⚕️ Thông tin bác sĩ</h3>
+                <div class="info-row">
+                    <span class="info-label">Bác sĩ:</span>
+                    <span class="info-value">{{doctor_name}}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Chuyên khoa:</span>
+                    <span class="info-value">{{specialty}}</span>
+                </div>
+            </div>
+            
+            <!-- Thông tin lịch khám -->
+            <div class="info-box">
+                <h3>📅 Thông tin lịch khám</h3>
+                <div class="info-row">
+                    <span class="info-label">Ngày khám:</span>
+                    <span class="info-value">{{appointment_date}}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Giờ khám:</span>
+                    <span class="info-value">{{appointment_time}}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Địa điểm:</span>
+                    <span class="info-value">{{hospital}}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phòng khám:</span>
+                    <span class="info-value">Phòng 204 - Tầng 2</span>
+                </div>
+            </div>
+            
+            <!-- Lưu ý quan trọng -->
+            <div class="note-box">
+                <div class="note-title">⚠️ LƯU Ý QUAN TRỌNG</div>
+                <div class="note-item">• Vui lòng đến trước giờ hẹn 15 phút</div>
+                <div class="note-item">• Mang theo CMND/CCCD và thẻ BHYT (nếu có)</div>
+                <div class="note-item">• Xuất trình mã check-in tại quầy lễ tân</div>
+                <div class="note-item">• Liên hệ hotline: <strong>1900 xxxx</strong> nếu cần hỗ trợ</div>
+            </div>
+            
+            <!-- Call to Action Button -->
+            <div class="button-container">
+                <a href="https://heartcare.app/appointments" class="button">
+                    📱 Xem lịch khám của tôi
+                </a>
+            </div>
+            
+            <!-- Signature -->
+            <div class="signature">
+                <p style="margin: 5px 0;">Trân trọng,</p>
+                <p style="margin: 5px 0;"><strong>Đội ngũ HeartCare</strong></p>
+                <p style="margin: 5px 0; font-size: 13px; color: #666;">
+                    💚 Chăm sóc sức khỏe từ trái tim
+                </p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>Email này được gửi tự động từ hệ thống <strong>HeartCare</strong></p>
+            <p>Nếu bạn không thực hiện đặt lịch này, vui lòng bỏ qua email này</p>
+            <p style="margin-top: 20px;">
+                © 2024 HeartCare. All rights reserved.<br>
+                <a href="https://heartcare.app">heartcare.app</a> | 
+                <a href="mailto:support@heartcare.app">support@heartcare.app</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

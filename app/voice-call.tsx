@@ -23,7 +23,7 @@ export default function VoiceCallScreen() {
   const [isSpeaker, setIsSpeaker] = useState(false);
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval> | undefined;
     
     if (isCallActive) {
       interval = setInterval(() => {

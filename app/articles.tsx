@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { articleData } from './article-data';
 
 export default function ArticlesScreen() {
   const router = useRouter();
@@ -25,112 +26,44 @@ export default function ArticlesScreen() {
     { id: 'endocrinology', name: 'Nội tiết', icon: 'water-outline' },
   ];
 
+  // Lấy dữ liệu từ articleData
   const featuredArticle = {
+    ...articleData['featured'],
     id: 'featured',
-    title: 'Phòng ngừa bệnh tim mạch hiệu quả',
-    date: '20/03/2024',
-    image: require('@/assets/images/dauhieubenhtim.png'),
-    category: 'Tim mạch',
   };
 
-  const articles = [
-    {
-      id: '1',
-      title: 'Uống đủ nước mỗi ngày',
-      excerpt: 'Nước là nguồn sống, chiếm 60-70% trọng lượng cơ thể',
-      date: '20/03/2024',
-      image: require('@/assets/images/chedouonguoc.png'),
-      category: 'nutrition',
-    },
-    {
-      id: '2',
-      title: 'Cách ngủ ngon hơn',
-      excerpt: 'Giấc ngủ chất lượng là nền tảng của sức khỏe',
-      date: '17/03/2024',
-      image: require('@/assets/images/stress.png'),
-      category: 'neurology',
-    },
-    {
-      id: '3',
-      title: 'Dấu hiệu bệnh tim',
-      excerpt: 'Bệnh tim là nguyên nhân gây tử vong hàng đầu',
-      date: '16/03/2024',
-      image: require('@/assets/images/dauhieubenhtim.png'),
-      category: 'cardiology',
-    },
-    {
-      id: '4',
-      title: 'Tập thể dục đều đặn',
-      excerpt: 'Vận động thể chất đều đặn là chìa khóa cho sức khỏe toàn diện',
-      date: '15/03/2024',
-      image: require('@/assets/images/yoga.png'),
-      category: 'fitness',
-    },
-    {
-      id: '5',
-      title: 'Chế độ ăn cân bằng',
-      excerpt: 'Dinh dưỡng cân bằng là nền tảng của sức khỏe',
-      date: '14/03/2024',
-      image: require('@/assets/images/chamsocdamun.png'),
-      category: 'nutrition',
-    },
-    {
-      id: '6',
-      title: 'Yoga cho người mới bắt đầu',
-      excerpt: 'Yoga là bộ môn kết hợp thể chất, hơi thở và thiền định',
-      date: '13/03/2024',
-      image: require('@/assets/images/chamsoctresosinh.png'),
-      category: 'fitness',
-    },
-    {
-      id: '7',
-      title: 'Quản lý stress hiệu quả',
-      excerpt: 'Stress kéo dài ảnh hưởng xấu đến sức khỏe thể chất và tinh thần',
-      date: '12/03/2024',
-      image: require('@/assets/images/thaikykhoemanh.png'),
-      category: 'mental',
-    },
-    {
-      id: '8',
-      title: 'Phòng ngừa tiểu đường',
-      excerpt: 'Tiểu đường type 2 có thể phòng ngừa được thông qua lối sống lành mạnh',
-      date: '11/03/2024',
-      image: require('@/assets/images/daukhopgoi.png'),
-      category: 'endocrinology',
-    },
-    {
-      id: '9',
-      title: 'Thực phẩm tốt cho não bộ',
-      excerpt: 'Não bộ cần dinh dưỡng đặc biệt để hoạt động tốt',
-      date: '10/03/2024',
-      image: require('@/assets/images/viemxoangmantinh.png'),
-      category: 'nutrition',
-    },
-    {
-      id: '10',
-      title: 'Cận thị ở trẻ em - Phòng ngừa sớm',
-      excerpt: 'Cận thị ở trẻ em ngày càng phổ biến do sử dụng thiết bị điện tử nhiều',
-      date: '09/03/2024',
-      image: require('@/assets/images/canthiotreem.png'),
-      category: 'ophthalmology',
-    },
-    {
-      id: '11',
-      title: 'Chăm sóc răng miệng đúng cách',
-      excerpt: 'Vệ sinh răng miệng đúng cách giúp phòng ngừa sâu răng',
-      date: '08/03/2024',
-      image: require('@/assets/images/chamsocrang.png'),
-      category: 'dentistry',
-    },
-    {
-      id: '12',
-      title: 'Phòng ngừa tiểu đường type 2',
-      excerpt: 'Lối sống lành mạnh để ngăn ngừa bệnh',
-      date: '07/03/2024',
-      image: require('@/assets/images/Phongnguatieuduong.png'),
-      category: 'endocrinology',
-    },
-  ];
+  const articles = Object.keys(articleData)
+    .filter(key => key !== 'featured')
+    .map(key => {
+      const article = articleData[key];
+      // Trích xuất excerpt từ content (100 ký tự đầu)
+      const excerpt = article.content
+        .trim()
+        .split('\n')
+        .find((line: string) => line.length > 20)
+        ?.substring(0, 100) + '...' || 'Đọc tiếp để biết thêm chi tiết';
+      
+      // Map category sang mã category cho filter
+      const categoryMap: { [key: string]: string } = {
+        'Tim mạch': 'cardiology',
+        'Dinh dưỡng': 'nutrition',
+        'Thần kinh': 'neurology',
+        'Thể dục': 'fitness',
+        'Tâm lý': 'mental',
+        'Nội tiết': 'endocrinology',
+        'Nhãn khoa': 'ophthalmology',
+        'Nha khoa': 'dentistry',
+      };
+      
+      return {
+        id: key,
+        title: article.title,
+        excerpt: excerpt,
+        date: article.date,
+        image: article.image,
+        category: categoryMap[article.category] || 'nutrition',
+      };
+    });
 
   const filteredArticles = articles.filter((article) => {
     // Mapping category sang tên tiếng Việt để search
@@ -167,7 +100,7 @@ export default function ArticlesScreen() {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="chevron-back" size={28} color="#00BCD4" />
+            <Ionicons name="chevron-back" size={28} color="#000" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Bài viết sức khỏe</Text>
         </View>
@@ -188,8 +121,7 @@ export default function ArticlesScreen() {
         {/* Category Filter */}
         <View style={styles.categorySection}>
           <View style={styles.categoryHeader}>
-            <Ionicons name="grid-outline" size={20} color="#00BCD4" />
-            <Text style={styles.categoryTitle}>Danh mục</Text>
+            <Text style={styles.categoryTitle}> Danh mục </Text>
           </View>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryList}>
             {categories.map((category) => (
@@ -222,8 +154,7 @@ export default function ArticlesScreen() {
         {/* Featured Article */}
         <View style={styles.featuredSection}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="star" size={18} color="#00BCD4" />
-            <Text style={styles.sectionTitle}>Bài viết nổi bật</Text>
+            <Text style={styles.sectionTitle}> Bài viết nổi bật </Text>
           </View>
           <TouchableOpacity 
             style={styles.featuredCard}
@@ -246,8 +177,7 @@ export default function ArticlesScreen() {
         {/* Articles List */}
         <View style={styles.articlesSection}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="list" size={18} color="#00BCD4" />
-            <Text style={styles.sectionTitle}>Danh sách bài viết</Text>
+            <Text style={styles.sectionTitle}> Danh sách bài viết </Text>
           </View>
           {filteredArticles.map((article) => (
             <TouchableOpacity
@@ -297,6 +227,7 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
     marginBottom: 12,
   },
@@ -305,11 +236,16 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'absolute',
+    left: 0,
+    zIndex: 1,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#00BCD4',
+    color: '#000',
+    flex: 1,
+    textAlign: 'center',
   },
   searchContainer: {
     flexDirection: 'row',

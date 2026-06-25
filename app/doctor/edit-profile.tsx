@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
+    Alert,
     Image,
     ScrollView,
     StyleSheet,
@@ -13,23 +15,23 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { updateDocument } from '../services/firebaseService';
 
-// Mapping ảnh bác sĩ
+// Mapping ảnh bác sĩ - 16 ảnh thật từ Pexels (chất lượng cao, miễn phí bản quyền)
 const doctorImages: any = {
-  'nguyenvanam.png': require('@/assets/images/nguyenvanam.png'),
-  'tranthilan.png': require('@/assets/images/tranthilan.png'),
-  'leminhtam.png': require('@/assets/images/leminhtam.png'),
-  'tranthimai.png': require('@/assets/images/tranthimai.png'),
-  'lehoangnam.png': require('@/assets/images/lehoangnam.png'),
-  'phamthuha.png': require('@/assets/images/phamthuha.png'),
-  'dominhtuan.png': require('@/assets/images/dominhtuan.png'),
-  'vuthilan.png': require('@/assets/images/vuthilan.png'),
-  'hoangvanduc.png': require('@/assets/images/hoangvanduc.png'),
-  'ngothihuong.png': require('@/assets/images/ngothihuong.png'),
-  'nguyenthihoa.png': require('@/assets/images/nguyenthihoa.png'),
-  'tranvankhoa.png': require('@/assets/images/tranvankhoa.png'),
-  'phamminhquan.png': require('@/assets/images/phamminhquan.png'),
-  'lethihang.png': require('@/assets/images/lethihang.png'),
-  'nguyenvanhai.png': require('@/assets/images/nguyenvanhai.png'),
+  'nguyenvanam.png': { uri: 'https://images.pexels.com/photos/26336880/pexels-photo-26336880.jpeg' },
+  'leminhtam.png': { uri: 'https://images.pexels.com/photos/5722163/pexels-photo-5722163.jpeg' },
+  'lehoangnam.png': { uri: 'https://images.pexels.com/photos/14438788/pexels-photo-14438788.jpeg' },
+  'dominhtuan.png': { uri: 'https://images.pexels.com/photos/14628069/pexels-photo-14628069.jpeg' },
+  'hoangvanduc.png': { uri: 'https://images.pexels.com/photos/27666713/pexels-photo-27666713.jpeg' },
+  'tranvankhoa.png': { uri: 'https://images.pexels.com/photos/15962798/pexels-photo-15962798.jpeg' },
+  'phamminhquan.png': { uri: 'https://images.pexels.com/photos/29995617/pexels-photo-29995617.jpeg' },
+  'nguyenvanhai.png': { uri: 'https://images.pexels.com/photos/19601385/pexels-photo-19601385.jpeg' },
+  'tranthilan.png': { uri: 'https://images.pexels.com/photos/15641079/pexels-photo-15641079.jpeg' },
+  'tranthimai.png': { uri: 'https://images.pexels.com/photos/27666717/pexels-photo-27666717.jpeg' },
+  'phamthuha.png': { uri: 'https://images.pexels.com/photos/15962796/pexels-photo-15962796.jpeg' },
+  'vuthilan.png': { uri: 'https://images.pexels.com/photos/27392531/pexels-photo-27392531.jpeg' },
+  'ngothihuong.png': { uri: 'https://images.pexels.com/photos/14628046/pexels-photo-14628046.jpeg' },
+  'nguyenthihoa.png': { uri: 'https://images.pexels.com/photos/14628045/pexels-photo-14628045.jpeg' },
+  'lethihang.png': { uri: 'https://images.pexels.com/photos/4173248/pexels-photo-4173248.jpeg' },
 };
 
 export default function EditDoctorProfile() {
@@ -48,42 +50,122 @@ export default function EditDoctorProfile() {
   const [education, setEducation] = useState('');
   const [fee, setFee] = useState('');
   const [avatar, setAvatar] = useState('');
+  const [customAvatar, setCustomAvatar] = useState(''); // For uploaded photo
   const [doctorFirebaseId, setDoctorFirebaseId] = useState('');
 
   useEffect(() => {
     loadDoctorInfo();
+    requestPermissions();
   }, []);
+
+  const requestPermissions = async () => {
+    const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
+    const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {
+      console.log('Camera or media library permissions not granted');
+    }
+  };
+
+  const pickImageFromGallery = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const imageUri = `data:image/jpeg;base64,${result.assets[0].base64}`;
+        setCustomAvatar(imageUri);
+        console.log('✅ Image selected from gallery');
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Lỗi', 'Không thể chọn ảnh');
+    }
+  };
+
+  const takePhoto = async () => {
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const imageUri = `data:image/jpeg;base64,${result.assets[0].base64}`;
+        setCustomAvatar(imageUri);
+        console.log('✅ Photo taken');
+      }
+    } catch (error) {
+      console.error('Error taking photo:', error);
+      Alert.alert('Lỗi', 'Không thể chụp ảnh');
+    }
+  };
+
+  const showImagePickerOptions = () => {
+    Alert.alert(
+      'Thay đổi ảnh đại diện',
+      'Chọn ảnh từ thư viện hoặc chụp ảnh mới',
+      [
+        {
+          text: 'Chụp ảnh',
+          onPress: takePhoto,
+        },
+        {
+          text: 'Chọn từ thư viện',
+          onPress: pickImageFromGallery,
+        },
+        {
+          text: 'Hủy',
+          style: 'cancel',
+        },
+      ]
+    );
+  };
 
   const loadDoctorInfo = async () => {
     try {
       setLoading(true);
-      const doctorId = (userData?.doctorInfo as any)?.doctorId;
+      // ✅ Use display doctor ID for profile operations
+      const displayDoctorId = (userData?.doctorInfo as any)?.doctorId;
       
-      if (!doctorId) {
+      if (!displayDoctorId) {
         console.log('❌ No doctorId found');
         setLoading(false);
         return;
       }
 
-      console.log('🔍 Loading doctor info for:', doctorId);
+      console.log('🔍 Loading doctor info for:', displayDoctorId);
       
       // Lấy thông tin bác sĩ từ doctors collection using document ID
       const { getDocumentById } = await import('../services/firebaseService');
-      const doctor = await getDocumentById('doctors', doctorId);
+      const doctor = await getDocumentById('doctors', displayDoctorId);
 
       if (doctor) {
         console.log('✅ Doctor info loaded:', doctor);
         
         setDoctorFirebaseId(doctor.id);
-        setFullName(doctor.ten || '');
-        setSpecialty(doctor.chuyen_khoa || '');
-        setPhone(doctor.so_dien_thoai || '');
+        setFullName((doctor as any).ten || '');
+        setSpecialty((doctor as any).chuyen_khoa || '');
+        setPhone((doctor as any).so_dien_thoai || '');
         setEmail(userData?.email || '');
-        setHospital(doctor.benh_vien || '');
-        setExperience(doctor.kinh_nghiem?.toString() || '');
-        setEducation(doctor.hoc_van || '');
-        setFee(doctor.gia_kham?.toString() || '');
-        setAvatar(doctor.hinh_anh || '');
+        setHospital((doctor as any).benh_vien || '');
+        setExperience((doctor as any).kinh_nghiem?.toString() || '');
+        setEducation((doctor as any).hoc_van || '');
+        setFee((doctor as any).gia_kham?.toString() || '');
+        setAvatar((doctor as any).hinh_anh || '');
+        
+        // Load custom avatar from users collection
+        if (userData?.avatar) {
+          setCustomAvatar(userData.avatar);
+          console.log('✅ Custom avatar loaded from users collection');
+        }
       }
 
       setLoading(false);
@@ -116,19 +198,29 @@ export default function EditDoctorProfile() {
         hinh_anh: avatar,
       });
 
+      // Update custom avatar in users collection if changed
+      if (customAvatar && userData?.uid) {
+        console.log('💾 Updating custom avatar in users collection...');
+        await updateDocument('users', userData.uid, {
+          avatar: customAvatar,
+          fullName: fullName, // Also update name
+        });
+        console.log('✅ Custom avatar updated');
+      }
+
       console.log('✅ Doctor info updated successfully');
       
-      // Hiển thị thông báo thành công (có thể dùng Alert hoặc Toast)
-      console.log('✅ Thông tin đã được cập nhật!');
+      Alert.alert('Thành công', 'Thông tin đã được cập nhật!', [
+        {
+          text: 'OK',
+          onPress: () => router.back(),
+        },
+      ]);
       
       setSaving(false);
-      
-      // Quay lại trang profile sau 500ms
-      setTimeout(() => {
-        router.back();
-      }, 500);
     } catch (error) {
       console.error('❌ Error saving doctor info:', error);
+      Alert.alert('Lỗi', 'Không thể lưu thông tin. Vui lòng thử lại!');
       setSaving(false);
     }
   };
@@ -155,15 +247,26 @@ export default function EditDoctorProfile() {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Avatar Section */}
         <View style={styles.avatarSection}>
-          <View style={styles.avatarContainer}>
+          <TouchableOpacity 
+            style={styles.avatarContainer}
+            onPress={showImagePickerOptions}
+            activeOpacity={0.7}
+          >
             <Image 
-              source={avatar ? doctorImages[avatar] : doctorImages['nguyenvanam.png']} 
+              source={
+                customAvatar 
+                  ? { uri: customAvatar } 
+                  : (avatar ? doctorImages[avatar] : doctorImages['nguyenvanam.png'])
+              } 
               style={styles.avatar} 
             />
-            <TouchableOpacity style={styles.cameraButton}>
+            <TouchableOpacity 
+              style={styles.cameraButton}
+              onPress={showImagePickerOptions}
+            >
               <Ionicons name="camera" size={18} color="#fff" />
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
           <Text style={styles.avatarHint}>Nhấn để thay đổi ảnh đại diện</Text>
         </View>
 

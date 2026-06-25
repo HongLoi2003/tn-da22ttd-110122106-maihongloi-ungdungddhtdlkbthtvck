@@ -11,7 +11,7 @@ import {
     TouchableOpacity,
     View
 } from 'react-native';
-import { db } from './config/firebase';
+import { getFirestoreDb,} from './config/firebase';
 
 interface DoctorResult {
   id: string;
@@ -43,7 +43,7 @@ export default function RebuildAllConversations() {
       console.log('🔄 Bắt đầu tái tạo conversations cho TẤT CẢ bác sĩ...');
       
       // 1. Lấy tất cả doctors
-      const doctorsSnapshot = await getDocs(collection(db, 'doctors'));
+      const doctorsSnapshot = await getDocs(collection(getFirestoreDb(), 'doctors'));
       const allDoctors = doctorsSnapshot.docs.map(doc => ({
         id: doc.data().id,
         name: doc.data().ten,
@@ -62,7 +62,7 @@ export default function RebuildAllConversations() {
         
         // 2.1. Lấy tất cả messages của bác sĩ này
         const messagesQuery = query(
-          collection(db, 'messages'),
+          collection(getFirestoreDb(), 'messages'),
           where('doctorId', '==', doctor.id)
         );
         const messagesSnapshot = await getDocs(messagesQuery);
@@ -88,7 +88,7 @@ export default function RebuildAllConversations() {
         // 2.2. Group messages theo patientId
         const messagesByPatient = new Map();
         messages.forEach(msg => {
-          const patientId = msg.patientId || msg.senderId;
+          const patientId = (msg as any).patientId || (msg as any).senderId;
           if (!messagesByPatient.has(patientId)) {
             messagesByPatient.set(patientId, []);
           }
@@ -101,7 +101,7 @@ export default function RebuildAllConversations() {
         const conversations = [];
         for (const [patientId, patientMessages] of messagesByPatient) {
           // Sắp xếp messages theo thời gian
-          patientMessages.sort((a, b) => {
+          patientMessages.sort((a: any, b: any) => {
             const timeA = a.timestamp?.toMillis?.() || 0;
             const timeB = b.timestamp?.toMillis?.() || 0;
             return timeB - timeA;
@@ -111,8 +111,8 @@ export default function RebuildAllConversations() {
           const patientName = lastMessage.patientName || lastMessage.senderName || 'Unknown Patient';
           
           // Đếm tin nhắn chưa đọc của bác sĩ
-          const unreadCount = patientMessages.filter(msg => 
-            msg.senderId === patientId && !msg.readByDoctor
+          const unreadCount = patientMessages.filter((msg: any) => 
+            (msg as any).senderId === patientId && !msg.readByDoctor
           ).length;
           
           // Tạo conversation mới
@@ -132,7 +132,7 @@ export default function RebuildAllConversations() {
           
           try {
             const conversationRef = await addDoc(
-              collection(db, 'conversations'),
+              collection(getFirestoreDb(), 'conversations'),
               conversationData
             );
             

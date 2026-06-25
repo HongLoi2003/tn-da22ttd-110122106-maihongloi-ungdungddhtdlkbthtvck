@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from './context/AuthContext';
 import { createDocument } from './services/firebaseService';
 
@@ -43,7 +43,15 @@ export default function AddInsuranceScreen() {
       Alert.alert(
         'Thành công',
         'Đã thêm thông tin bảo hiểm',
-        [{ text: 'OK', onPress: () => router.back() }]
+        [{ 
+          text: 'OK', 
+          onPress: () => {
+            // Đợi một chút để Alert đóng hoàn toàn trước khi navigate
+            setTimeout(() => {
+              router.back();
+            }, 100);
+          }
+        }]
       );
     } catch (error) {
       console.error('Error saving insurance:', error);
@@ -57,10 +65,10 @@ export default function AddInsuranceScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Thêm bảo hiểm y tế</Text>
-        <View style={{ width: 24 }} />
+        <View style={styles.backButton} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -164,11 +172,18 @@ const styles = StyleSheet.create({
   },
   backButton: {
     padding: 4,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#0f172a',
+    flex: 1,
+    textAlign: 'center',
+    marginHorizontal: 8,
   },
   content: {
     flex: 1,

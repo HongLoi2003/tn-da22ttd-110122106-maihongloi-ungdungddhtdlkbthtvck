@@ -1,18 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image as ExpoImage } from 'expo-image';
-import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { where } from 'firebase/firestore';
 import { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { useAuth } from './context/AuthContext';
 import { createDocument, getDocumentsWithQuery } from './services/firebaseService';
@@ -571,6 +572,7 @@ const analyzeSymptoms = (text: string): { name: string; match: number; icon: str
 
 export default function AIChatScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const { user } = useAuth();
   const [inputText, setInputText] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -585,13 +587,25 @@ export default function AIChatScreen() {
   const [followUpMode, setFollowUpMode] = useState(false);
   const [questionCount, setQuestionCount] = useState(0);
 
+  // Menu modal state
+  const [showMenuModal, setShowMenuModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState<any[]>([]);
+
   useEffect(() => {
     loadOrCreateConversation();
-  }, [user]);
+  }, [user, params.conversationId]);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Lưu messages vào AsyncStorage mỗi khi messages thay đổi
+  useEffect(() => {
+    if (conversationId && messages.length > 0) {
+      saveMessagesToStorage();
+    }
+  }, [messages, conversationId]);
 
   const loadOrCreateConversation = async () => {
     if (!user) {
@@ -600,12 +614,97 @@ export default function AIChatScreen() {
     }
 
     try {
-      // Tìm conversation AI chat của user - đơn giản hóa query
+      console.log('🔍 Loading conversation for user:', user.uid);
+      
+      // Nếu có conversationId từ params (từ màn hình history), load conversation đó
+      if (params.conversationId) {
+        console.log('📝 Loading conversation from params:', params.conversationId);
+        setConversationId(params.conversationId as string);
+        
+        // Lưu conversationId này để lần sau sử dụng
+        await AsyncStorage.setItem('last_ai_conversation_id', params.conversationId as string);
+        
+        // Thử load từ AsyncStorage trước
+        const cachedMessages = await loadMessagesFromStorage(params.conversationId as string);
+        if (cachedMessages && cachedMessages.length > 0) {
+          console.log('✅ Loaded', cachedMessages.length, 'messages from cache');
+          setMessages(cachedMessages);
+          setLoading(false);
+          
+          // Đồng bộ với Firestore trong background để cập nhật nếu có thay đổi
+          syncMessagesInBackground(params.conversationId as string);
+          return;
+        }
+        
+        // Nếu không có cache, load từ Firestore
+        const msgs = await getDocumentsWithQuery('ai-messages', [
+          where('conversationId', '==', params.conversationId)
+        ]);
+        
+        console.log('📦 Loaded', msgs.length, 'messages from Firestore');
+        
+        const sortedMsgs = msgs.sort((a: any, b: any) => {
+          const dateA = a.createdAt?.seconds || 0;
+          const dateB = b.createdAt?.seconds || 0;
+          return dateA - dateB;
+        });
+        
+        setMessages(formatFirestoreMessages(sortedMsgs));
+        setLoading(false);
+        return;
+      }
+
+      // Nếu không có params, thử load từ last conversation ID đã lưu
+      console.log('🔍 Checking for last conversation ID...');
+      const lastConvId = await AsyncStorage.getItem('last_ai_conversation_id');
+      
+      if (lastConvId) {
+        console.log('✅ Found last conversation ID:', lastConvId);
+        setConversationId(lastConvId);
+        
+        // Thử load từ cache trước
+        const cachedMessages = await loadMessagesFromStorage(lastConvId);
+        if (cachedMessages && cachedMessages.length > 0) {
+          console.log('✅ Loaded', cachedMessages.length, 'messages from cache');
+          setMessages(cachedMessages);
+          setLoading(false);
+          
+          // Đồng bộ với Firestore trong background
+          syncMessagesInBackground(lastConvId);
+          return;
+        }
+        
+        // Nếu không có cache, load từ Firestore
+        console.log('🔍 Loading from Firestore for last conversation...');
+        const msgs = await getDocumentsWithQuery('ai-messages', [
+          where('conversationId', '==', lastConvId)
+        ]);
+        
+        if (msgs.length > 0) {
+          console.log('📦 Loaded', msgs.length, 'messages from Firestore');
+          
+          const sortedMsgs = msgs.sort((a: any, b: any) => {
+            const dateA = a.createdAt?.seconds || 0;
+            const dateB = b.createdAt?.seconds || 0;
+            return dateA - dateB;
+          });
+          
+          setMessages(formatFirestoreMessages(sortedMsgs));
+          setLoading(false);
+          return;
+        }
+        
+        console.log('⚠️ Last conversation not found, searching for any conversation...');
+      }
+
+      // Nếu không có last conversation hoặc không tìm thấy, tìm conversation mới nhất
+      console.log('🔍 Searching for existing conversations...');
       const conversations = await getDocumentsWithQuery('ai-conversations', [
         where('userId', '==', user.uid)
       ]);
 
-      // Sắp xếp ở client side
+      console.log('📋 Found', conversations.length, 'conversations');
+
       const sortedConversations = conversations.sort((a: any, b: any) => {
         const dateA = a.createdAt?.seconds || 0;
         const dateB = b.createdAt?.seconds || 0;
@@ -615,36 +714,53 @@ export default function AIChatScreen() {
       if (sortedConversations.length > 0) {
         // Load conversation hiện có
         const conv = sortedConversations[0];
+        console.log('✅ Loading most recent conversation:', conv.id);
         setConversationId(conv.id);
         
-        // Load messages - đơn giản hóa query
+        // Lưu conversationId này để lần sau sử dụng
+        await AsyncStorage.setItem('last_ai_conversation_id', conv.id);
+        
+        // Thử load từ AsyncStorage trước
+        const cachedMessages = await loadMessagesFromStorage(conv.id);
+        if (cachedMessages && cachedMessages.length > 0) {
+          console.log('✅ Loaded', cachedMessages.length, 'messages from cache');
+          setMessages(cachedMessages);
+          setLoading(false);
+          
+          // Đồng bộ với Firestore trong background
+          syncMessagesInBackground(conv.id);
+          return;
+        }
+        
+        console.log('🔍 No cache found, loading from Firestore...');
+        
+        // Nếu không có cache, load từ Firestore
         const msgs = await getDocumentsWithQuery('ai-messages', [
           where('conversationId', '==', conv.id)
         ]);
         
-        // Sắp xếp ở client side
+        console.log('📦 Loaded', msgs.length, 'messages from Firestore');
+        
         const sortedMsgs = msgs.sort((a: any, b: any) => {
           const dateA = a.createdAt?.seconds || 0;
           const dateB = b.createdAt?.seconds || 0;
           return dateA - dateB;
         });
         
-        setMessages(sortedMsgs.map((msg: any) => ({
-          id: msg.id,
-          text: msg.text,
-          isUser: msg.isUser,
-          timestamp: new Date(msg.createdAt.seconds * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-          specialties: msg.specialties,
-          actions: msg.actions
-        })));
+        setMessages(formatFirestoreMessages(sortedMsgs));
       } else {
         // Tạo conversation mới
+        console.log('🆕 Creating new conversation...');
         const newConv = await createDocument('ai-conversations', {
           userId: user.uid,
           createdAt: new Date(),
           updatedAt: new Date()
         });
         setConversationId(newConv.id);
+        console.log('✅ Created new conversation:', newConv.id);
+        
+        // Lưu conversationId này
+        await AsyncStorage.setItem('last_ai_conversation_id', newConv.id);
         
         // Thêm tin nhắn chào mừng
         const welcomeMsg = await createDocument('ai-messages', {
@@ -664,9 +780,92 @@ export default function AIChatScreen() {
         }]);
       }
     } catch (error) {
-      console.error('Error loading conversation:', error);
+      console.error('❌ Error loading conversation:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Lưu messages vào AsyncStorage
+  const saveMessagesToStorage = async () => {
+    try {
+      const storageKey = `ai_chat_${conversationId}`;
+      await AsyncStorage.setItem(storageKey, JSON.stringify(messages));
+      console.log('💾 Saved', messages.length, 'messages to storage with key:', storageKey);
+    } catch (error) {
+      console.error('❌ Error saving messages to storage:', error);
+    }
+  };
+
+  // Load messages từ AsyncStorage
+  const loadMessagesFromStorage = async (convId: string): Promise<Message[] | null> => {
+    try {
+      const storageKey = `ai_chat_${convId}`;
+      const cachedData = await AsyncStorage.getItem(storageKey);
+      if (cachedData) {
+        const parsedData = JSON.parse(cachedData);
+        console.log('📱 Loaded', parsedData.length, 'messages from storage with key:', storageKey);
+        return parsedData;
+      }
+      console.log('❌ No cached data found for key:', storageKey);
+      return null;
+    } catch (error) {
+      console.error('❌ Error loading messages from storage:', error);
+      return null;
+    }
+  };
+
+  // Xóa messages từ AsyncStorage
+  const clearMessagesFromStorage = async () => {
+    try {
+      const storageKey = `ai_chat_${conversationId}`;
+      await AsyncStorage.removeItem(storageKey);
+    } catch (error) {
+      console.error('Error clearing messages from storage:', error);
+    }
+  };
+
+  // Helper function để format messages từ Firestore
+  const formatFirestoreMessages = (msgs: any[]): Message[] => {
+    return msgs.map((msg: any) => ({
+      id: msg.id,
+      text: msg.text,
+      isUser: msg.isUser,
+      timestamp: new Date(msg.createdAt.seconds * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+      specialties: msg.specialties,
+      actions: msg.actions,
+      followUpQuestion: msg.followUpQuestion,
+      quickReplies: msg.quickReplies,
+      isFollowUp: msg.isFollowUp,
+      confidence: msg.confidence
+    }));
+  };
+
+  // Đồng bộ messages với Firestore trong background
+  const syncMessagesInBackground = async (convId: string) => {
+    try {
+      console.log('🔄 Syncing messages from Firestore in background...');
+      const msgs = await getDocumentsWithQuery('ai-messages', [
+        where('conversationId', '==', convId)
+      ]);
+      
+      const sortedMsgs = msgs.sort((a: any, b: any) => {
+        const dateA = a.createdAt?.seconds || 0;
+        const dateB = b.createdAt?.seconds || 0;
+        return dateA - dateB;
+      });
+      
+      const firestoreMessages = formatFirestoreMessages(sortedMsgs);
+      
+      // Chỉ cập nhật nếu có sự thay đổi
+      if (firestoreMessages.length !== messages.length) {
+        console.log('🔄 Updating messages from Firestore:', firestoreMessages.length);
+        setMessages(firestoreMessages);
+      } else {
+        console.log('✅ Messages are in sync');
+      }
+    } catch (error) {
+      console.error('❌ Error syncing messages:', error);
     }
   };
 
@@ -1024,6 +1223,109 @@ export default function AIChatScreen() {
     }
   };
 
+  // Menu handlers
+  const handleNewChat = async () => {
+    setShowMenuModal(false);
+    
+    // Xóa cache của conversation hiện tại
+    await clearMessagesFromStorage();
+    
+    // Xóa last conversation ID
+    await AsyncStorage.removeItem('last_ai_conversation_id');
+    
+    // Tạo conversation mới
+    const newConvData = {
+      userId: user?.uid,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    const newConv = await createDocument('ai-conversations', newConvData);
+    setConversationId(newConv.id);
+    
+    // Lưu conversationId mới
+    await AsyncStorage.setItem('last_ai_conversation_id', newConv.id);
+    
+    // Reset messages với welcome message
+    const welcomeText = 'Bạn đang gặp vấn đề về sức khỏe?\n\nHãy mô tả chi tiết triệu chứng của bạn.\nAI sẽ phân tích và gợi ý chuyên khoa phù hợp.';
+    
+    const welcomeMsgData = {
+      conversationId: newConv.id,
+      text: welcomeText,
+      isUser: false,
+      createdAt: new Date()
+    };
+    const welcomeMsg = await createDocument('ai-messages', welcomeMsgData);
+    
+    setMessages([{
+      id: welcomeMsg.id,
+      text: welcomeText,
+      isUser: false,
+      timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+    }]);
+  };
+
+  const handleClearHistory = async () => {
+    setShowMenuModal(false);
+    
+    try {
+      // Xóa cache của conversation hiện tại
+      await clearMessagesFromStorage();
+      
+      // Xóa last conversation ID
+      await AsyncStorage.removeItem('last_ai_conversation_id');
+      
+      // Chỉ reset local state, KHÔNG xóa conversation cũ trong database
+      const welcomeText = 'Lịch sử chat đã được xóa.\n\nBạn đang gặp vấn đề về sức khỏe?\n\nHãy mô tả chi tiết triệu chứng của bạn.\nAI sẽ phân tích và gợi ý chuyên khoa phù hợp.';
+      
+      setMessages([{
+        id: Date.now().toString(),
+        text: welcomeText,
+        isUser: false,
+        timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+      }]);
+      
+      // Reset conversationId để tạo conversation mới khi gửi tin nhắn tiếp theo
+      setConversationId('');
+      
+      console.log('✅ Chat history cleared successfully (local only)');
+    } catch (error: any) {
+      console.error('Error clearing history:', error);
+    }
+  };
+
+  const handleLoadConversation = async (convId: string) => {
+    setShowHistoryModal(false);
+    
+    try {
+      setConversationId(convId);
+      
+      // Load messages
+      const msgs = await getDocumentsWithQuery('ai-messages', [
+        where('conversationId', '==', convId)
+      ]);
+      
+      const sortedMsgs = msgs.sort((a: any, b: any) => {
+        const dateA = a.createdAt?.seconds || 0;
+        const dateB = b.createdAt?.seconds || 0;
+        return dateA - dateB;
+      });
+      
+      setMessages(sortedMsgs.map((msg: any) => ({
+        id: msg.id,
+        text: msg.text,
+        isUser: msg.isUser,
+        timestamp: new Date(msg.createdAt.seconds * 1000).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
+        specialties: msg.specialties,
+        actions: msg.actions,
+        followUpQuestion: msg.followUpQuestion,
+        quickReplies: msg.quickReplies,
+        isFollowUp: msg.isFollowUp
+      })));
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+    }
+  };
+
   if (loading) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
@@ -1054,17 +1356,15 @@ export default function AIChatScreen() {
           <Ionicons name="chevron-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
-          <ExpoImage 
-            source={require('@/assets/images/ai.png')} 
-            style={styles.aiAvatarHeader}
-            contentFit="cover"
-          />
+          <View style={[styles.aiAvatarHeader, { backgroundColor: '#00BCD4', justifyContent: 'center', alignItems: 'center' }]}>
+            <Ionicons name="sparkles" size={24} color="#fff" />
+          </View>
           <View>
             <Text style={styles.headerTitle}>Chat tư vấn chuyên khoa</Text>
-            <Text style={styles.headerSubtitle}>Đặt hỏi 100% thông tin của bạn</Text>
+            <Text style={styles.headerSubtitle}>Đặt câu hỏi về thông tin triệu chứng của bạn</Text>
           </View>
         </View>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => setShowMenuModal(true)}>
           <Ionicons name="ellipsis-vertical" size={20} color="#64748b" />
         </TouchableOpacity>
       </View>
@@ -1173,10 +1473,7 @@ export default function AIChatScreen() {
       {/* Input */}
       <View style={styles.inputContainer}>
         <View style={styles.disclaimer}>
-          <Ionicons name="information-circle-outline" size={14} color="#94a3b8" />
-          <Text style={styles.disclaimerText}>
-            AI có thể mắc lỗi. Hãy kiểm tra thông tin quan trọng trước khi sử dụng.
-          </Text>
+          
         </View>
         <View style={styles.inputWrapper}>
           <TouchableOpacity style={styles.micButton}>
@@ -1203,6 +1500,121 @@ export default function AIChatScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Menu Modal */}
+      <Modal
+        visible={showMenuModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowMenuModal(false)}
+      >
+        <View style={styles.menuModalOverlay}>
+          <TouchableOpacity 
+            style={StyleSheet.absoluteFill}
+            activeOpacity={1}
+            onPress={() => setShowMenuModal(false)}
+          />
+          <View style={styles.menuModalContent}>
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={handleNewChat}
+            >
+              <Ionicons name="add-circle-outline" size={22} color="#0f172a" />
+              <Text style={styles.menuItemText}>Tạo cuộc trò chuyện mới</Text>
+            </TouchableOpacity>
+
+            <View style={styles.menuDivider} />
+
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={handleClearHistory}
+            >
+              <Ionicons name="trash-outline" size={22} color="#ef4444" />
+              <Text style={[styles.menuItemText, { color: '#ef4444' }]}>Xóa lịch sử chat</Text>
+            </TouchableOpacity>
+
+            <View style={styles.menuDivider} />
+
+            <TouchableOpacity 
+              style={styles.menuItem}
+              onPress={() => setShowMenuModal(false)}
+            >
+              <Ionicons name="close-circle-outline" size={22} color="#64748b" />
+              <Text style={styles.menuItemText}>Đóng</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* History Modal */}
+      <Modal
+        visible={showHistoryModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowHistoryModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.historyModalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowHistoryModal(false)}
+        >
+          <TouchableOpacity 
+            activeOpacity={1} 
+            style={styles.historyModalContent}
+          >
+            <View style={styles.historyModalHeader}>
+              <Text style={styles.historyModalTitle}>Lịch sử chat</Text>
+              <TouchableOpacity onPress={() => setShowHistoryModal(false)}>
+                <Ionicons name="close" size={24} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.historyList} showsVerticalScrollIndicator={false}>
+              {conversationHistory.length === 0 ? (
+                <View style={styles.emptyHistory}>
+                  <Ionicons name="chatbubbles-outline" size={48} color="#cbd5e1" />
+                  <Text style={styles.emptyHistoryText}>Chưa có lịch sử chat</Text>
+                </View>
+              ) : (
+                conversationHistory.map((conv) => (
+                  <TouchableOpacity
+                    key={conv.id}
+                    style={[
+                      styles.historyItem,
+                      conv.id === conversationId && styles.historyItemActive
+                    ]}
+                    onPress={() => handleLoadConversation(conv.id)}
+                  >
+                    <View style={styles.historyItemIcon}>
+                      <Ionicons name="chatbubble-ellipses" size={20} color="#4A90E2" />
+                    </View>
+                    <View style={styles.historyItemContent}>
+                      <Text style={styles.historyItemPreview} numberOfLines={2}>
+                        {conv.preview}
+                      </Text>
+                      <View style={styles.historyItemMeta}>
+                        <Text style={styles.historyItemDate}>
+                          {new Date(conv.createdAt.seconds * 1000).toLocaleDateString('vi-VN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })}
+                        </Text>
+                        <Text style={styles.historyItemCount}>
+                          {conv.messageCount} tin nhắn
+                        </Text>
+                      </View>
+                    </View>
+                    {conv.id === conversationId && (
+                      <Ionicons name="checkmark-circle" size={20} color="#4A90E2" />
+                    )}
+                  </TouchableOpacity>
+                ))
+              )}
+            </ScrollView>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -1473,5 +1885,123 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#4A90E2',
+  },
+  menuModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: Platform.OS === 'ios' ? 120 : 80,
+    paddingRight: 16,
+  },
+  menuModalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    minWidth: 240,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  menuItemText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#0f172a',
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: '#e2e8f0',
+    marginHorizontal: 16,
+  },
+  historyModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  historyModalContent: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    minHeight: '50%',
+    maxHeight: '80%',
+    paddingBottom: Platform.OS === 'ios' ? 34 : 16,
+  },
+  historyModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e2e8f0',
+  },
+  historyModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  historyList: {
+    flex: 1,
+  },
+  emptyHistory: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+  },
+  emptyHistoryText: {
+    fontSize: 14,
+    color: '#94a3b8',
+    marginTop: 12,
+  },
+  historyItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+    gap: 12,
+  },
+  historyItemActive: {
+    backgroundColor: '#f0f9ff',
+  },
+  historyItemIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#E3F2FD',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  historyItemContent: {
+    flex: 1,
+    gap: 6,
+  },
+  historyItemPreview: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#0f172a',
+    lineHeight: 20,
+  },
+  historyItemMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  historyItemDate: {
+    fontSize: 12,
+    color: '#64748b',
+  },
+  historyItemCount: {
+    fontSize: 12,
+    color: '#94a3b8',
   },
 });

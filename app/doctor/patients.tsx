@@ -38,11 +38,13 @@ export default function DoctorPatients() {
     try {
       if (!userData?.uid) return;
 
-      // Ưu tiên dùng doctorInfo.doctorId nếu có, không thì dùng uid
-      const doctorId = (userData.doctorInfo as any)?.doctorId || userData.uid;
-      console.log('🔍 [Patients] Loading patients for doctorId:', doctorId);
+      // ✅ Separate IDs for different purposes
+      const firebaseAuthUid = userData.uid;
+      const displayDoctorId = (userData.doctorInfo as any)?.doctorId || userData.uid;
+      console.log('🔍 [Patients] Firebase Auth UID:', firebaseAuthUid);
+      console.log('📝 [Patients] Display Doctor ID:', displayDoctorId);
 
-      const data = await doctorServiceInstance.getDoctorPatients(doctorId);
+      const data = await doctorServiceInstance.getDoctorPatients(displayDoctorId);
       console.log('✅ [Patients] Loaded', data.length, 'patients');
       setPatients(data);
       
@@ -78,7 +80,8 @@ export default function DoctorPatients() {
           ]);
           
           if (users.length > 0 && (users[0] as any).avatar) {
-            avatarMap[patientId] = (users[0] as any).avatar;
+            const patId = patientId || '';
+            avatarMap[patId] = (users[0] as any).avatar;
             console.log('✅ [Patients] Loaded avatar for:', (users[0] as any).fullName);
           }
         } catch (error) {

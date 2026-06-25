@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import aiDiagnosticService, { DiagnosticResult, Symptom } from './services/aiDiagnosticService';
+import { Alert, FlatList, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { DiagnosticResult, Symptom } from './services/aiDiagnosticService';
+import symptomMappingService, { SymptomItem } from './services/symptomMappingService';
 
 export default function AIDiagnosticScreen() {
   const router = useRouter();
@@ -13,17 +14,19 @@ export default function AIDiagnosticScreen() {
   const [selectedDuration, setSelectedDuration] = useState('');
   const [result, setResult] = useState<DiagnosticResult | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  
+  // Tìm kiếm triệu chứng
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SymptomItem[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [selectedSymptomItems, setSelectedSymptomItems] = useState<SymptomItem[]>([]);
 
-  const commonSymptoms = [
-    { id: '1', name: 'Đau đầu', icon: '🤕' },
-    { id: '2', name: 'Sốt', icon: '🌡️' },
-    { id: '3', name: 'Ho', icon: '😷' },
-    { id: '4', name: 'Đau ngực', icon: '💔' },
-    { id: '5', name: 'Đau bụng', icon: '🤢' },
-    { id: '6', name: 'Khó thở', icon: '😮‍💨' },
-    { id: '7', name: 'Chóng mặt', icon: '😵' },
-    { id: '8', name: 'Mệt mỏi', icon: '😴' },
-  ];
+  // Lấy triệu chứng phổ biến từ service
+  const commonSymptoms = symptomMappingService.getCommonSymptoms().slice(0, 12).map((s: SymptomItem, idx: number) => ({
+    id: s.id.toString(),
+    name: s.name,
+    icon: ['🤕', '🤒', '🤢', '😷', '😵', '🌡️', '😮‍💨', '😴', '🦷', '🫁', '🧠', '💊'][idx] || '🩺'
+  }));
 
   const durations = [
     { id: '1', label: '< 1 ngày', value: 'less_than_1_day' },
@@ -31,6 +34,31 @@ export default function AIDiagnosticScreen() {
     { id: '3', label: '3-7 ngày', value: '3_7_days' },
     { id: '4', label: '> 1 tuần', value: 'more_than_week' },
   ];
+
+  // Tìm kiếm triệu chứng
+  const handleSearchSymptom = (text: string) => {
+    setSearchQuery(text);
+    if (text.trim().length > 0) {
+      const results = symptomMappingService.searchSymptoms(text);
+      setSearchResults(results);
+      setShowSearchResults(true);
+    } else {
+      setSearchResults([]);
+      setShowSearchResults(false);
+    }
+  };
+
+  // Chọn triệu chứng từ kết quả tìm kiếm
+  const selectSymptomFromSearch = (symptomItem: SymptomItem) => {
+    setCurrentSymptom(symptomItem.name);
+    setSearchQuery(symptomItem.name);
+    setShowSearchResults(false);
+    
+    // Thêm vào danh sách đã chọn nếu chưa có
+    if (!selectedSymptomItems.find(s => s.id === symptomItem.id)) {
+      setSelectedSymptomItems([...selectedSymptomItems, symptomItem]);
+    }
+  };
 
   const addSymptom = () => {
     if (!currentSymptom.trim()) {
@@ -62,14 +90,48 @@ export default function AIDiagnosticScreen() {
   };
 
   const analyzeSymptoms = async () => {
-    if (symptoms.length === 0) {
+    if (symptoms.length === 0 && selectedSymptomItems.length === 0) {
       Alert.alert('Lỗi', 'Vui lòng thêm ít nhất 1 triệu chứng');
       return;
     }
 
     setAnalyzing(true);
     try {
-      const diagnosticResult = await aiDiagnosticService.analyzeSymptoms(symptoms);
+      // Sử dụng symptom mapping service để phân tích
+      const symptomIds = selectedSymptomItems.map(s => s.id);
+      const specialtyMatches = symptomMappingService.analyzeSymptoms(symptomIds);
+      
+      if (specialtyMatches.length === 0) {
+        Alert.alert('Thông báo', 'Không tìm thấy chuyên khoa phù hợp. Vui lòng thử lại với triệu chứng khác.');
+        setAnalyzing(false);
+        return;
+      }
+
+      // Lấy chuyên khoa tốt nhất
+      const bestMatch = specialtyMatches[0];
+      
+      // Tạo kết quả diagnostic
+      const diagnosticResult: DiagnosticResult = {
+        urgencyLevel: bestMatch.matchPercentage >= 80 ? 'high' : 
+                      bestMatch.matchPercentage >= 50 ? 'medium' : 'low',
+        confidence: bestMatch.matchPercentage,
+        possibleConditions: specialtyMatches.slice(0, 3).map((match: any) => ({
+          name: `Vấn đề về ${match.specialtyName}`,
+          probability: match.matchPercentage,
+          description: `Các triệu chứng bạn mô tả có thể liên quan đến chuyên khoa ${match.specialtyName}. Bạn nên khám để được chẩn đoán chính xác.`,
+          symptoms: match.matchedSymptoms.map((s: SymptomItem) => s.name),
+          riskFactors: []
+        })),
+        recommendedSpecialty: bestMatch.specialtyName,
+        recommendedDoctors: [],
+        nextSteps: [
+          `Đặt lịch khám với bác sĩ chuyên khoa ${bestMatch.specialtyName}`,
+          'Ghi chú lại thời gian xuất hiện các triệu chứng',
+          'Chuẩn bị các thông tin về tiền sử bệnh tật',
+          'Không tự ý dùng thuốc khi chưa được bác sĩ tư vấn'
+        ]
+      };
+
       setResult(diagnosticResult);
       setCurrentStep(2);
     } catch (error) {
@@ -110,7 +172,7 @@ export default function AIDiagnosticScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
+          <Ionicons name="arrow-back" size={24} color="#0f172a" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Chẩn đoán AI</Text>
         <View style={{ width: 24 }} />
@@ -122,7 +184,7 @@ export default function AIDiagnosticScreen() {
           <View style={styles.infoCard}>
             <Ionicons name="information-circle" size={24} color="#00BCD4" />
             <Text style={styles.infoText}>
-              Mô tả chi tiết các triệu chứng để AI có thể phân tích chính xác hơn
+              Mô tả chi tiết các triệu chứng để AI có thể phân tích chuyên khoa chính xác hơn
             </Text>
           </View>
 
@@ -145,98 +207,152 @@ export default function AIDiagnosticScreen() {
 
           {/* Add Symptom */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Thêm triệu chứng</Text>
+            <Text style={styles.sectionTitle}>Tìm kiếm triệu chứng</Text>
             
             <TextInput
               style={styles.input}
-              placeholder="Nhập triệu chứng..."
-              value={currentSymptom}
-              onChangeText={setCurrentSymptom}
+              placeholder="Nhập triệu chứng... (VD: đau đầu, ho, sốt)"
+              value={searchQuery}
+              onChangeText={handleSearchSymptom}
             />
 
-            <Text style={styles.label}>Mức độ nghiêm trọng</Text>
-            <View style={styles.severityRow}>
-              <TouchableOpacity
-                style={[
-                  styles.severityBtn,
-                  selectedSeverity === 'mild' && styles.severityBtnActive,
-                  { borderColor: '#4CAF50' }
-                ]}
-                onPress={() => setSelectedSeverity('mild')}
-              >
-                <Text style={[
-                  styles.severityText,
-                  selectedSeverity === 'mild' && { color: '#4CAF50' }
-                ]}>
-                  Nhẹ
-                </Text>
-              </TouchableOpacity>
+            {/* Kết quả tìm kiếm */}
+            {showSearchResults && searchResults.length > 0 && (
+              <View style={styles.searchResultsContainer}>
+                <FlatList
+                  data={searchResults}
+                  keyExtractor={(item: SymptomItem) => item.id.toString()}
+                  renderItem={({ item }: { item: SymptomItem }) => (
+                    <TouchableOpacity
+                      style={styles.searchResultItem}
+                      onPress={() => selectSymptomFromSearch(item)}
+                    >
+                      <Text style={styles.searchResultText}>{item.name}</Text>
+                      <Ionicons name="add-circle-outline" size={20} color="#00BCD4" />
+                    </TouchableOpacity>
+                  )}
+                  style={styles.searchResultsList}
+                />
+              </View>
+            )}
 
-              <TouchableOpacity
-                style={[
-                  styles.severityBtn,
-                  selectedSeverity === 'moderate' && styles.severityBtnActive,
-                  { borderColor: '#FFB800' }
-                ]}
-                onPress={() => setSelectedSeverity('moderate')}
-              >
-                <Text style={[
-                  styles.severityText,
-                  selectedSeverity === 'moderate' && { color: '#FFB800' }
-                ]}>
-                  Trung bình
-                </Text>
-              </TouchableOpacity>
+            {selectedSymptomItems.length > 0 && (
+              <>
+                <Text style={styles.label}>Mức độ nghiêm trọng</Text>
+                <View style={styles.severityRow}>
+                  <TouchableOpacity
+                    style={[
+                      styles.severityBtn,
+                      selectedSeverity === 'mild' && styles.severityBtnActive,
+                      { borderColor: '#4CAF50' }
+                    ]}
+                    onPress={() => setSelectedSeverity('mild')}
+                  >
+                    <Text style={[
+                      styles.severityText,
+                      selectedSeverity === 'mild' && { color: '#4CAF50' }
+                    ]}>
+                      Nhẹ
+                    </Text>
+                  </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.severityBtn,
-                  selectedSeverity === 'severe' && styles.severityBtnActive,
-                  { borderColor: '#FF4444' }
-                ]}
-                onPress={() => setSelectedSeverity('severe')}
-              >
-                <Text style={[
-                  styles.severityText,
-                  selectedSeverity === 'severe' && { color: '#FF4444' }
-                ]}>
-                  Nặng
-                </Text>
-              </TouchableOpacity>
-            </View>
+                  <TouchableOpacity
+                    style={[
+                      styles.severityBtn,
+                      selectedSeverity === 'moderate' && styles.severityBtnActive,
+                      { borderColor: '#FFB800' }
+                    ]}
+                    onPress={() => setSelectedSeverity('moderate')}
+                  >
+                    <Text style={[
+                      styles.severityText,
+                      selectedSeverity === 'moderate' && { color: '#FFB800' }
+                    ]}>
+                      Trung bình
+                    </Text>
+                  </TouchableOpacity>
 
-            <Text style={styles.label}>Thời gian xuất hiện</Text>
-            <View style={styles.durationRow}>
-              {durations.map((duration) => (
-                <TouchableOpacity
-                  key={duration.id}
-                  style={[
-                    styles.durationBtn,
-                    selectedDuration === duration.value && styles.durationBtnActive
-                  ]}
-                  onPress={() => setSelectedDuration(duration.value)}
-                >
-                  <Text style={[
-                    styles.durationText,
-                    selectedDuration === duration.value && styles.durationTextActive
-                  ]}>
-                    {duration.label}
-                  </Text>
+                  <TouchableOpacity
+                    style={[
+                      styles.severityBtn,
+                      selectedSeverity === 'severe' && styles.severityBtnActive,
+                      { borderColor: '#FF4444' }
+                    ]}
+                    onPress={() => setSelectedSeverity('severe')}
+                  >
+                    <Text style={[
+                      styles.severityText,
+                      selectedSeverity === 'severe' && { color: '#FF4444' }
+                    ]}>
+                      Nặng
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <Text style={styles.label}>Thời gian xuất hiện</Text>
+                <View style={styles.durationRow}>
+                  {durations.map((duration) => (
+                    <TouchableOpacity
+                      key={duration.id}
+                      style={[
+                        styles.durationBtn,
+                        selectedDuration === duration.value && styles.durationBtnActive
+                      ]}
+                      onPress={() => setSelectedDuration(duration.value)}
+                    >
+                      <Text style={[
+                        styles.durationText,
+                        selectedDuration === duration.value && styles.durationTextActive
+                      ]}>
+                        {duration.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <TouchableOpacity style={styles.addBtn} onPress={addSymptom}>
+                  <Ionicons name="add-circle" size={20} color="#fff" />
+                  <Text style={styles.addBtnText}>Thêm triệu chứng</Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-
-            <TouchableOpacity style={styles.addBtn} onPress={addSymptom}>
-              <Ionicons name="add-circle" size={20} color="#fff" />
-              <Text style={styles.addBtnText}>Thêm triệu chứng</Text>
-            </TouchableOpacity>
+              </>
+            )}
           </View>
 
           {/* Symptoms List */}
-          {symptoms.length > 0 && (
+          {(symptoms.length > 0 || selectedSymptomItems.length > 0) && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Các triệu chứng đã thêm ({symptoms.length})</Text>
-              {symptoms.map((symptom) => (
+              <Text style={styles.sectionTitle}>Các triệu chứng đã thêm ({symptoms.length + selectedSymptomItems.length})</Text>
+              
+              {/* Hiển thị triệu chứng từ mapping service */}
+              {selectedSymptomItems.map((symptomItem: SymptomItem) => (
+                <View key={`mapping-${symptomItem.id}`} style={styles.symptomItem}>
+                  <View style={styles.symptomInfo}>
+                    <Text style={styles.symptomItemName}>{symptomItem.name}</Text>
+                    <View style={styles.symptomMeta}>
+                      <View style={[
+                        styles.severityBadge,
+                        { backgroundColor: getSeverityColor(selectedSeverity) + '20' }
+                      ]}>
+                        <Text style={[
+                          styles.severityBadgeText,
+                          { color: getSeverityColor(selectedSeverity) }
+                        ]}>
+                          {selectedSeverity === 'mild' ? 'Nhẹ' : 
+                           selectedSeverity === 'moderate' ? 'Trung bình' : 'Nặng'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <TouchableOpacity onPress={() => {
+                    setSelectedSymptomItems(selectedSymptomItems.filter(s => s.id !== symptomItem.id));
+                  }}>
+                    <Ionicons name="close-circle" size={24} color="#FF4444" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+              
+              {/* Hiển thị triệu chứng cũ */}
+              {symptoms.map((symptom: Symptom) => (
                 <View key={symptom.id} style={styles.symptomItem}>
                   <View style={styles.symptomInfo}>
                     <Text style={styles.symptomItemName}>{symptom.name}</Text>
@@ -359,6 +475,8 @@ export default function AIDiagnosticScreen() {
             onPress={() => {
               setCurrentStep(1);
               setSymptoms([]);
+              setSelectedSymptomItems([]);
+              setSearchQuery('');
               setResult(null);
             }}
           >
@@ -722,5 +840,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: '#64748b',
+  },
+  searchResultsContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginTop: 8,
+    marginBottom: 16,
+    maxHeight: 200,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  searchResultsList: {
+    maxHeight: 200,
+  },
+  searchResultItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  searchResultText: {
+    fontSize: 14,
+    color: '#0f172a',
+    flex: 1,
   },
 });

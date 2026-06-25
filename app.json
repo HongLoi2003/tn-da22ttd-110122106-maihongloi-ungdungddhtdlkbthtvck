@@ -7,6 +7,11 @@
     "icon": "./assets/images/logo.png",
     "scheme": "heatlecare",
     "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.maihongloi23.heatlecare",
@@ -34,7 +39,9 @@
         "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
       "package": "com.maihongloi23.heatlecare",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "allowBackup": true,
+      "softwareKeyboardLayoutMode": "pan"
     },
     "web": {
       "output": "static",
@@ -57,6 +64,12 @@
           "sounds": [],
           "androidMode": "default",
           "androidCollapsedTitle": "Thông báo mới"
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.9119519990-h0ghp9fhpjltof05160ea98bchd42i6n"
         }
       ],
       "expo-font",

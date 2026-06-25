@@ -87,7 +87,7 @@ export default function CheckAllDoctorsChatStatus() {
           noUserAccount++;
         } else {
           hasUserAccount = true;
-          userAccountUid = users[0].uid;
+          userAccountUid = (users[0] as any).uid;
           console.log(`  ✅ Has user account: ${userAccountUid}`);
           
           // 4. Kiểm tra authUid có khớp không

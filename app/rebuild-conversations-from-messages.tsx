@@ -1,15 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { Timestamp } from 'firebase/firestore';
+import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import React, { useState } from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import { createDocument, getDocumentsWithQuery } from './services/firebaseService';
+import { getFirestoreDb } from './config/firebase';
+import { getDocumentsWithQuery } from './services/firebaseService';
 
 export default function RebuildConversationsFromMessages() {
   const router = useRouter();
@@ -37,20 +38,34 @@ export default function RebuildConversationsFromMessages() {
 
       output += `📋 Tìm thấy ${conversationMap.size} conversations cần tái tạo\n\n`;
 
-      // 3. Load doctor mapping
-      const doctors = await getDocumentsWithQuery('doctors', []);
+      // 3. Load doctor mapping from users collection
+      const users = await getDocumentsWithQuery('users', []);
+      const doctorUsers = users.filter((u: any) => u.role === 'doctor' && u.doctorInfo?.doctorId);
       const doctorIdToAuthUid = new Map<string, any>();
+      
+      // Get doctor names from doctors collection
+      const doctors = await getDocumentsWithQuery('doctors', []);
+      const doctorNames = new Map<string, any>();
       doctors.forEach((doc: any) => {
-        if (doc.authUid) {
-          doctorIdToAuthUid.set(doc.id, {
-            authUid: doc.authUid,
-            name: doc.ten,
-            specialty: doc.chuyen_khoa
-          });
-        }
+        doctorNames.set(doc.id, {
+          name: doc.ten || doc.name,
+          specialty: doc.chuyen_khoa || doc.specialty
+        });
+      });
+      
+      // Map doctorId to authUid from users
+      doctorUsers.forEach((user: any) => {
+        const doctorId = user.doctorInfo.doctorId;
+        const doctorInfo = doctorNames.get(doctorId);
+        doctorIdToAuthUid.set(doctorId, {
+          authUid: user.uid,
+          name: doctorInfo?.name || 'Bác sĩ',
+          specialty: doctorInfo?.specialty || ''
+        });
       });
 
-      output += `✅ Loaded ${doctorIdToAuthUid.size} doctors\n\n`;
+      output += `✅ Loaded ${doctorIdToAuthUid.size} doctors with auth mapping\n`;
+      output += `   Doctors: ${Array.from(doctorIdToAuthUid.keys()).join(', ')}\n\n`;
 
       // 4. Recreate conversations
       let created = 0;
@@ -69,21 +84,24 @@ export default function RebuildConversationsFromMessages() {
           const lastMsg = sortedMsgs[sortedMsgs.length - 1];
 
           // Get patient info
-          const patientId = firstMsg.senderId;
+          const patientId = firstMsg.senderType === 'patient' ? firstMsg.senderId : 
+                           (lastMsg.senderType === 'patient' ? lastMsg.senderId : '');
+          
+          if (!patientId) {
+            output += `⚠️  [${convId}] Không tìm thấy patientId, bỏ qua\n`;
+            errors++;
+            continue;
+          }
+          
           let patientName = 'Bệnh nhân';
           let patientAvatar = '';
           let patientPhone = '';
 
-          try {
-            const users = await getDocumentsWithQuery('users', []);
-            const patient = users.find((u: any) => u.uid === patientId);
-            if (patient) {
-              patientName = (patient as any).fullName || patientName;
-              patientAvatar = (patient as any).avatar || '';
-              patientPhone = (patient as any).phone || '';
-            }
-          } catch (error) {
-            output += `⚠️  Không load được patient info cho ${patientId}\n`;
+          const patient = users.find((u: any) => u.uid === patientId || u.id === patientId);
+          if (patient) {
+            patientName = (patient as any).fullName || patientName;
+            patientAvatar = (patient as any).avatar || '';
+            patientPhone = (patient as any).phone || '';
           }
 
           // Try to determine doctorId from conversationId or messages
@@ -135,7 +153,7 @@ export default function RebuildConversationsFromMessages() {
 
           // Count unread messages
           const unreadPatient = msgs.filter((m: any) => m.senderType === 'doctor' && !m.read).length;
-          const unreadDoctor = msgs.filter((m: any) => m.senderType === 'patient' && !m.read).length;
+          const doctorUnreadCount = msgs.filter((m: any) => m.senderType === 'patient' && !m.read).length;
 
           // Create conversation with original ID
           const conversationData = {
@@ -151,12 +169,12 @@ export default function RebuildConversationsFromMessages() {
             lastMessageTimestamp: lastMsg.timestamp || Timestamp.now(),
             lastMessageSender: lastMsg.senderType || 'patient',
             unreadCountPatient: unreadPatient,
-            unreadCountDoctor: unreadDoctor,
+            doctorUnreadCount: doctorUnreadCount,
             createdAt: firstMsg.timestamp || Timestamp.now(),
           };
 
           // Try to create with original ID
-          await createDocument('conversations', conversationData, convId);
+          await setDoc(doc(getFirestoreDb(), 'conversations', convId), conversationData);
 
           output += `✅ [${convId}] ${patientName} <-> ${doctorName} (${msgs.length} messages)\n`;
           created++;

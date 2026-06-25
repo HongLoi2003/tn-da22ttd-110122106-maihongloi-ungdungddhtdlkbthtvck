@@ -1,57 +1,5 @@
 [
   {
-    "id": "msg001",
-    "conversationId": "conv001",
-    "senderId": "user001",
-    "senderName": "Nguyễn Văn A",
-    "senderType": "patient",
-    "receiverId": "bs001",
-    "receiverName": "BS. Nguyễn Văn An",
-    "message": "Chào bác sĩ, em muốn hỏi về tình trạng tim mạch của em",
-    "timestamp": "2026-04-28T08:30:00",
-    "read": true,
-    "type": "text"
-  },
-  {
-    "id": "msg002",
-    "conversationId": "conv001",
-    "senderId": "bs001",
-    "senderName": "BS. Nguyễn Văn An",
-    "senderType": "doctor",
-    "receiverId": "user001",
-    "receiverName": "Nguyễn Văn A",
-    "message": "Chào bạn, bạn có thể mô tả chi tiết triệu chứng không?",
-    "timestamp": "2026-04-28T08:35:00",
-    "read": true,
-    "type": "text"
-  },
-  {
-    "id": "msg003",
-    "conversationId": "conv001",
-    "senderId": "user001",
-    "senderName": "Nguyễn Văn A",
-    "senderType": "patient",
-    "receiverId": "bs001",
-    "receiverName": "BS. Nguyễn Văn An",
-    "message": "Em thỉnh thoảng bị đau ngực, nhịp tim nhanh khi vận động",
-    "timestamp": "2026-04-28T08:37:00",
-    "read": true,
-    "type": "text"
-  },
-  {
-    "id": "msg004",
-    "conversationId": "conv001",
-    "senderId": "bs001",
-    "senderName": "BS. Nguyễn Văn An",
-    "senderType": "doctor",
-    "receiverId": "user001",
-    "receiverName": "Nguyễn Văn A",
-    "message": "Bạn nên đến khám trực tiếp để tôi kiểm tra kỹ hơn. Tôi sẽ đặt lịch cho bạn vào tuần sau nhé.",
-    "timestamp": "2026-04-28T08:40:00",
-    "read": true,
-    "type": "text"
-  },
-  {
     "id": "msg005",
     "conversationId": "conv002",
     "senderId": "user001",

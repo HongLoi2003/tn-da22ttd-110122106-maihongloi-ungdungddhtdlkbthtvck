@@ -24,6 +24,7 @@ export default function DoctorAppointmentDetail() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [appointment, setAppointment] = useState<DoctorAppointment | null>(null);
+  const [patientData, setPatientData] = useState<any>(null); // Thêm state cho thông tin bệnh nhân
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [newDate, setNewDate] = useState('');
   const [newTime, setNewTime] = useState('');
@@ -43,11 +44,13 @@ export default function DoctorAppointmentDetail() {
 
       console.log('🔍 Loading appointment detail for ID:', appointmentId);
 
-      // Ưu tiên dùng doctorInfo.doctorId nếu có
-      const doctorId = (userData.doctorInfo as any)?.doctorId || userData.uid;
-      console.log('🔑 Using doctorId:', doctorId);
+      // ✅ Separate IDs for different purposes
+      const firebaseAuthUid = userData.uid;
+      const displayDoctorId = (userData.doctorInfo as any)?.doctorId || userData.uid;
+      console.log('🔑 Firebase Auth UID:', firebaseAuthUid);
+      console.log('📝 Display Doctor ID:', displayDoctorId);
 
-      const appointments = await doctorServiceInstance.getDoctorAppointments(doctorId);
+      const appointments = await doctorServiceInstance.getDoctorAppointments(displayDoctorId);
       console.log('✅ Loaded', appointments.length, 'appointments');
       
       const found = appointments.find(apt => apt.id === appointmentId);
@@ -57,6 +60,34 @@ export default function DoctorAppointmentDetail() {
         console.log('💰 [APPOINTMENT_DETAIL] Fee value:', found.fee);
         console.log('💰 [APPOINTMENT_DETAIL] Fee type:', typeof found.fee);
         setAppointment(found);
+
+        // Load patient data from users collection
+        if (found.userId) {
+          const { getDocumentsWithQuery, getDocumentById } = await import('../services/firebaseService');
+          const { where } = await import('firebase/firestore');
+          
+          try {
+            // Try by document ID first
+            let userData = await getDocumentById('users', found.userId);
+            
+            // If not found, try by uid field
+            if (!userData) {
+              const users = await getDocumentsWithQuery('users', [
+                where('uid', '==', found.userId)
+              ]);
+              if (users.length > 0) {
+                userData = users[0];
+              }
+            }
+            
+            if (userData) {
+              console.log('✅ Loaded patient data:', userData);
+              setPatientData(userData);
+            }
+          } catch (error) {
+            console.error('❌ Error loading patient data:', error);
+          }
+        }
       } else {
         console.log('❌ Appointment not found with ID:', appointmentId);
         console.log('Available appointment IDs:', appointments.map(a => a.id));
@@ -66,6 +97,45 @@ export default function DoctorAppointmentDetail() {
     } catch (error) {
       console.error('❌ Error loading appointment:', error);
       setLoading(false);
+    }
+  };
+
+  const calculateAge = (dateOfBirth: string) => {
+    if (!dateOfBirth) return null;
+    
+    try {
+      // Support multiple date formats: DD/MM/YYYY, YYYY-MM-DD, ISO
+      let birthDate: Date;
+      
+      if (dateOfBirth.includes('/')) {
+        // DD/MM/YYYY format
+        const parts = dateOfBirth.split('/');
+        if (parts.length === 3) {
+          birthDate = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+        } else {
+          return null;
+        }
+      } else {
+        // ISO or YYYY-MM-DD format
+        birthDate = new Date(dateOfBirth);
+      }
+      
+      if (isNaN(birthDate.getTime())) {
+        return null;
+      }
+      
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      return age > 0 ? age : null;
+    } catch (error) {
+      console.error('Error calculating age:', error);
+      return null;
     }
   };
 
@@ -234,7 +304,18 @@ export default function DoctorAppointmentDetail() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Thông tin bệnh nhân</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Thông tin bệnh nhân</Text>
+            {appointment.userId && (
+              <TouchableOpacity
+                style={styles.viewProfileButton}
+                onPress={() => router.push(`/doctor/patient-detail?id=${appointment.userId}`)}
+              >
+                <Text style={styles.viewProfileText}>Xem hồ sơ</Text>
+                <Ionicons name="chevron-forward" size={16} color="#00BCD4" />
+              </TouchableOpacity>
+            )}
+          </View>
           <View style={styles.card}>
             <View style={styles.infoRow}>
               <Ionicons name="person" size={20} color="#00BCD4" />
@@ -270,7 +351,16 @@ export default function DoctorAppointmentDetail() {
                   <Ionicons name="calendar-outline" size={20} color="#00BCD4" />
                   <View style={styles.infoContent}>
                     <Text style={styles.infoLabel}>Tuổi</Text>
-                    <Text style={styles.infoValue}>{appointment.patientAge} tuổi</Text>
+                    <Text style={styles.infoValue}>
+                      {(() => {
+                        // Tính tuổi từ dateOfBirth trong patientData nếu có
+                        if (patientData?.dateOfBirth) {
+                          const age = calculateAge(patientData.dateOfBirth);
+                          return age !== null ? `${age} tuổi` : `${appointment.patientAge} tuổi`;
+                        }
+                        return `${appointment.patientAge} tuổi`;
+                      })()}
+                    </Text>
                   </View>
                 </View>
               </>
@@ -573,7 +663,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: '#0f172a',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 12,
+  },
+  viewProfileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  viewProfileText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#00BCD4',
   },
   card: {
     backgroundColor: '#fff',
@@ -653,7 +758,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#00BCD4',
   },
   completeButton: {
-    backgroundColor: '#00BCD4',
+    backgroundColor: '#9c27b0',
   },
   actionButtonText: {
     color: '#fff',
