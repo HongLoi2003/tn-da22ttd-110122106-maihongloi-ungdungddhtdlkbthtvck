@@ -1,170 +1,65 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
-# dependencies
+# Dependencies
 node_modules/
+/src/functions/node_modules/
 
 # Expo
 .expo/
 dist/
 web-build/
-expo-env.d.ts
 
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Keystore files (IMPORTANT - DO NOT COMMIT!)
-*.keystore
-keystore.properties
-android/keystore.properties
-android/app/release.keystore
-android/app/*.keystore
-
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
-.DS_Store
-*.pem
-
-# local env files
-.env*.local
-
-# Firebase
+# Environment variables
+.env
+.env.local
+.env.*.local
 serviceAccountKey.json
-android/app/google-services.json
-ios/GoogleService-Info.plist
-
-# typescript
-*.tsbuildinfo
-
-app-example
-
-# generated native folders (comment out if using prebuild)
-# /ios
-# /android
-
-# Scripts và file tạm thời phát triển
-build-*.ps1
-build-*.sh
-build-*.bat
-check-*.ps1
-check-*.js
-clear-*.ps1
-clear-*.js
-delete-*.ps1
-delete-*.js
-deploy-*.ps1
-deploy-*.sh
-download-*.js
-final-*.ps1
-find-*.js
-fix-*.ps1
-fix-*.js
-fix-*.py
-fix-*.sh
-fix-*.md
-generate-*.js
-import-*.js
-reload-*.ps1
-remove-*.ps1
-rename-*.js
-replace-*.ps1
-replace-*.js
-restart-*.ps1
-safe-*.ps1
-seed-*.tsx
-setup-*.ps1
-start-*.ps1
-start-*.sh
-test-*.ps1
-test-*.js
-test-*.tsx
-update-*.ps1
-update-*.js
-use-*.js
-verify-*.ps1
-verify-*.js
-pre-build-*.ps1
-pre-build-*.sh
-get-*.ps1
-convert-*.js
-enhance-*.js
-translate-*.js
-shorten-*.js
-optimize-*.js
-existing-*.txt
-typescript-errors.txt
-xoa-*.ps1
-
-# File tạm và log
-*.log
-hs_err_pid*.log
-DA_*.txt
-SANGSANG_*.txt
-MEDICINE-*.txt
-
-# File debug và test trong thư mục app
-app/test-*.tsx
-app/debug-*.tsx
-app/check-*.tsx
-app/fix-*.tsx
-app/clear-*.tsx
-app/create-test-*.tsx
-app/seed-data.tsx
-app/setup-*.tsx
-app/rebuild-*.tsx
-app/force-*.tsx
-app/sync-*.tsx
-app/auto-*.tsx
-app/analyze-*.tsx
-app/compare-*.tsx
-app/diagnose-*.tsx
-app/find-*.tsx
-app/inspect-*.tsx
-app/list-all-*.tsx
-app/quick-*.tsx
-app/chat-debug-*.tsx
-app/dev-tools.tsx
-app/verify-*.tsx
-app/get-all-*.tsx
-app/remove-duplicate-*.tsx
-app/enable-*.tsx
-app/admin-*.tsx
-
-# File backup
-*.backup
-*.orig
-*-temp.tsx
-*-original.tsx
-
-# Script data files
-add-*.js
-specialties-data*.js
-compare-*.js
-regenerate-*.js
-real-doctor-*.js
-rebuild-*.js
-create-conversation-*.js
-create-doctor-*.js
-quick-*.js
-
-# Example files
-example-*.tsx
-RESPONSIVE-EXAMPLE.tsx
-
-# Firebase admin
 firebase-admin-key.json.json
 
-# Email templates
-email-template-*.html
+# Build
+*.apk
+*.aab
+*.ipa
+build/
+android/app/build/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cache
+.cache/
+*.cache
+metro.config.js.cache
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# Test
+coverage/
+
+# Misc
+*.orig
+.expo-shared/
+
+# Large files - Videos
+src/videos/
+*.MOV
+*.mov
+*.mp4
+*.avi
+*.mkv
