@@ -56,10 +56,7 @@ coverage/
 *.orig
 .expo-shared/
 
-# Large files - Videos
-src/videos/
+# Large files - Videos (only very large files)
 *.MOV
-*.mov
-*.mp4
-*.avi
-*.mkv
+# Allow small mp4 files in src/videos/
+# *.mp4  # commented out to allow src/videos/*.mp4
